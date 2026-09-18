@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuario, Rol
+from .models import Usuario, Rol, Cliente
 
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,3 +20,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'contrasenaencriptada': {'write_only': True, 'required': False}
         }
+
+
+
+
+
+class ClienteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cliente
+        fields = '__all__'

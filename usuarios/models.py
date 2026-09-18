@@ -28,3 +28,32 @@ class Usuario(models.Model):
 
     def __str__(self):
         return self.nombreusuario
+
+
+class TipoCliente(models.Model):
+    idtipocliente = models.AutoField(primary_key=True, db_column='idTipoCliente')
+    nombre = models.CharField(max_length=50, db_column='nombre') 
+
+    class Meta:
+        managed = False
+        db_table = 'TIPO_CLIENTE'
+
+
+
+class Cliente(models.Model):
+    idcliente = models.AutoField(primary_key=True, db_column='idCliente') 
+    idtipocliente = models.IntegerField(db_column='idTipoCliente', default=1) 
+    nombrecliente = models.CharField(max_length=100, db_column='nombreCliente') 
+    nit = models.CharField(max_length=20, db_column='nit', null=True, blank=True) 
+    telefono = models.CharField(max_length=20, db_column='telefono', null=True, blank=True) 
+    correo = models.EmailField(max_length=100, db_column='correo', null=True, blank=True) 
+    direccion = models.CharField(max_length=200, db_column='direccion', null=True, blank=True) 
+    nombrecontacto = models.CharField(max_length=100, db_column='nombreContacto', null=True, blank=True)
+    activo = models.BooleanField(default=True, db_column='activo') #[cite: 5]
+
+    class Meta:
+        managed = False
+        db_table = 'CLIENTE'
+
+    def __str__(self):
+        return f"{self.nombres} {self.apellidos}"
