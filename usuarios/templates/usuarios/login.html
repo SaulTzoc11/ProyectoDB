@@ -1,0 +1,82 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Prototipo navegable del sistema Sapo Pinturas">
+  <title>Sapo Pinturas | Sistema comercial</title>
+  <link rel="stylesheet" href="{% static 'usuarios/styles.css' %}">
+</head>
+<body>
+  <section id="loginView" class="login-view">
+    <div class="login-brand" aria-hidden="true">
+      <div class="hero-logo-wrap"><img class="hero-logo" src="{% static 'usuarios/assets/logo-sapo-pinturas.png' %}" alt="Logo de Sapo Pinturas"></div>
+      <p class="eyebrow">SISTEMA COMERCIAL</p>
+      <h1>Color en cada proyecto</h1>
+      <p>Ventas, inventario y operaciones en un solo lugar.</p>
+      <div class="paint-stripes"><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <main class="login-panel">
+      <div class="login-card">
+        <div class="brand-lockup">
+          <img class="brand-logo" src="{% static 'usuarios/assets/logo-sapo-pinturas.png' %}" alt="Logo de Sapo Pinturas">
+          <div><strong>SAPO PINTURAS</strong><small>Acceso al sistema</small></div>
+        </div>
+        <h2>Bienvenido</h2>
+        <p class="muted">Ingresá tus credenciales para continuar.</p>
+        <form id="loginForm">
+          {% csrf_token %}
+          <label for="username">Usuario</label>
+          <input id="username" name="username" autocomplete="username" placeholder="Ej. gerente" required>
+          <label for="password">Contraseña</label>
+          <div class="password-row">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+            <button id="togglePassword" class="icon-button" type="button" aria-label="Mostrar contraseña">◉</button>
+          </div>
+          <p id="loginError" class="error" role="alert"></p>
+          <button class="primary-button" type="submit">Ingresar al sistema <span>→</span></button>
+        </form>
+      </div>
+    </main>
+  </section>
+
+  <section id="appView" class="app-view hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img class="sidebar-logo" src="{% static 'usuarios/assets/logo-sapo-pinturas.png' %}" alt="Logo de Sapo Pinturas">
+        <div><strong>SAPO</strong><span>PINTURAS</span></div>
+      </div>
+      <nav id="mainNav" aria-label="Navegación principal"></nav>
+      <div class="sidebar-footer">
+        <div class="avatar" id="avatar">M</div>
+        <div><strong id="sidebarName">Usuario</strong><span id="sidebarRole">Rol</span></div>
+        <button id="logoutButton" class="logout-button" title="Cerrar sesión" aria-label="Cerrar sesión">↪</button>
+      </div>
+    </aside>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <button id="menuButton" class="menu-button" aria-label="Abrir menú">☰</button>
+        <div>
+          <p class="eyebrow">SAPO PINTURAS</p>
+          <h1 id="pageTitle">Panel principal</h1>
+        </div>
+        <div class="top-actions">
+          <button id="cartButton" class="cart-button"><span>Carrito</span> 🛒 <b id="cartCount">0</b></button>
+          <div class="user-chip"><span id="headerName">Usuario</span><small id="headerRole">Rol</small></div>
+        </div>
+      </header>
+
+      <nav id="subNav" class="subnav" aria-label="Opciones de la sección"></nav>
+
+      <main id="content" class="content" tabindex="-1"></main>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status"></div>
+  <section id="printArea" class="print-area" aria-hidden="true"></section>
+  <script src="{% static 'usuarios/app.js' %}"></script>
+</body>
+</html>
