@@ -78,11 +78,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'PintureriaDB',
-        'HOST': 'localhost', 
+        'HOST': r'localhost\MSSQLSERVER01', 
         'PORT': '',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
-            'TrustServerCertificate': 'yes',
+            'extra_params': 'TrustServerCertificate=yes;Trusted_Connection=yes',
         },
     }
 }
