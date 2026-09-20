@@ -5,11 +5,10 @@ from rest_framework.response import Response
 
 from .models import Usuario, Rol
 from .serializers import UsuarioSerializer, RolSerializer
-from . import seguridad
 
 from django.http import JsonResponse
+from django.contrib.auth.hashers import check_password
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
 class RolViewSet(viewsets.ReadOnlyModelViewSet):
@@ -59,64 +58,55 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         usuario = self.get_object()
         usuario.activo = False
-        usuario.save(update_fields=["activo"])
+        usuario.save()
 
         return Response(
             {"mensaje": "Usuario desactivado exitosamente"},
             status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=["post"], url_path="cambiar-contrasena")
-    def cambiar_contrasena(self, request, pk=None):
-        nueva = request.data.get("contrasena_nueva", "")
-        actual = request.data.get("contrasena_actual") or None
-        es_admin = str(request.data.get("es_administrador", "")).lower() in ("1", "true", "on")
- 
-        if not nueva:
-            return Response({"mensaje": "Debe indicar la nueva contrasena."},
-                            status=status.HTTP_400_BAD_REQUEST)
- 
-        resultado = seguridad.cambiar_contrasena(
-            id_usuario=pk,
-            contrasena_nueva=nueva,
-            contrasena_actual=actual,
-            es_administrador=es_admin,
-        )
- 
-        estado = status.HTTP_200_OK if resultado["ok"] else status.HTTP_400_BAD_REQUEST
-        return Response(resultado, status=estado)
-@csrf_exempt
 @require_POST
 def iniciar_sesion_api(request):
     nombre_usuario = request.POST.get("username", "").strip()
     contrasena = request.POST.get("password", "")
 
-    if not nombre_usuario or not contrasena:
+    try:
+        usuario = Usuario.objects.select_related("idrol").get(
+            nombreusuario=nombre_usuario,
+            activo=True
+        )
+    except Usuario.DoesNotExist:
         return JsonResponse({
             "ok": False,
-            "mensaje": "Debe ingresar usuario y contrasena."
-        }, status=400)
- 
-    resultado = seguridad.validar_login(nombre_usuario, contrasena)
- 
-    if not resultado["ok"]:
-        return JsonResponse({
-            "ok": False,
-            "mensaje": resultado["mensaje"]
+            "mensaje": "El usuario o la contraseña no son correctos."
         }, status=401)
 
+    if not check_password(
+        contrasena,
+        usuario.contrasenaencriptada
+    ):
+        return JsonResponse({
+            "ok": False,
+            "mensaje": "El usuario o la contraseña no son correctos."
+        }, status=401)
+
+    usuario.ultimoacceso = timezone.now()
+    usuario.save(update_fields=["ultimoacceso"])
+
     # Guardar información en la sesión
-    request.session["usuario_id"] = resultado["idUsuario"]
-    request.session["usuario_nombre"] = resultado["nombreUsuario"]
-    request.session["usuario_rol"] = resultado["rol"]
+    request.session["usuario_id"] = usuario.idusuario
+    request.session["usuario_nombre"] = usuario.nombreusuario
+    request.session["usuario_rol"] = usuario.idrol.nombre
+
+    nombre_completo = f"{usuario.nombres} {usuario.apellidos}".strip()
 
     return JsonResponse({
         "ok": True,
         "usuario": {
-            "id": resultado["idUsuario"],
-            "username": resultado["nombreUsuario"],
-            "name": resultado["nombreCompleto"],
-            "role": resultado["rol"],
+            "id": usuario.idusuario,
+            "username": usuario.nombreusuario,
+            "name": nombre_completo,
+            "role": usuario.idrol.nombre
         }
     })
 

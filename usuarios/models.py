@@ -57,3 +57,18 @@ class Cliente(models.Model):
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos}"
+
+
+
+class Producto(models.Model):
+    idproducto = models.AutoField(primary_key=True, db_column='idProducto') #[cite: 7]
+    idproductogeneral = models.IntegerField(db_column='idProductoGeneral', null=True, blank=True) # O ForeignKey si tienes el modelo de ProductoGeneral[cite: 7]
+    idpresentacion = models.IntegerField(db_column='idPresentacion', null=True, blank=True) # O ForeignKey a Presentacion[cite: 7]
+    idcolor = models.IntegerField(db_column='idColor', null=True, blank=True) # O ForeignKey a Color[cite: 7]
+    codigoproducto = models.CharField(max_length=50, db_column='codigoProducto', null=True, blank=True) #[cite: 7]
+    codigobarras = models.CharField(max_length=50, db_column='codigoBarras', null=True, blank=True) #[cite: 7]
+    activo = models.BooleanField(default=True, db_column='activo') #[cite: 7]
+
+    class Meta:
+        managed = False
+        db_table = 'PRODUCTO'
