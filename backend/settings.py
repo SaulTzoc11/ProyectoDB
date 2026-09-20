@@ -78,11 +78,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'PintureriaDB',
-        'HOST': r'localhost\MSSQLSERVER01', 
-        'PORT': '',
+        'HOST': '100.127.139.17,1433',
+        'USER': 'app_django',
+        'PASSWORD': 'Pintureria123!',
+        'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'TrustServerCertificate=yes;Trusted_Connection=yes',
+            'extra_params': 'TrustServerCertificate=yes',
         },
     }
 }
