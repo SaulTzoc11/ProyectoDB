@@ -17,13 +17,7 @@ const sections = {
   informacion: [{ id: "consultas", label: "Consultas" }, { id: "reportes", label: "Reportes" }, { id: "mantenimientos", label: "Mantenimientos" }, { id: "usuarios", label: "Usuarios y roles", managerOnly: true }, { id: "historial", label: "Historial de movimientos" }]
 };
 
-const products = [
-  { id: 1, category: "Pinturas", brand: "Sapo", color: "#027DD6", name: "Pintura interior", detail: "Blanco", price: 189.50, stock: 24, units: ["1/2 galón", "1 galón", "1 cubeta"], prices: [{ type: "Individual", value: 189.50 }, { type: "Empresa", value: 174.00 }], locations: [{ place: "Bodega central · Estante A-01", quantity: 16 }, { place: "Bodega zona 3 · Estante B-04", quantity: 8 }] },
-  { id: 2, category: "Pinturas", brand: "ColorMax", color: "#53962F", name: "Pintura exterior", detail: "Verde", price: 214.00, stock: 16, units: ["1 galón", "1 cubeta"], prices: [{ type: "Individual", value: 214.00 }, { type: "Empresa", value: 199.00 }], locations: [{ place: "Bodega central · Estante A-03", quantity: 10 }, { place: "Bodega zona 3 · Estante C-02", quantity: 6 }] },
-  { id: 3, category: "Barnices", brand: "BrilloPro", color: "#8D0C44", name: "Barniz acrílico", detail: "Transparente", price: 126.75, stock: 9, units: ["1/4 galón", "1/2 galón"], prices: [{ type: "Individual", value: 126.75 }, { type: "Empresa", value: 115.50 }], locations: [{ place: "Bodega central · Estante B-01", quantity: 9 }] },
-  { id: 4, category: "Accesorios", brand: "MasterTool", color: "#F4B52E", name: "Brocha profesional 2”", detail: "Cerda mixta", price: 38.25, stock: 31, units: ["Unidad"], prices: [{ type: "Individual", value: 38.25 }, { type: "Empresa", value: 34.50 }], locations: [{ place: "Bodega central · Estante D-05", quantity: 31 }] },
-  { id: 5, category: "Solventes", brand: "Solvex", color: "#7A5AF8", name: "Aguarrás mineral", detail: "Limpieza profesional", price: 42.00, stock: 18, units: ["1/16 galón", "1/8 galón", "1/4 galón"], prices: [{ type: "Individual", value: 42.00 }, { type: "Empresa", value: 38.75 }], locations: [{ place: "Bodega central · Estante S-02", quantity: 12 }, { place: "Bodega zona 3 · Estante S-01", quantity: 6 }] }
-];
+let products = [];
 
 const databaseGroups = {
   "Catálogo": ["PRESENTACION", "MARCA", "CATEGORIA", "COLOR", "TIPO_PRECIO", "PRODUCTO_GENERAL", "PRODUCTO", "PRECIO"],
@@ -35,16 +29,242 @@ const databaseGroups = {
 };
 
 // Campos tomados del archivo pintureria.xlsx compartido para el proyecto.
-const tableSchemas = {
-  PRESENTACION:["nombre","cantidad","unidadMedida"], MARCA:["nombre","descripcion"], CATEGORIA:["nombre","descripcion"], COLOR:["nombre","codigoHex","activo"], TIPO_PRECIO:["nombre","descripcion","activo"],
-  PRODUCTO_GENERAL:["idMarca","idCategoria","nombre","descripcion","activo"], PRODUCTO:["idProductoGeneral","idPresentacion","idColor","codigoProducto","codigoBarras","activo"], PRECIO:["idTipoPrecio","idProducto","idEstado","precio","fechaAsignacion"],
-  TIPO_CLIENTE:["nombre","descripcion"], CLIENTE:["idTipoCliente","nombreCliente","nit","telefono","correo","direccion","nombreContacto","activo"], PROVEEDOR:["nombreProveedor","nit","nombreContacto","telefono","correo","direccion","activo"],
-  BODEGA:["nombre","direccion","descripcion","activo"], ESTANTE:["idBodega","codigoEstante","descripcion","activo"], LOTE:["idDetalleEntrega","idEstante","idEstado","codigoLote","fechaIngreso","cantidadInicial","cantidadDisponible"], TIPO_MOVIMIENTO:["nombre","descripcion"], MODIFICACION_INVENTARIO:["idLote","idTipoMovimiento","idUsuario","fecha","cantidad","observaciones"], MOVIMIENTO:["idUsuario","idAccion","idTabla","fecha","informacionModificada"],
-  COMPRA:["idProveedor","idUsuario","idEstado","codigoCompra","fechaCompra","total","observaciones"], DETALLE_COMPRA:["idCompra","idProducto","idEstado","cantidad","costoUnitario","subtotal"], ENTREGA:["idCompra","idUsuario","idEstado","codigoEntrega","fechaEntrega","observaciones"], DETALLE_ENTREGA:["idEntrega","idDetalleCompra","cantidadEntregada","costoUnitarioReal"],
-  COTIZACION:["idCliente","idUsuario","idEstado","codigoCotizacion","fecha","subtotal","descuento","total","observaciones"], DETALLE_COTIZACION:["idCotizacion","idProducto","cantidad","precioUnitario","descuento","subtotal"], FACTURA:["idCliente","idUsuario","idCotizacion","idEstado","noFactura","fecha","subtotal","descuento","total","observaciones"], DETALLE_FACTURA:["idFactura","idProducto","cantidad","precioUnitario","descuento","subtotal"], TIPO_PAGO:["nombre","descripcion","activo"], PAGO:["idFactura","idTipoPago","idUsuario","monto","observaciones","fecha"],
-  MOTIVO:["descripcion"], ESTADO:["nombre"], DEVOLUCION:["idFactura","idUsuario","idMotivo","idEstado","codigoDevolucion","fecha","total"], DETALLE_DEVOLUCION:["idDevolucion","idDetalleFactura","cantidad","montoCobrado","subtotal"],
-  ROL:["nombre"], USUARIO:["idRol","nombreUsuario","contrasenaEncriptada","nombres","apellidos","correo","ultimoAcceso","activo"], ACCION:["nombre","descripcion"], TABLA:["nombre"]
+const maintenanceConfigs = {
+  CATEGORIA: {
+    endpoint: "/api/categorias/",
+    primaryKey: "idcategoria",
+    fields: [
+      { name: "nombre", label: "Nombre", required: true },
+      { name: "descripcion", label: "Descripción", type: "textarea" }
+    ]
+  },
+
+  MARCA: {
+    endpoint: "/api/marcas/",
+    primaryKey: "idmarca",
+    fields: [
+      { name: "nombre", label: "Nombre", required: true },
+      { name: "descripcion", label: "Descripción", type: "textarea" }
+    ]
+  },
+
+  PRESENTACION: {
+    endpoint: "/api/presentaciones/",
+    primaryKey: "idpresentacion",
+    fields: [
+      { name: "nombre", label: "Nombre", required: true },
+      {
+        name: "cantidad",
+        label: "Cantidad",
+        type: "number",
+        step: "0.0001",
+        required: true
+      },
+      {
+        name: "unidadmedida",
+        label: "Unidad de medida",
+        required: true
+      }
+    ]
+  },
+
+  COLOR: {
+    endpoint: "/api/colores/",
+    primaryKey: "idcolor",
+    fields: [
+      { name: "nombre", label: "Nombre", required: true },
+      {
+        name: "codigohex",
+        label: "Código hexadecimal",
+        placeholder: "#FFFFFF"
+      },
+      { name: "activo", label: "Activo", type: "checkbox" }
+    ]
+  },
+
+  TIPO_PRECIO: {
+    endpoint: "/api/tipos-precio/",
+    primaryKey: "idtipoprecio",
+    fields: [
+      { name: "nombre", label: "Nombre", required: true },
+      { name: "descripcion", label: "Descripción", type: "textarea" },
+      { name: "activo", label: "Activo", type: "checkbox" }
+    ]
+  },
+
+  PRODUCTO_GENERAL: {
+    endpoint: "/api/productos-generales/",
+    primaryKey: "idproductogeneral",
+    fields: [
+      {
+        name: "idmarca",
+        label: "Marca",
+        type: "select",
+        source: "/api/marcas/",
+        valueKey: "idmarca",
+        labelKey: "nombre",
+        required: true
+      },
+      {
+        name: "idcategoria",
+        label: "Categoría",
+        type: "select",
+        source: "/api/categorias/",
+        valueKey: "idcategoria",
+        labelKey: "nombre",
+        required: true
+      },
+      { name: "nombre", label: "Nombre", required: true },
+      { name: "descripcion", label: "Descripción", type: "textarea" },
+      { name: "activo", label: "Activo", type: "checkbox" }
+    ]
+  },
+
+  PRODUCTO: {
+    endpoint: "/api/productos/",
+    primaryKey: "idproducto",
+    fields: [
+      {
+        name: "idproductogeneral",
+        label: "Producto general",
+        type: "select",
+        source: "/api/productos-generales/",
+        valueKey: "idproductogeneral",
+        labelKey: "nombre",
+        required: true
+      },
+      {
+        name: "idpresentacion",
+        label: "Presentación",
+        type: "select",
+        source: "/api/presentaciones/",
+        valueKey: "idpresentacion",
+        labelKey: "nombre",
+        required: true
+      },
+      {
+        name: "idcolor",
+        label: "Color",
+        type: "select",
+        source: "/api/colores/",
+        valueKey: "idcolor",
+        labelKey: "nombre"
+      },
+      {
+        name: "codigoproducto",
+        label: "Código del producto",
+        required: true
+      },
+      {
+        name: "codigobarras",
+        label: "Código de barras"
+      },
+      { name: "activo", label: "Activo", type: "checkbox" }
+    ]
+  },
+
+  PRECIO: {
+    endpoint: "/api/precios/",
+    primaryKey: "idprecio",
+    fields: [
+      {
+        name: "idtipoprecio",
+        label: "Tipo de precio",
+        type: "select",
+        source: "/api/tipos-precio/",
+        valueKey: "idtipoprecio",
+        labelKey: "nombre",
+        required: true
+      },
+      {
+        name: "idproducto",
+        label: "Producto",
+        type: "select",
+        source: "/api/productos/",
+        valueKey: "idproducto",
+        labelKey: "codigoproducto",
+        required: true
+      },
+      {
+        name: "idestado",
+        label: "Estado",
+        type: "select",
+        source: "/api/estados/",
+        valueKey: "idestado",
+        labelKey: "nombre",
+        required: true
+      },
+      {
+        name: "precio",
+        label: "Precio",
+        type: "number",
+        step: "0.01",
+        required: true
+      }
+    ]
+  },
+
+  TIPO_CLIENTE: {
+    endpoint: "/api/tipos-cliente/",
+    primaryKey: "idtipocliente",
+    fields: [
+      { name: "nombre", label: "Nombre", required: true },
+      { name: "descripcion", label: "Descripción", type: "textarea" }
+    ]
+  },
+
+  CLIENTE: {
+    endpoint: "/api/clientes/",
+    primaryKey: "idcliente",
+    fields: [
+      {
+        name: "idtipocliente",
+        label: "Tipo de cliente",
+        type: "select",
+        source: "/api/tipos-cliente/",
+        valueKey: "idtipocliente",
+        labelKey: "nombre",
+        required: true
+      },
+      {
+        name: "nombrecliente",
+        label: "Nombre del cliente",
+        required: true
+      },
+      { name: "nit", label: "NIT", required: true },
+      { name: "telefono", label: "Teléfono" },
+      { name: "correo", label: "Correo", type: "email" },
+      { name: "direccion", label: "Dirección", type: "textarea" },
+      { name: "nombrecontacto", label: "Nombre de contacto" },
+      { name: "activo", label: "Activo", type: "checkbox" }
+    ]
+  },
+
+  PROVEEDOR: {
+    endpoint: "/api/proveedores/",
+    primaryKey: "idproveedor",
+    fields: [
+      {
+        name: "nombreproveedor",
+        label: "Nombre del proveedor",
+        required: true
+      },
+      { name: "nit", label: "NIT", required: true },
+      { name: "nombrecontacto", label: "Nombre de contacto" },
+      { name: "telefono", label: "Teléfono" },
+      { name: "correo", label: "Correo", type: "email" },
+      { name: "direccion", label: "Dirección", type: "textarea" },
+      { name: "activo", label: "Activo", type: "checkbox" }
+    ]
+  }
 };
+
+const tableSchemas = Object.fromEntries(
+  Object.entries(maintenanceConfigs).map(([table, config]) => [
+    table,
+    config.fields.map(field => field.name)
+  ])
+);
 
 const reportDefinitions = [
   { id: 1, icon: "Q", title: "Facturación y medios de pago", desc: "Monto total facturado entre dos fechas, separado en efectivo, cheque y tarjeta.", dates: true },
@@ -160,12 +380,243 @@ function renderSubNavigation(route) {
 function openSubsection(section, option, label) {
   if (option === "nueva-cotizacion") return navigate("carrito");
   if (option === "usuarios") return renderUsers();
-  if (section === "catalogo" && option === "categorias") return renderCategories();
-  if (section === "catalogo" && option === "producto-detalle") return renderProductSelector();
+
+  if (section === "catalogo" && option === "categorias") {
+    return renderCategories();
+  }
+
+  if (section === "catalogo" && option === "producto-detalle") {
+    return renderProductSelector();
+  }
+
   if (option === "mantenimientos") return renderMaintenances();
   if (option === "reportes") return renderReports();
-  if (section === "ventas" && option.includes("pendiente")) return renderSales(label);
-  content.innerHTML = `<div class="section-heading"><div><h2>${label}</h2><p>Pantalla preparada para conectarse posteriormente con la base de datos.</p></div><button class="action-button">Nuevo registro</button></div><section class="workspace-card"><div class="empty-state"><div class="big-icon">▤</div><h2>${label}</h2><p>Aquí se mostrará el formulario o consulta correspondiente.</p></div></section>`;
+
+  // LISTADO DE PROVEEDORES
+  if (section === "compras" && option === "proveedores") {
+    return renderDirectory({
+      title: "Proveedores",
+      description: "Proveedores registrados en la base de datos.",
+      endpoint: "/api/proveedores/",
+      maintenanceTable: "PROVEEDOR",
+      columns: [
+        { field: "nombreproveedor", label: "Proveedor" },
+        { field: "nit", label: "NIT" },
+        { field: "nombrecontacto", label: "Contacto" },
+        { field: "telefono", label: "Teléfono" },
+        { field: "correo", label: "Correo" },
+        { field: "activo", label: "Estado", boolean: true }
+      ]
+    });
+  }
+
+  // LISTADO DE CLIENTES
+  if (section === "ventas" && option === "clientes") {
+    return renderDirectory({
+      title: "Clientes y empresas",
+      description: "Clientes registrados en la base de datos.",
+      endpoint: "/api/clientes/",
+      maintenanceTable: "CLIENTE",
+      columns: [
+        { field: "nombrecliente", label: "Cliente" },
+        { field: "tipo_cliente_nombre", label: "Tipo" },
+        { field: "nit", label: "NIT" },
+        { field: "telefono", label: "Teléfono" },
+        { field: "correo", label: "Correo" },
+        { field: "activo", label: "Estado", boolean: true }
+      ]
+    });
+  }
+  if (
+    section === "ventas" &&
+    option.includes("pendiente")
+  ) {
+    return renderSales(label);
+  }
+
+  content.innerHTML = `
+    <div class="section-heading">
+      <div>
+        <h2>${label}</h2>
+        <p>
+          Pantalla preparada para conectarse posteriormente
+          con la base de datos.
+        </p>
+      </div>
+
+      <button class="action-button">
+        Nuevo registro
+      </button>
+    </div>
+
+    <section class="workspace-card">
+      <div class="empty-state">
+        <div class="big-icon">▤</div>
+        <h2>${label}</h2>
+        <p>
+          Aquí se mostrará el formulario o consulta correspondiente.
+        </p>
+      </div>
+    </section>
+  `;
+}
+ async function renderDirectory(config) {
+  content.innerHTML = `
+    <div class="section-heading">
+      <div>
+        <h2>${escapeHtml(config.title)}</h2>
+        <p>${escapeHtml(config.description)}</p>
+      </div>
+
+      <button
+        class="action-button"
+        id="newDirectoryRecord"
+      >
+        + Nuevo registro
+      </button>
+    </div>
+
+    <section class="workspace-card">
+      <div id="directoryResults">
+        <div class="empty-state">
+          <h2>Cargando registros...</h2>
+          <p>Consultando información en SQL Server.</p>
+        </div>
+      </div>
+    </section>
+  `;
+
+  $("#newDirectoryRecord").addEventListener(
+    "click",
+    () => {
+      openMaintenanceTable(config.maintenanceTable);
+    }
+  );
+
+  try {
+    const response = await fetch(config.endpoint);
+
+    if (!response.ok) {
+      throw new Error(
+        "No se pudieron consultar los registros."
+      );
+    }
+
+    const responseData = await response.json();
+
+    const records = Array.isArray(responseData)
+      ? responseData
+      : responseData.results || [];
+
+    if (!records.length) {
+      $("#directoryResults").innerHTML = `
+        <div class="empty-state">
+          <h2>No hay registros</h2>
+          <p>
+            Presioná “Nuevo registro” para agregar el primero.
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    $("#directoryResults").innerHTML = `
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              ${config.columns.map(column => `
+                <th>${escapeHtml(column.label)}</th>
+              `).join("")}
+
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${records.map(record => `
+              <tr>
+                ${config.columns.map(column => {
+                  const value = record[column.field];
+
+                  if (column.boolean) {
+                    return `
+                      <td>
+                        <span class="${
+                          value
+                            ? "active-badge"
+                            : "inactive-badge"
+                        }">
+                          ${value ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                    `;
+                  }
+
+                  return `
+                    <td>
+                      ${escapeHtml(
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                          ? "—"
+                          : value
+                      )}
+                    </td>
+                  `;
+                }).join("")}
+
+                <td>
+                  <button
+                    type="button"
+                    class="edit-user"
+                    data-directory-maintenance
+                  >
+                    Administrar
+                  </button>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    document
+      .querySelectorAll("[data-directory-maintenance]")
+      .forEach(button => {
+        button.addEventListener("click", () => {
+          openMaintenanceTable(
+            config.maintenanceTable
+          );
+        });
+      });
+
+  } catch (error) {
+    $("#directoryResults").innerHTML = `
+      <div class="empty-state">
+        <h2>No se pudo cargar la información</h2>
+        <p>${escapeHtml(error.message)}</p>
+      </div>
+    `;
+  }
+}
+
+
+async function openMaintenanceTable(table) {
+  navigate("informacion");
+
+  document
+    .querySelectorAll(".subnav-button")
+    .forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.option === "mantenimientos"
+      );
+    });
+
+  renderMaintenances();
+  await selectMaintenanceTable(table);
 }
 
 function frogIcon(color) {
@@ -177,18 +628,340 @@ function productCards(items) {
   return `<section class="product-grid">${items.map(product => `<article class="product-card"><div class="product-color" style="background:linear-gradient(135deg,${product.color},${product.color}99)"></div>${frogIcon(product.color)}<div class="product-info"><div class="product-heading"><div><span class="status">${product.category}</span><span class="brand-tag">${product.brand}</span><h3>${product.name}</h3></div><button class="info-circle" data-info="${product.id}" title="Ver información específica">i</button></div><div class="product-meta"><span>${product.detail}</span><span>Stock: ${product.stock}</span></div><div class="product-footer"><span class="price">Q${product.price.toFixed(2)}</span><div class="quantity-control"><button data-minus="${product.id}">−</button><output id="qty-${product.id}">${quantities[product.id]}</output><button data-plus="${product.id}">+</button></div></div><button class="primary-button" data-add="${product.id}">Agregar al carrito</button></div></article>`).join("")}</section>`;
 }
 
-function renderCategories() {
+async function loadProductsFromApi() {
+  const response = await fetch("/api/productos/");
+
+  if (!response.ok) {
+    throw new Error(
+      "No se pudieron consultar los productos."
+    );
+  }
+
+  const responseData = await response.json();
+
+  const apiProducts = Array.isArray(responseData)
+    ? responseData
+    : responseData.results || [];
+
+  products = apiProducts
+    .filter(product => product.activo)
+    .map(product => {
+      const prices = (product.precios || []).map(price => ({
+        type: price.tipo,
+        value: Number(price.valor)
+      }));
+
+      const individualPrice =
+        prices.find(
+          price =>
+            price.type.toLowerCase() === "individual"
+        ) || prices[0];
+
+      return {
+        id: product.idproducto,
+        generalId: product.idproductogeneral,
+        name: product.producto_general_nombre,
+        description: product.producto_descripcion || "",
+        brand: product.marca_nombre,
+        category: product.categoria_nombre,
+        colorName: product.color_nombre,
+        color: product.color_codigohex || "#027DD6",
+        presentation: product.presentacion_nombre,
+        presentationQuantity:
+          product.presentacion_cantidad,
+        unitMeasure: product.unidad_medida,
+        detail:
+          `${product.color_nombre} · ${product.presentacion_nombre}`,
+        code: product.codigoproducto,
+        barcode: product.codigobarras,
+        stock: Number(product.stock || 0),
+        units: [product.presentacion_nombre],
+        prices,
+        price: individualPrice
+          ? individualPrice.value
+          : 0,
+        locations: (product.ubicaciones || []).map(
+          location => ({
+            place:
+              `${location.bodega} · Estante ${location.estante}`,
+            quantity: Number(location.cantidad)
+          })
+        )
+      };
+    });
+
+  quantities = Object.fromEntries(
+    products.map(product => [product.id, 1])
+  );
+}
+
+
+async function renderCategories() {
   markSubnav("categorias");
-  const categories = ["Todos", "Accesorios", "Solventes", "Pinturas", "Barnices"];
-  content.innerHTML = `<div class="section-heading"><div><h2>Catálogo por categoría</h2><p>Buscá y filtrá productos para agregarlos a una cotización.</p></div></div><section class="workspace-card"><div class="choice-group">${categories.map((category, index) => `<label class="choice-card"><input type="radio" name="category" value="${category}" ${index === 0 ? "checked" : ""}><span>${category}</span></label>`).join("")}</div><div class="search-row"><input id="productSearch" placeholder="Escribí un producto o una marca"><button class="action-button" id="searchButton">Buscar</button><button class="action-button wine" id="filtersButton">Filtros</button></div><div class="filter-panel" id="filterPanel"><div><label>Precio</label><select id="priceOrder"><option value="">Sin ordenar</option><option value="asc">Menor a mayor</option><option value="desc">Mayor a menor</option></select></div><div><label>Marca</label><select id="brandFilter"><option value="">Todas</option>${[...new Set(products.map(p => p.brand))].map(brand => `<option>${brand}</option>`).join("")}</select></div><div><label>Tipo de cliente</label><select id="clientFilter"><option selected>Individual</option><option>Empresa</option></select></div><div><label>Unidad</label><select id="unitFilter"><option value="">Todas</option>${[...new Set(products.flatMap(p => p.units))].map(unit => `<option>${unit}</option>`).join("")}</select></div></div><div id="categoryProducts"></div></section>`;
-  const apply = () => {
-    const category = document.querySelector('input[name="category"]:checked').value, query = $("#productSearch").value.toLowerCase(), brand = $("#brandFilter").value, unit = $("#unitFilter").value, order = $("#priceOrder").value, client = $("#clientFilter").value;
-    let items = products.filter(p => (category === "Todos" || p.category === category) && (!query || `${p.name} ${p.brand}`.toLowerCase().includes(query)) && (!brand || p.brand === brand) && (!unit || p.units.includes(unit))).map(p => ({ ...p, price: p.prices.find(x => x.type === client).value }));
-    if (order) items.sort((a,b) => order === "asc" ? a.price-b.price : b.price-a.price);
-    $("#categoryProducts").innerHTML = productCards(items); bindProductActions();
+
+  content.innerHTML = `
+    <section class="workspace-card">
+      <div class="empty-state">
+        <h2>Cargando productos...</h2>
+        <p>Consultando información en SQL Server.</p>
+      </div>
+    </section>
+  `;
+
+  try {
+    await loadProductsFromApi();
+  } catch (error) {
+    content.innerHTML = `
+      <section class="workspace-card">
+        <div class="empty-state">
+          <h2>No se pudo cargar el catálogo</h2>
+          <p>${escapeHtml(error.message)}</p>
+        </div>
+      </section>
+    `;
+    return;
+  }
+
+  const categories = [
+    "Todos",
+    "Accesorios",
+    "Solventes",
+    "Pinturas",
+    "Barnices"
+  ];
+
+  const brands = [
+    ...new Set(
+      products
+        .map(product => product.brand)
+        .filter(Boolean)
+    )
+  ];
+
+  const units = [
+    ...new Set(
+      products.flatMap(product => product.units)
+    )
+  ];
+
+  content.innerHTML = `
+    <div class="section-heading">
+      <div>
+        <h2>Catálogo por categoría</h2>
+        <p>
+          Buscá y filtrá productos para agregarlos
+          a una cotización.
+        </p>
+      </div>
+    </div>
+
+    <section class="workspace-card">
+      <div class="choice-group">
+        ${categories.map((category, index) => `
+          <label class="choice-card">
+            <input
+              type="radio"
+              name="category"
+              value="${category}"
+              ${index === 0 ? "checked" : ""}
+            >
+            <span>${category}</span>
+          </label>
+        `).join("")}
+      </div>
+
+      <div class="search-row">
+        <input
+          id="productSearch"
+          placeholder="Escribí un producto o una marca"
+        >
+
+        <button
+          class="action-button"
+          id="searchButton"
+        >
+          Buscar
+        </button>
+
+        <button
+          class="action-button wine"
+          id="filtersButton"
+        >
+          Filtros
+        </button>
+      </div>
+
+      <div class="filter-panel" id="filterPanel">
+        <div>
+          <label>Precio</label>
+          <select id="priceOrder">
+            <option value="">Sin ordenar</option>
+            <option value="asc">Menor a mayor</option>
+            <option value="desc">Mayor a menor</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Marca</label>
+          <select id="brandFilter">
+            <option value="">Todas</option>
+            ${brands.map(brand => `
+              <option value="${escapeHtml(brand)}">
+                ${escapeHtml(brand)}
+              </option>
+            `).join("")}
+          </select>
+        </div>
+
+        <div>
+          <label>Tipo de cliente</label>
+          <select id="clientFilter">
+            <option value="Individual" selected>
+              Individual
+            </option>
+            <option value="Empresa">
+              Empresa
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label>Unidad</label>
+          <select id="unitFilter">
+            <option value="">Todas</option>
+            ${units.map(unit => `
+              <option value="${escapeHtml(unit)}">
+                ${escapeHtml(unit)}
+              </option>
+            `).join("")}
+          </select>
+        </div>
+      </div>
+
+      <div id="categoryProducts"></div>
+    </section>
+  `;
+
+  const applyFilters = () => {
+    const category = document.querySelector(
+      'input[name="category"]:checked'
+    ).value;
+
+    const query = $("#productSearch")
+      .value
+      .trim()
+      .toLowerCase();
+
+    const brand = $("#brandFilter").value;
+    const unit = $("#unitFilter").value;
+    const order = $("#priceOrder").value;
+    const clientType = $("#clientFilter").value;
+
+    let filteredProducts = products
+      .filter(product => {
+        const matchesCategory =
+          category === "Todos" ||
+          product.category === category;
+
+        const searchableText =
+          `${product.name} ${product.brand} ${product.code}`
+            .toLowerCase();
+
+        const matchesSearch =
+          !query || searchableText.includes(query);
+
+        const matchesBrand =
+          !brand || product.brand === brand;
+
+        const matchesUnit =
+          !unit || product.units.includes(unit);
+
+        return (
+          matchesCategory &&
+          matchesSearch &&
+          matchesBrand &&
+          matchesUnit
+        );
+      })
+      .map(product => {
+        const selectedPrice = product.prices.find(
+          price =>
+            price.type.toLowerCase() ===
+            clientType.toLowerCase()
+        );
+
+        if (!selectedPrice) {
+          return null;
+        }
+
+        product.price = selectedPrice.value;
+        return product;
+      })
+      .filter(Boolean);
+
+    if (order === "asc") {
+      filteredProducts.sort(
+        (first, second) =>
+          first.price - second.price
+      );
+    }
+
+    if (order === "desc") {
+      filteredProducts.sort(
+        (first, second) =>
+          second.price - first.price
+      );
+    }
+
+    $("#categoryProducts").innerHTML =
+      productCards(filteredProducts);
+
+    bindProductActions();
   };
-  document.querySelectorAll('input[name="category"]').forEach(x => x.addEventListener("change", apply)); ["priceOrder","brandFilter","clientFilter","unitFilter"].forEach(id => $("#"+id).addEventListener("change", apply));
-  $("#searchButton").addEventListener("click", apply); $("#productSearch").addEventListener("keydown", e => { if (e.key === "Enter") apply(); }); $("#filtersButton").addEventListener("click", () => $("#filterPanel").classList.toggle("open")); apply();
+
+  document
+    .querySelectorAll('input[name="category"]')
+    .forEach(input => {
+      input.addEventListener(
+        "change",
+        applyFilters
+      );
+    });
+
+  [
+    "priceOrder",
+    "brandFilter",
+    "clientFilter",
+    "unitFilter"
+  ].forEach(id => {
+    $("#" + id).addEventListener(
+      "change",
+      applyFilters
+    );
+  });
+
+  $("#searchButton").addEventListener(
+    "click",
+    applyFilters
+  );
+
+  $("#productSearch").addEventListener(
+    "keydown",
+    event => {
+      if (event.key === "Enter") {
+        applyFilters();
+      }
+    }
+  );
+
+  $("#filtersButton").addEventListener(
+    "click",
+    () => {
+      $("#filterPanel").classList.toggle("open");
+    }
+  );
+
+  applyFilters();
 }
 
 function bindProductActions() {
@@ -259,17 +1032,860 @@ function reportResult(id) {
 }
 function reportTable(headers,rows){return `<div class="table-wrap"><table class="data-table"><thead><tr>${headers.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(x=>`<td>${x}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;}
 
-function renderMaintenances() {
-  content.innerHTML=`<div class="section-heading"><div><h2>Mantenimientos</h2><p>Seleccioná una tabla para abrir su formulario de registro.</p></div></div><section class="workspace-card maintenance-shell"><details id="tablePicker" class="table-picker"><summary><span><i>▤</i><b id="selectedTableLabel">Seleccionar una tabla</b></span><small>${Object.keys(tableSchemas).length} tablas disponibles</small></summary><div class="picker-panel"><input id="tableSearch" placeholder="Buscar una tabla..."><div id="maintenanceGroups" class="maintenance-groups">${maintenanceMarkup("")}</div></div></details><div id="maintenanceForm" class="maintenance-form empty-maintenance"><div class="big-icon">▤</div><h3>Elegí una tabla</h3><p>Al seleccionarla aparecerán aquí los datos que se pueden agregar.</p></div></section>`;
-  $("#tableSearch").addEventListener("input",e=>{ $("#maintenanceGroups").innerHTML=maintenanceMarkup(e.target.value); bindTableLinks(); }); bindTableLinks();
+let currentMaintenanceTable = null;
+let currentMaintenanceRecords = [];
+let currentMaintenanceEditId = null;
+
+
+function getCsrfToken() {
+  return document.querySelector(
+    '[name="csrfmiddlewaretoken"]'
+  )?.value || "";
 }
-function maintenanceMarkup(query){const q=query.toLowerCase();return Object.entries(databaseGroups).map(([group,tables])=>{const filtered=tables.filter(t=>tableSchemas[t]&&(t.toLowerCase().includes(q)||t.replaceAll("_"," ").toLowerCase().includes(q)));if(!filtered.length)return "";return `<section class="maintenance-group"><h3>${group}<span>${filtered.length}</span></h3><div>${filtered.map(t=>`<button class="maintenance-row" data-table="${t}"><span class="table-symbol">▤</span><span><b>${t.replaceAll("_"," ")}</b></span><strong>Seleccionar ›</strong></button>`).join("")}</div></section>`;}).join("")||`<div class="empty-state">No se encontraron tablas.</div>`;}
-function bindTableLinks(){document.querySelectorAll("[data-table]").forEach(b=>b.addEventListener("click",()=>selectMaintenanceTable(b.dataset.table)));}
-function selectMaintenanceTable(table){$("#selectedTableLabel").textContent=table.replaceAll("_"," ");$("#tablePicker").open=false;const fields=tableSchemas[table]||[];$("#maintenanceForm").className="maintenance-form";$("#maintenanceForm").innerHTML=`<div class="maintenance-form-head"><div><span class="table-symbol">▤</span><div><small>NUEVO REGISTRO</small><h3>${table.replaceAll("_"," ")}</h3></div></div><button class="close-form" id="closeMaintenance">× Cerrar</button></div><form id="tableForm"><div class="dynamic-fields">${fields.map(field=>maintenanceField(field)).join("")}</div><div class="form-actions"><button type="button" class="ghost-form-button" id="clearMaintenance">Limpiar</button><button type="submit" class="action-button green">Guardar registro</button></div></form>`;$("#closeMaintenance").addEventListener("click",()=>{$("#maintenanceForm").className="maintenance-form empty-maintenance";$("#maintenanceForm").innerHTML=`<div class="big-icon">▤</div><h3>Formulario cerrado</h3><p>Seleccioná otra tabla para continuar.</p>`;});$("#clearMaintenance").addEventListener("click",()=>$("#tableForm").reset());$("#tableForm").addEventListener("submit",e=>{e.preventDefault();showToast(`Registro de ${table} preparado para guardar`);});}
-function maintenanceField(field){const label=field.replace(/([a-z])([A-Z])/g,"$1 $2").replace(/^id/,"").trim();if(field==="activo")return `<label class="field-check"><input type="checkbox" checked><span>Activo</span></label>`;if(field.startsWith("id"))return `<label>${label}<select required><option value="">Seleccionar ${label.toLowerCase()}</option><option>Registro de demostración 1</option><option>Registro de demostración 2</option></select></label>`;if(/fecha|ultimoAcceso/i.test(field))return `<label>${label}<input type="date" required></label>`;if(/descripcion|observaciones|direccion|informacion/i.test(field))return `<label class="field-wide">${label}<textarea rows="3" placeholder="Ingresar ${label.toLowerCase()}"></textarea></label>`;if(/cantidad|precio|costo|subtotal|total|descuento|monto/i.test(field))return `<label>${label}<input type="number" min="0" step="0.01" placeholder="0.00" required></label>`;return `<label>${label}<input placeholder="Ingresar ${label.toLowerCase()}" required></label>`;}
+
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+function renderMaintenances() {
+  currentMaintenanceTable = null;
+  currentMaintenanceRecords = [];
+  currentMaintenanceEditId = null;
+
+  content.innerHTML = `
+    <div class="section-heading">
+      <div>
+        <h2>Mantenimientos</h2>
+        <p>
+          Creá, consultá, editá y desactivá registros de la base de datos.
+        </p>
+      </div>
+    </div>
+
+    <section class="workspace-card maintenance-shell">
+      <details id="tablePicker" class="table-picker">
+        <summary>
+          <span>
+            <i>▤</i>
+            <b id="selectedTableLabel">Seleccionar una tabla</b>
+          </span>
+
+          <small>
+            ${Object.keys(maintenanceConfigs).length} tablas disponibles
+          </small>
+        </summary>
+
+        <div class="picker-panel">
+          <input
+            id="tableSearch"
+            placeholder="Buscar una tabla..."
+          >
+
+          <div
+            id="maintenanceGroups"
+            class="maintenance-groups"
+          >
+            ${maintenanceMarkup("")}
+          </div>
+        </div>
+      </details>
+
+      <div
+        id="maintenanceForm"
+        class="maintenance-form empty-maintenance"
+      >
+        <div class="big-icon">▤</div>
+        <h3>Elegí una tabla</h3>
+        <p>
+          Aquí aparecerán el formulario y los registros almacenados.
+        </p>
+      </div>
+    </section>
+  `;
+
+  $("#tableSearch").addEventListener("input", event => {
+    $("#maintenanceGroups").innerHTML =
+      maintenanceMarkup(event.target.value);
+
+    bindTableLinks();
+  });
+
+  bindTableLinks();
+}
+
+
+function maintenanceMarkup(query) {
+  const search = query.toLowerCase();
+
+  return Object.entries(databaseGroups)
+    .map(([group, tables]) => {
+      const filteredTables = tables.filter(table => {
+        if (!maintenanceConfigs[table]) {
+          return false;
+        }
+
+        const normalName = table
+          .replaceAll("_", " ")
+          .toLowerCase();
+
+        return (
+          table.toLowerCase().includes(search) ||
+          normalName.includes(search)
+        );
+      });
+
+      if (!filteredTables.length) {
+        return "";
+      }
+
+      return `
+        <section class="maintenance-group">
+          <h3>
+            ${group}
+            <span>${filteredTables.length}</span>
+          </h3>
+
+          <div>
+            ${filteredTables.map(table => `
+              <button
+                class="maintenance-row"
+                data-table="${table}"
+              >
+                <span class="table-symbol">▤</span>
+
+                <span>
+                  <b>${table.replaceAll("_", " ")}</b>
+                </span>
+
+                <strong>Seleccionar ›</strong>
+              </button>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    })
+    .join("") ||
+    `<div class="empty-state">No se encontraron tablas.</div>`;
+}
+
+
+function bindTableLinks() {
+  document
+    .querySelectorAll("[data-table]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        selectMaintenanceTable(button.dataset.table);
+      });
+    });
+}
+
+
+async function selectMaintenanceTable(table) {
+  currentMaintenanceTable = table;
+  currentMaintenanceEditId = null;
+
+  $("#selectedTableLabel").textContent =
+    table.replaceAll("_", " ");
+
+  $("#tablePicker").open = false;
+
+  await renderMaintenanceWorkspace();
+}
+
+
+async function renderMaintenanceWorkspace(record = null) {
+  const config = maintenanceConfigs[currentMaintenanceTable];
+
+  if (!config) {
+    return;
+  }
+
+  currentMaintenanceEditId = record
+    ? record[config.primaryKey]
+    : null;
+
+  $("#maintenanceForm").className = "maintenance-form";
+
+  $("#maintenanceForm").innerHTML = `
+    <div class="maintenance-form-head">
+      <div>
+        <span class="table-symbol">▤</span>
+
+        <div>
+          <small>
+            ${record ? "EDITAR REGISTRO" : "NUEVO REGISTRO"}
+          </small>
+
+          <h3>
+            ${currentMaintenanceTable.replaceAll("_", " ")}
+          </h3>
+        </div>
+      </div>
+
+      <button class="close-form" id="closeMaintenance">
+        × Cerrar
+      </button>
+    </div>
+
+    <form id="tableForm">
+      <div
+        id="dynamicMaintenanceFields"
+        class="dynamic-fields"
+      >
+        <p>Cargando formulario...</p>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="ghost-form-button"
+          id="clearMaintenance"
+        >
+          ${record ? "Cancelar edición" : "Limpiar"}
+        </button>
+
+        <button
+          type="submit"
+          class="action-button green"
+          id="saveMaintenance"
+        >
+          ${record ? "Guardar cambios" : "Guardar registro"}
+        </button>
+      </div>
+
+      <p id="maintenanceMessage"></p>
+    </form>
+
+    <div class="maintenance-records">
+      <div class="maintenance-records-head">
+        <div>
+          <h3>Registros existentes</h3>
+          <p>Datos consultados desde SQL Server.</p>
+        </div>
+
+        <button
+          type="button"
+          class="ghost-form-button"
+          id="refreshMaintenance"
+        >
+          Actualizar
+        </button>
+      </div>
+
+      <div id="maintenanceRecords">
+        <p>Cargando registros...</p>
+      </div>
+    </div>
+  `;
+
+  const fieldsMarkup = await Promise.all(
+    config.fields.map(field =>
+      maintenanceField(
+        field,
+        record ? record[field.name] : undefined
+      )
+    )
+  );
+
+  $("#dynamicMaintenanceFields").innerHTML =
+    fieldsMarkup.join("");
+
+  $("#closeMaintenance").addEventListener("click", () => {
+    $("#maintenanceForm").className =
+      "maintenance-form empty-maintenance";
+
+    $("#maintenanceForm").innerHTML = `
+      <div class="big-icon">▤</div>
+      <h3>Formulario cerrado</h3>
+      <p>Seleccioná otra tabla para continuar.</p>
+    `;
+  });
+
+  $("#clearMaintenance").addEventListener("click", async () => {
+    if (record) {
+      await renderMaintenanceWorkspace();
+    } else {
+      $("#tableForm").reset();
+
+      document
+        .querySelectorAll(
+          '#tableForm input[type="checkbox"]'
+        )
+        .forEach(input => {
+          input.checked = true;
+        });
+    }
+  });
+
+  $("#refreshMaintenance").addEventListener(
+    "click",
+    loadMaintenanceRecords
+  );
+
+  $("#tableForm").addEventListener(
+    "submit",
+    saveMaintenanceRecord
+  );
+
+  await loadMaintenanceRecords();
+}
+
+
+async function maintenanceField(field, value = undefined) {
+  const required = field.required ? "required" : "";
+  const safeValue = escapeHtml(value ?? "");
+  const placeholder = escapeHtml(
+    field.placeholder || `Ingresar ${field.label.toLowerCase()}`
+  );
+
+  if (field.type === "checkbox") {
+    const checked =
+      value === undefined || value === true
+        ? "checked"
+        : "";
+
+    return `
+      <label class="field-check">
+        <input
+          type="checkbox"
+          name="${field.name}"
+          ${checked}
+        >
+        <span>${field.label}</span>
+      </label>
+    `;
+  }
+
+  if (field.type === "textarea") {
+    return `
+      <label class="field-wide">
+        ${field.label}
+
+        <textarea
+          name="${field.name}"
+          rows="3"
+          placeholder="${placeholder}"
+          ${required}
+        >${safeValue}</textarea>
+      </label>
+    `;
+  }
+
+  if (field.type === "select") {
+    try {
+      const response = await fetch(field.source);
+
+      if (!response.ok) {
+        throw new Error("No se pudieron cargar las opciones.");
+      }
+
+      const responseData = await response.json();
+
+      const options = Array.isArray(responseData)
+        ? responseData
+        : responseData.results || [];
+
+      return `
+        <label>
+          ${field.label}
+
+          <select name="${field.name}" ${required}>
+            <option value="">
+              Seleccionar ${field.label.toLowerCase()}
+            </option>
+
+            ${options.map(option => {
+              const optionValue = option[field.valueKey];
+              const optionLabel = option[field.labelKey];
+
+              const selected =
+                String(optionValue) === String(value)
+                  ? "selected"
+                  : "";
+
+              return `
+                <option
+                  value="${escapeHtml(optionValue)}"
+                  ${selected}
+                >
+                  ${escapeHtml(optionLabel)}
+                </option>
+              `;
+            }).join("")}
+          </select>
+        </label>
+      `;
+    } catch (error) {
+      return `
+        <label>
+          ${field.label}
+
+          <select name="${field.name}" ${required}>
+            <option value="">
+              No se pudieron cargar las opciones
+            </option>
+          </select>
+        </label>
+      `;
+    }
+  }
+
+  if (field.type === "number") {
+    return `
+      <label>
+        ${field.label}
+
+        <input
+          type="number"
+          name="${field.name}"
+          min="0"
+          step="${field.step || "0.01"}"
+          value="${safeValue}"
+          placeholder="${placeholder}"
+          ${required}
+        >
+      </label>
+    `;
+  }
+
+  return `
+    <label>
+      ${field.label}
+
+      <input
+        type="${field.type || "text"}"
+        name="${field.name}"
+        value="${safeValue}"
+        placeholder="${placeholder}"
+        ${required}
+      >
+    </label>
+  `;
+}
+
+
+function getMaintenancePayload(config) {
+  const form = $("#tableForm");
+  const payload = {};
+
+  config.fields.forEach(field => {
+    const input = form.elements[field.name];
+
+    if (!input) {
+      return;
+    }
+
+    if (field.type === "checkbox") {
+      payload[field.name] = input.checked;
+      return;
+    }
+
+    if (field.type === "number") {
+      payload[field.name] =
+        input.value === ""
+          ? null
+          : Number(input.value);
+
+      return;
+    }
+
+    if (field.type === "select") {
+      payload[field.name] =
+        input.value === ""
+          ? null
+          : input.value;
+
+      return;
+    }
+
+    payload[field.name] = input.value.trim();
+  });
+
+  return payload;
+}
+
+
+async function saveMaintenanceRecord(event) {
+  event.preventDefault();
+
+  const config =
+    maintenanceConfigs[currentMaintenanceTable];
+
+  const payload = getMaintenancePayload(config);
+  const editing = currentMaintenanceEditId !== null;
+
+  const url = editing
+    ? `${config.endpoint}${currentMaintenanceEditId}/`
+    : config.endpoint;
+
+  const button = $("#saveMaintenance");
+  const message = $("#maintenanceMessage");
+
+  button.disabled = true;
+  button.textContent = "Guardando...";
+  message.textContent = "";
+
+  try {
+    const response = await fetch(url, {
+      method: editing ? "PATCH" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken()
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        await readMaintenanceError(response)
+      );
+    }
+
+    showToast(
+      editing
+        ? "Registro actualizado correctamente"
+        : "Registro creado correctamente"
+    );
+
+    currentMaintenanceEditId = null;
+    await renderMaintenanceWorkspace();
+
+  } catch (error) {
+    message.textContent = error.message;
+    message.className = "form-error";
+
+  } finally {
+    button.disabled = false;
+    button.textContent = editing
+      ? "Guardar cambios"
+      : "Guardar registro";
+  }
+}
+
+
+async function readMaintenanceError(response) {
+  try {
+    const data = await response.json();
+
+    if (data.mensaje) {
+      return data.mensaje;
+    }
+
+    return Object.entries(data)
+      .map(([field, messages]) => {
+        const message = Array.isArray(messages)
+          ? messages.join(", ")
+          : messages;
+
+        return `${field}: ${message}`;
+      })
+      .join(" | ");
+
+  } catch (error) {
+    return "No se pudo completar la operación.";
+  }
+}
+
+
+async function loadMaintenanceRecords() {
+  const config =
+    maintenanceConfigs[currentMaintenanceTable];
+
+  const container = $("#maintenanceRecords");
+
+  if (!config || !container) {
+    return;
+  }
+
+  container.innerHTML = "<p>Cargando registros...</p>";
+
+  try {
+    const response = await fetch(config.endpoint);
+
+    if (!response.ok) {
+      throw new Error(
+        "No se pudieron consultar los registros."
+      );
+    }
+
+    const responseData = await response.json();
+
+    currentMaintenanceRecords =
+      Array.isArray(responseData)
+        ? responseData
+        : responseData.results || [];
+
+    renderMaintenanceRecords();
+
+  } catch (error) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>No se pudieron cargar los registros</h3>
+        <p>${escapeHtml(error.message)}</p>
+      </div>
+    `;
+  }
+}
+
+
+function getMaintenanceDisplayValue(record, field) {
+  const relatedNames = {
+    idmarca: "marca_nombre",
+    idcategoria: "categoria_nombre",
+    idproductogeneral: "producto_general_nombre",
+    idpresentacion: "presentacion_nombre",
+    idcolor: "color_nombre",
+    idtipoprecio: "tipo_precio_nombre",
+    idproducto: "producto_nombre",
+    idestado: "estado_nombre",
+    idtipocliente: "tipo_cliente_nombre"
+  };
+
+  const relatedField = relatedNames[field.name];
+
+  let value = relatedField && record[relatedField] !== undefined
+    ? record[relatedField]
+    : record[field.name];
+
+  if (field.type === "checkbox") {
+    return value ? "Activo" : "Inactivo";
+  }
+
+  if (value === null || value === undefined || value === "") {
+    return "—";
+  }
+
+  return value;
+}
+
+
+function renderMaintenanceRecords() {
+  const config =
+    maintenanceConfigs[currentMaintenanceTable];
+
+  const container = $("#maintenanceRecords");
+
+  if (!currentMaintenanceRecords.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>No hay registros</h3>
+        <p>Usá el formulario para crear el primero.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  const visibleFields = config.fields.slice(0, 5);
+  const hasActiveField = config.fields.some(
+    field => field.name === "activo"
+  );
+
+  container.innerHTML = `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            ${visibleFields.map(field =>
+              `<th>${field.label}</th>`
+            ).join("")}
+
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${currentMaintenanceRecords.map(record => {
+            const id = record[config.primaryKey];
+            const inactive =
+              hasActiveField && record.activo === false;
+
+            return `
+              <tr>
+                ${visibleFields.map(field => `
+                  <td>
+                    ${escapeHtml(
+                      getMaintenanceDisplayValue(
+                        record,
+                        field
+                      )
+                    )}
+                  </td>
+                `).join("")}
+
+                <td>
+                  <div class="maintenance-actions">
+                    <button
+                      type="button"
+                      class="edit-user"
+                      data-maintenance-edit="${id}"
+                    >
+                      Editar
+                    </button>
+
+                    ${inactive ? `
+                      <button
+                        type="button"
+                        class="maintenance-activate"
+                        data-maintenance-activate="${id}"
+                      >
+                        Activar
+                      </button>
+                    ` : `
+                      <button
+                        type="button"
+                        class="maintenance-delete"
+                        data-maintenance-delete="${id}"
+                      >
+                        ${hasActiveField
+                          ? "Desactivar"
+                          : "Eliminar"}
+                      </button>
+                    `}
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document
+    .querySelectorAll("[data-maintenance-edit]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        editMaintenanceRecord(
+          button.dataset.maintenanceEdit
+        );
+      });
+    });
+
+  document
+    .querySelectorAll("[data-maintenance-delete]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        deleteMaintenanceRecord(
+          button.dataset.maintenanceDelete
+        );
+      });
+    });
+
+  document
+    .querySelectorAll("[data-maintenance-activate]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        activateMaintenanceRecord(
+          button.dataset.maintenanceActivate
+        );
+      });
+    });
+}
+
+
+async function editMaintenanceRecord(id) {
+  const config =
+    maintenanceConfigs[currentMaintenanceTable];
+
+  const record = currentMaintenanceRecords.find(item =>
+    String(item[config.primaryKey]) === String(id)
+  );
+
+  if (!record) {
+    showToast("No se encontró el registro");
+    return;
+  }
+
+  await renderMaintenanceWorkspace(record);
+}
+
+
+async function deleteMaintenanceRecord(id) {
+  const config =
+    maintenanceConfigs[currentMaintenanceTable];
+
+  const hasActiveField = config.fields.some(
+    field => field.name === "activo"
+  );
+
+  const action = hasActiveField
+    ? "desactivar"
+    : "eliminar";
+
+  if (!confirm(`¿Deseás ${action} este registro?`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${config.endpoint}${id}/`,
+      {
+        method: "DELETE",
+        headers: {
+          "X-CSRFToken": getCsrfToken()
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        await readMaintenanceError(response)
+      );
+    }
+
+    showToast(
+      hasActiveField
+        ? "Registro desactivado"
+        : "Registro eliminado"
+    );
+
+    await loadMaintenanceRecords();
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+
+async function activateMaintenanceRecord(id) {
+  const config =
+    maintenanceConfigs[currentMaintenanceTable];
+
+  try {
+    const response = await fetch(
+      `${config.endpoint}${id}/activar/`,
+      {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCsrfToken()
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        await readMaintenanceError(response)
+      );
+    }
+
+    showToast("Registro activado");
+    await loadMaintenanceRecords();
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
 
 function renderHome() {
-  content.innerHTML=`<section class="home-hero"><div class="home-copy"><span class="home-kicker">PANEL PRINCIPAL</span><h2>¡Hola, ${currentUser.name.split(" ")[0]}!</h2><p>Gestioná ventas, compras, inventario y clientes desde un solo lugar.</p><div class="hero-actions"><button class="action-button" data-home-route="catalogo">Explorar catálogo</button><button class="ghost-button" data-home-route="carrito">Nueva cotización</button></div></div><img src="assets/logo-sapo-pinturas.png" alt="Logo Sapo Pinturas"></section><img class="home-art-banner" src="assets/barra.png" alt="Colores para cada idea"><section class="quick-stats"><article><i>▦</i><span><small>Productos activos</small><b>128</b></span></article><article><i>🛒</i><span><small>Cotizaciones hoy</small><b>12</b></span></article><article><i>$</i><span><small>Ventas del día</small><b>Q8,450</b></span></article><article><i>!</i><span><small>Alertas de stock</small><b>4</b></span></article></section><div class="section-heading"><div><h2>¿Qué querés hacer?</h2><p>Elegí un módulo para comenzar.</p></div></div><section class="module-grid">${modules.filter(m=>m.id!=="inicio").map(m=>`<article class="module-card" data-home-route="${m.id}" tabindex="0"><div class="module-icon">${m.icon}</div><h3>${m.label}</h3><p>${m.desc}</p><span class="card-link">Abrir módulo →</span></article>`).join("")}</section>`;
+  content.innerHTML=`<section class="home-hero"><div class="home-copy"><span class="home-kicker">PANEL PRINCIPAL</span><h2>¡Hola, ${currentUser.name.split(" ")[0]}!</h2><p>Gestioná ventas, compras, inventario y clientes desde un solo lugar.</p><div class="hero-actions"><button class="action-button" data-home-route="catalogo">Explorar catálogo</button><button class="ghost-button" data-home-route="carrito">Nueva cotización</button></div></div><img src="/static/usuarios/assets/logo-sapo-pinturas.png" alt="Logo Sapo Pinturas"></section><img class="home-art-banner" src="/static/usuarios/assets/barra.png" alt="Colores para cada idea"><section class="quick-stats"><article><i>▦</i><span><small>Productos activos</small><b>128</b></span></article><article><i>🛒</i><span><small>Cotizaciones hoy</small><b>12</b></span></article><article><i>$</i><span><small>Ventas del día</small><b>Q8,450</b></span></article><article><i>!</i><span><small>Alertas de stock</small><b>4</b></span></article></section><div class="section-heading"><div><h2>¿Qué querés hacer?</h2><p>Elegí un módulo para comenzar.</p></div></div><section class="module-grid">${modules.filter(m=>m.id!=="inicio").map(m=>`<article class="module-card" data-home-route="${m.id}" tabindex="0"><div class="module-icon">${m.icon}</div><h3>${m.label}</h3><p>${m.desc}</p><span class="card-link">Abrir módulo →</span></article>`).join("")}</section>`;
   document.querySelectorAll("[data-home-route]").forEach(x=>x.addEventListener("click",()=>navigate(x.dataset.homeRoute)));
 }
 
@@ -283,7 +1899,7 @@ function printInvoice() {
 }
 
 function printDocumentMarkup({type,number,items,subtotal,discount,total,payment,note}) {
-  return `<div class="document-sheet"><div class="document-accent"></div><header class="print-header"><div class="print-brand"><img src="assets/logo-sapo-pinturas.png" alt="Sapo Pinturas"><div><b>SAPO <em>PINTURAS</em></b><span>Color en cada proyecto</span></div></div><div class="document-title"><span>DOCUMENTO COMERCIAL</span><h1>${type}</h1></div><div class="print-number"><span>NÚMERO</span><b>${number}</b><small>${new Date().toLocaleDateString("es-GT")}</small></div></header><section class="print-meta"><div><span>CLIENTE</span><b>Cliente de demostración</b><small>NIT: C/F</small></div><div><span>ATENDIÓ / DESPACHÓ</span><b>${currentUser.name}</b><small>${currentUser.role}</small></div><div><span>MEDIO DE PAGO</span><b>${payment}</b><small>Quetzales (GTQ)</small></div></section><table class="print-table"><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unitario</th><th>Descuento</th><th>Importe</th></tr></thead><tbody>${items.map(x=>`<tr><td><b>${x.name}</b><small>${x.brand} · ${x.detail}</small></td><td>${x.quantity}</td><td>Q${x.price.toFixed(2)}</td><td>${x.discount||0}%</td><td><b>Q${(x.price*x.quantity*(1-(x.discount||0)/100)).toFixed(2)}</b></td></tr>`).join("")}</tbody></table><section class="document-bottom"><div class="document-note"><b>Observaciones</b><p>${note}</p><span>Documento generado por el sistema comercial Sapo Pinturas.</span></div><div class="print-totals"><p><span>Subtotal</span><b>Q${subtotal.toFixed(2)}</b></p><p><span>Descuento</span><b>− Q${discount.toFixed(2)}</b></p><p class="print-grand"><span>TOTAL</span><b>Q${total.toFixed(2)}</b></p></div></section><footer class="print-footer"><div class="signature-row"><span>Firma del cliente</span><span>Firma del responsable</span></div><div class="footer-wave"><span></span><span></span><span></span></div><div class="footer-content"><img src="assets/logo-sapo-pinturas.png" alt=""><p><b>COLOR EN CADA PROYECTO</b><small>Gracias por preferirnos · Sapo Pinturas</small></p><p class="footer-contact">Guatemala<br>ventas@sapopinturas.com</p></div></footer></div>`;
+  return `<div class="document-sheet"><div class="document-accent"></div><header class="print-header"><div class="print-brand"><img src="/static/usuarios/assets/logo-sapo-pinturas.png" alt="Sapo Pinturas"><div><b>SAPO <em>PINTURAS</em></b><span>Color en cada proyecto</span></div></div><div class="document-title"><span>DOCUMENTO COMERCIAL</span><h1>${type}</h1></div><div class="print-number"><span>NÚMERO</span><b>${number}</b><small>${new Date().toLocaleDateString("es-GT")}</small></div></header><section class="print-meta"><div><span>CLIENTE</span><b>Cliente de demostración</b><small>NIT: C/F</small></div><div><span>ATENDIÓ / DESPACHÓ</span><b>${currentUser.name}</b><small>${currentUser.role}</small></div><div><span>MEDIO DE PAGO</span><b>${payment}</b><small>Quetzales (GTQ)</small></div></section><table class="print-table"><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unitario</th><th>Descuento</th><th>Importe</th></tr></thead><tbody>${items.map(x=>`<tr><td><b>${x.name}</b><small>${x.brand} · ${x.detail}</small></td><td>${x.quantity}</td><td>Q${x.price.toFixed(2)}</td><td>${x.discount||0}%</td><td><b>Q${(x.price*x.quantity*(1-(x.discount||0)/100)).toFixed(2)}</b></td></tr>`).join("")}</tbody></table><section class="document-bottom"><div class="document-note"><b>Observaciones</b><p>${note}</p><span>Documento generado por el sistema comercial Sapo Pinturas.</span></div><div class="print-totals"><p><span>Subtotal</span><b>Q${subtotal.toFixed(2)}</b></p><p><span>Descuento</span><b>− Q${discount.toFixed(2)}</b></p><p class="print-grand"><span>TOTAL</span><b>Q${total.toFixed(2)}</b></p></div></section><footer class="print-footer"><div class="signature-row"><span>Firma del cliente</span><span>Firma del responsable</span></div><div class="footer-wave"><span></span><span></span><span></span></div><div class="footer-content"><img src="/static/usuarios/assets/logo-sapo-pinturas.png" alt=""><p><b>COLOR EN CADA PROYECTO</b><small>Gracias por preferirnos · Sapo Pinturas</small></p><p class="footer-contact">Guatemala<br>ventas@sapopinturas.com</p></div></footer></div>`;
 }
 function obtenerCsrfToken() {
   return document.querySelector(

@@ -490,3 +490,97 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(2,125,214,.1
     flex-direction: column-reverse;
   }
 }
+
+/* Registros de mantenimientos */
+
+.maintenance-records {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #d8e3ec;
+}
+
+.maintenance-records-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.maintenance-records-head h3 {
+  margin: 0 0 4px;
+  color: #013a6f;
+}
+
+.maintenance-records-head p {
+  margin: 0;
+  color: #68798c;
+}
+
+.maintenance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.maintenance-activate,
+.maintenance-delete {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.maintenance-activate {
+  color: #ffffff;
+  background: #53962f;
+}
+
+.maintenance-delete {
+  color: #ffffff;
+  background: #8d0c44;
+}
+
+.maintenance-activate:hover,
+.maintenance-delete:hover,
+.edit-user:hover {
+  opacity: 0.85;
+}
+
+#maintenanceMessage {
+  margin-top: 12px;
+  font-weight: 700;
+}
+
+#maintenanceMessage.form-error {
+  color: #b42318;
+  background: #fff1f0;
+  border: 1px solid #f2b8b5;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.maintenance-records .table-wrap {
+  overflow-x: auto;
+}
+
+.maintenance-records .data-table {
+  width: 100%;
+  min-width: 750px;
+}
+
+.maintenance-records .data-table td {
+  vertical-align: middle;
+}
+
+@media (max-width: 700px) {
+  .maintenance-records-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .maintenance-actions {
+    min-width: 190px;
+  }
+}

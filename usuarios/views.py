@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import check_password, make_password
+from django.db import IntegrityError, transaction
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -6,8 +7,38 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 
-from .models import Usuario, Rol
-from .serializers import UsuarioSerializer, RolSerializer
+from .models import (
+    Usuario,
+    Rol,
+    Categoria,
+    Marca,
+    Presentacion,
+    Color,
+    TipoPrecio,
+    Estado,
+    ProductoGeneral,
+    Producto,
+    Precio,
+    TipoCliente,
+    Cliente,
+    Proveedor,
+)
+from .serializers import (
+    UsuarioSerializer,
+    RolSerializer,
+    CategoriaSerializer,
+    MarcaSerializer,
+    PresentacionSerializer,
+    ColorSerializer,
+    TipoPrecioSerializer,
+    EstadoSerializer,
+    ProductoGeneralSerializer,
+    ProductoSerializer,
+    PrecioSerializer,
+    TipoClienteSerializer,
+    ClienteSerializer,
+    ProveedorSerializer,
+)
 
 
 class RolViewSet(viewsets.ModelViewSet):
@@ -74,6 +105,147 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             "mensaje": "Contrasena actualizada correctamente."
         })
 
+class MantenimientoViewSet(viewsets.ModelViewSet):
+    """
+    CRUD común para los mantenimientos.
+
+    Si la tabla tiene el campo activo, DELETE desactiva el
+    registro. Si no lo tiene, intenta eliminarlo físicamente.
+    """
+
+    def destroy(self, request, *args, **kwargs):
+        registro = self.get_object()
+
+        if hasattr(registro, "activo"):
+            registro.activo = False
+            registro.save(update_fields=["activo"])
+
+            return Response(
+                {"mensaje": "Registro desactivado correctamente."},
+                status=status.HTTP_200_OK
+            )
+
+        try:
+            with transaction.atomic():
+                self.perform_destroy(registro)
+
+        except IntegrityError:
+            return Response(
+                {
+                    "mensaje": (
+                        "No se puede eliminar porque está relacionado "
+                        "con otros registros."
+                    )
+                },
+                status=status.HTTP_409_CONFLICT
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"], url_path="activar")
+    def activar(self, request, pk=None):
+        registro = self.get_object()
+
+        if not hasattr(registro, "activo"):
+            return Response(
+                {
+                    "mensaje": (
+                        "Esta tabla no utiliza activación "
+                        "y desactivación."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        registro.activo = True
+        registro.save(update_fields=["activo"])
+
+        return Response(
+            {
+                "mensaje": "Registro activado correctamente.",
+                "registro": self.get_serializer(registro).data,
+            }
+        )
+
+
+class CategoriaViewSet(MantenimientoViewSet):
+    queryset = Categoria.objects.all().order_by("nombre")
+    serializer_class = CategoriaSerializer
+
+
+class MarcaViewSet(MantenimientoViewSet):
+    queryset = Marca.objects.all().order_by("nombre")
+    serializer_class = MarcaSerializer
+
+
+class PresentacionViewSet(MantenimientoViewSet):
+    queryset = Presentacion.objects.all().order_by("nombre")
+    serializer_class = PresentacionSerializer
+
+
+class ColorViewSet(MantenimientoViewSet):
+    queryset = Color.objects.all().order_by("nombre")
+    serializer_class = ColorSerializer
+
+
+class TipoPrecioViewSet(MantenimientoViewSet):
+    queryset = TipoPrecio.objects.all().order_by("nombre")
+    serializer_class = TipoPrecioSerializer
+
+
+class EstadoViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Estado.objects.all().order_by("nombre")
+    serializer_class = EstadoSerializer
+
+
+class ProductoGeneralViewSet(MantenimientoViewSet):
+    queryset = ProductoGeneral.objects.select_related(
+        "idmarca",
+        "idcategoria"
+    ).all().order_by("nombre")
+
+    serializer_class = ProductoGeneralSerializer
+
+
+class ProductoViewSet(MantenimientoViewSet):
+    queryset = Producto.objects.select_related(
+        "idproductogeneral",
+        "idpresentacion",
+        "idcolor"
+    ).all().order_by("codigoproducto")
+
+    serializer_class = ProductoSerializer
+
+
+class PrecioViewSet(MantenimientoViewSet):
+    queryset = Precio.objects.select_related(
+        "idtipoprecio",
+        "idproducto",
+        "idproducto__idproductogeneral",
+        "idestado"
+    ).all().order_by("-fechaasignacion")
+
+    serializer_class = PrecioSerializer
+
+
+class TipoClienteViewSet(MantenimientoViewSet):
+    queryset = TipoCliente.objects.all().order_by("nombre")
+    serializer_class = TipoClienteSerializer
+
+
+class ClienteViewSet(MantenimientoViewSet):
+    queryset = Cliente.objects.select_related(
+        "idtipocliente"
+    ).all().order_by("nombrecliente")
+
+    serializer_class = ClienteSerializer
+
+
+class ProveedorViewSet(MantenimientoViewSet):
+    queryset = Proveedor.objects.all().order_by(
+        "nombreproveedor"
+    )
+    serializer_class = ProveedorSerializer
 
 @api_view(["POST"])
 def iniciar_sesion_api(request):
