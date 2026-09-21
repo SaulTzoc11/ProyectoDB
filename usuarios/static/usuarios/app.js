@@ -1,8 +1,4 @@
-const demoUsers = {
-  gerente: { password: "Gerente123*", name: "Andrea Morales", role: "Gerente" },
-  cajero: { password: "Caja123*", name: "Carlos Pérez", role: "Cajero" },
-  digitador: { password: "Datos123*", name: "María López", role: "Digitador" }
-};
+
 
 const DISCOUNT_PASSWORD = "Descuento123*";
 const modules = [
@@ -289,6 +285,449 @@ function printInvoice() {
 function printDocumentMarkup({type,number,items,subtotal,discount,total,payment,note}) {
   return `<div class="document-sheet"><div class="document-accent"></div><header class="print-header"><div class="print-brand"><img src="assets/logo-sapo-pinturas.png" alt="Sapo Pinturas"><div><b>SAPO <em>PINTURAS</em></b><span>Color en cada proyecto</span></div></div><div class="document-title"><span>DOCUMENTO COMERCIAL</span><h1>${type}</h1></div><div class="print-number"><span>NÚMERO</span><b>${number}</b><small>${new Date().toLocaleDateString("es-GT")}</small></div></header><section class="print-meta"><div><span>CLIENTE</span><b>Cliente de demostración</b><small>NIT: C/F</small></div><div><span>ATENDIÓ / DESPACHÓ</span><b>${currentUser.name}</b><small>${currentUser.role}</small></div><div><span>MEDIO DE PAGO</span><b>${payment}</b><small>Quetzales (GTQ)</small></div></section><table class="print-table"><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unitario</th><th>Descuento</th><th>Importe</th></tr></thead><tbody>${items.map(x=>`<tr><td><b>${x.name}</b><small>${x.brand} · ${x.detail}</small></td><td>${x.quantity}</td><td>Q${x.price.toFixed(2)}</td><td>${x.discount||0}%</td><td><b>Q${(x.price*x.quantity*(1-(x.discount||0)/100)).toFixed(2)}</b></td></tr>`).join("")}</tbody></table><section class="document-bottom"><div class="document-note"><b>Observaciones</b><p>${note}</p><span>Documento generado por el sistema comercial Sapo Pinturas.</span></div><div class="print-totals"><p><span>Subtotal</span><b>Q${subtotal.toFixed(2)}</b></p><p><span>Descuento</span><b>− Q${discount.toFixed(2)}</b></p><p class="print-grand"><span>TOTAL</span><b>Q${total.toFixed(2)}</b></p></div></section><footer class="print-footer"><div class="signature-row"><span>Firma del cliente</span><span>Firma del responsable</span></div><div class="footer-wave"><span></span><span></span><span></span></div><div class="footer-content"><img src="assets/logo-sapo-pinturas.png" alt=""><p><b>COLOR EN CADA PROYECTO</b><small>Gracias por preferirnos · Sapo Pinturas</small></p><p class="footer-contact">Guatemala<br>ventas@sapopinturas.com</p></div></footer></div>`;
 }
-function renderUsers(){const roleClass={Gerente:"role-manager",Cajero:"role-cashier",Digitador:"role-data"};content.innerHTML=`<div class="section-heading users-heading"><div><span class="users-kicker">SEGURIDAD Y ACCESOS</span><h2>Usuarios y roles</h2><p>Administrá quién puede acceder y qué función cumple en el sistema.</p></div><button class="action-button">＋ Nuevo usuario</button></div><section class="user-stats"><article><span>Usuarios activos</span><b>3</b></article><article><span>Roles configurados</span><b>3</b></article><article><span>Último acceso</span><b>Hoy, 11:42</b></article></section><section class="workspace-card user-list"><div class="user-list-header"><span>Usuario</span><span>Nombre de acceso</span><span>Rol asignado</span><span>Estado</span><span>Acciones</span></div>${Object.entries(demoUsers).map(([username,user])=>`<article class="user-row"><div class="user-person"><i>${user.name[0]}</i><span><b>${user.name}</b><small>${user.role} del sistema</small></span></div><code>${username}</code><span class="role-badge ${roleClass[user.role]}">${user.role}</span><span class="active-badge"><i></i>Activo</span><button class="edit-user">Editar</button></article>`).join("")}</section>`;}
-function renderModule(module){const items={compras:["Nueva compra","Proveedores","Compras pendientes","Entregas"],ventas:["Nueva cotización","Clientes y empresas","Pendiente de despachar","Pendiente de cancelar","Devoluciones"],informacion:["Consultas","Reportes","Mantenimientos","Usuarios y roles","Historial de movimientos"]};content.innerHTML=`<div class="section-heading"><div><h2>${module.label}</h2><p>${module.desc}</p></div></div><section class="module-grid">${(items[module.id]||[]).map((name,i)=>`<article class="module-card"><div class="module-icon">${i+1}</div><h3>${name}</h3><p>Seleccioná la opción superior para abrir esta gestión.</p></article>`).join("")}</section>`;}
+function obtenerCsrfToken() {
+  return document.querySelector(
+    '[name="csrfmiddlewaretoken"]'
+  )?.value || "";
+}
+
+
+function obtenerLista(datos) {
+  return Array.isArray(datos) ? datos : datos.results || [];
+}
+
+
+function obtenerMensajeError(datos) {
+  if (datos.mensaje) {
+    return datos.mensaje;
+  }
+
+  const primerCampo = Object.keys(datos)[0];
+
+  if (!primerCampo) {
+    return "No se pudo completar la operación.";
+  }
+
+  const error = datos[primerCampo];
+
+  if (Array.isArray(error)) {
+    return `${primerCampo}: ${error[0]}`;
+  }
+
+  return `${primerCampo}: ${error}`;
+}
+
+
+async function renderUsers() {
+  content.innerHTML = `
+    <section class="workspace-card">
+      <p>Cargando usuarios...</p>
+    </section>
+  `;
+
+  try {
+    const [respuestaUsuarios, respuestaRoles] = await Promise.all([
+      fetch("/api/usuarios/"),
+      fetch("/api/roles/")
+    ]);
+
+    if (!respuestaUsuarios.ok || !respuestaRoles.ok) {
+      throw new Error("No se pudieron cargar los datos.");
+    }
+
+    const usuarios = obtenerLista(await respuestaUsuarios.json());
+    const roles = obtenerLista(await respuestaRoles.json());
+
+    const activos = usuarios.filter(usuario => usuario.activo).length;
+
+    content.innerHTML = `
+      <div class="section-heading users-heading">
+        <div>
+          <span class="users-kicker">SEGURIDAD Y ACCESOS</span>
+          <h2>Usuarios y roles</h2>
+          <p>
+            Administra quién puede acceder y qué función cumple
+            dentro del sistema.
+          </p>
+        </div>
+
+        <button class="action-button" id="nuevoUsuario">
+          + Nuevo usuario
+        </button>
+      </div>
+
+      <section class="user-stats">
+        <article>
+          <span>Usuarios activos</span>
+          <b>${activos}</b>
+        </article>
+
+        <article>
+          <span>Usuarios registrados</span>
+          <b>${usuarios.length}</b>
+        </article>
+
+        <article>
+          <span>Roles configurados</span>
+          <b>${roles.length}</b>
+        </article>
+      </section>
+
+      <section
+        class="workspace-card user-form-card hidden"
+        id="formularioUsuarioContenedor"
+      ></section>
+
+      <section class="workspace-card user-list">
+        <div class="user-list-header">
+          <span>Usuario</span>
+          <span>Nombre de acceso</span>
+          <span>Rol asignado</span>
+          <span>Estado</span>
+          <span>Acciones</span>
+        </div>
+
+        ${
+          usuarios.length
+            ? usuarios.map(usuario => {
+                const nombreCompleto =
+                  `${usuario.nombres} ${usuario.apellidos}`.trim();
+
+                const estadoClase = usuario.activo
+                  ? "active-badge"
+                  : "inactive-badge";
+
+                const estadoTexto = usuario.activo
+                  ? "Activo"
+                  : "Inactivo";
+
+                return `
+                  <article class="user-row">
+                    <div class="user-person">
+                      <i>${nombreCompleto.charAt(0).toUpperCase()}</i>
+
+                      <span>
+                        <b>${nombreCompleto}</b>
+                        <small>${usuario.correo}</small>
+                      </span>
+                    </div>
+
+                    <code>${usuario.nombreusuario}</code>
+
+                    <span class="role-badge">
+                      ${usuario.rol_nombre || "Sin rol"}
+                    </span>
+
+                    <span class="${estadoClase}">
+                      <i></i>${estadoTexto}
+                    </span>
+
+                    <div class="user-actions">
+                      <button
+                        class="edit-user"
+                        data-editar-usuario="${usuario.idusuario}"
+                      >
+                        Editar
+                      </button>
+
+                      <button
+                        class="toggle-user"
+                        data-cambiar-estado="${usuario.idusuario}"
+                        data-activo="${usuario.activo}"
+                      >
+                        ${usuario.activo ? "Desactivar" : "Activar"}
+                      </button>
+                    </div>
+                  </article>
+                `;
+              }).join("")
+            : `
+              <p class="empty-users">
+                No hay usuarios registrados.
+              </p>
+            `
+        }
+      </section>
+    `;
+
+    $("#nuevoUsuario").addEventListener("click", () => {
+      mostrarFormularioUsuario(null, roles);
+    });
+
+    document.querySelectorAll("[data-editar-usuario]").forEach(boton => {
+      boton.addEventListener("click", () => {
+        const id = Number(boton.dataset.editarUsuario);
+        const usuario = usuarios.find(item => item.idusuario === id);
+
+        mostrarFormularioUsuario(usuario, roles);
+      });
+    });
+
+    document.querySelectorAll("[data-cambiar-estado]").forEach(boton => {
+      boton.addEventListener("click", async () => {
+        const id = boton.dataset.cambiarEstado;
+        const estaActivo = boton.dataset.activo === "true";
+
+        await cambiarEstadoUsuario(id, estaActivo);
+      });
+    });
+
+  } catch (error) {
+    content.innerHTML = `
+      <section class="workspace-card">
+        <h3>No se pudieron cargar los usuarios</h3>
+        <p>${error.message}</p>
+      </section>
+    `;
+  }
+}
+
+
+function mostrarFormularioUsuario(usuario, roles) {
+  const contenedor = $("#formularioUsuarioContenedor");
+  const editando = Boolean(usuario);
+
+  contenedor.classList.remove("hidden");
+
+  contenedor.innerHTML = `
+    <div class="user-form-header">
+      <div>
+        <h3>${editando ? "Editar usuario" : "Crear usuario"}</h3>
+        <p>
+          ${
+            editando
+              ? "Modifica los datos y el rol del usuario."
+              : "Ingresa los datos del nuevo usuario."
+          }
+        </p>
+      </div>
+
+      <button type="button" id="cerrarFormularioUsuario">
+        ×
+      </button>
+    </div>
+
+    <form id="formularioUsuario" class="user-form">
+      <label>
+        Nombres
+        <input
+          name="nombres"
+          value="${usuario?.nombres || ""}"
+          required
+        >
+      </label>
+
+      <label>
+        Apellidos
+        <input
+          name="apellidos"
+          value="${usuario?.apellidos || ""}"
+          required
+        >
+      </label>
+
+      <label>
+        Nombre de usuario
+        <input
+          name="nombreusuario"
+          value="${usuario?.nombreusuario || ""}"
+          required
+        >
+      </label>
+
+      <label>
+        Correo
+        <input
+          type="email"
+          name="correo"
+          value="${usuario?.correo || ""}"
+          required
+        >
+      </label>
+
+      <label>
+        Rol
+        <select name="idrol" required>
+          <option value="">Seleccionar rol</option>
+
+          ${roles.map(rol => `
+            <option
+              value="${rol.idrol}"
+              ${usuario?.idrol === rol.idrol ? "selected" : ""}
+            >
+              ${rol.nombre}
+            </option>
+          `).join("")}
+        </select>
+      </label>
+
+      <label>
+        ${editando ? "Nueva contraseña (opcional)" : "Contraseña"}
+        <input
+          type="password"
+          name="contrasena"
+          minlength="8"
+          ${editando ? "" : "required"}
+        >
+      </label>
+
+      <label class="field-check">
+        <input
+          type="checkbox"
+          name="activo"
+          ${usuario?.activo !== false ? "checked" : ""}
+        >
+        <span>Usuario activo</span>
+      </label>
+
+      <div class="user-form-error" id="errorFormularioUsuario"></div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="ghost-form-button"
+          id="cancelarFormularioUsuario"
+        >
+          Cancelar
+        </button>
+
+        <button type="submit" class="action-button">
+          ${editando ? "Guardar cambios" : "Crear usuario"}
+        </button>
+      </div>
+    </form>
+  `;
+
+  $("#cerrarFormularioUsuario").addEventListener(
+    "click",
+    cerrarFormularioUsuario
+  );
+
+  $("#cancelarFormularioUsuario").addEventListener(
+    "click",
+    cerrarFormularioUsuario
+  );
+
+  $("#formularioUsuario").addEventListener("submit", event => {
+    guardarUsuario(event, usuario?.idusuario);
+  });
+
+  contenedor.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+
+function cerrarFormularioUsuario() {
+  const contenedor = $("#formularioUsuarioContenedor");
+  contenedor.classList.add("hidden");
+  contenedor.innerHTML = "";
+}
+
+
+async function guardarUsuario(event, idUsuario = null) {
+  event.preventDefault();
+
+  const formulario = event.currentTarget;
+  const boton = formulario.querySelector('button[type="submit"]');
+  const datosFormulario = new FormData(formulario);
+
+  const datos = {
+    nombres: datosFormulario.get("nombres"),
+    apellidos: datosFormulario.get("apellidos"),
+    nombreusuario: datosFormulario.get("nombreusuario"),
+    correo: datosFormulario.get("correo"),
+    idrol: datosFormulario.get("idrol"),
+    activo: datosFormulario.get("activo") === "on"
+  };
+
+  const contrasena = datosFormulario.get("contrasena");
+
+  if (contrasena) {
+    datos.contrasena = contrasena;
+  }
+
+  const url = idUsuario
+    ? `/api/usuarios/${idUsuario}/`
+    : "/api/usuarios/";
+
+  const metodo = idUsuario ? "PATCH" : "POST";
+
+  boton.disabled = true;
+  boton.textContent = "Guardando...";
+  $("#errorFormularioUsuario").textContent = "";
+
+  try {
+    const respuesta = await fetch(url, {
+      method: metodo,
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": obtenerCsrfToken()
+      },
+      body: JSON.stringify(datos)
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      $("#errorFormularioUsuario").textContent =
+        obtenerMensajeError(resultado);
+      return;
+    }
+
+    showToast(
+      idUsuario
+        ? "Usuario actualizado correctamente."
+        : "Usuario creado correctamente."
+    );
+
+    await renderUsers();
+
+  } catch (error) {
+    $("#errorFormularioUsuario").textContent =
+      "No se pudo conectar con el servidor.";
+  } finally {
+    boton.disabled = false;
+    boton.textContent = idUsuario
+      ? "Guardar cambios"
+      : "Crear usuario";
+  }
+}
+
+
+async function cambiarEstadoUsuario(idUsuario, estaActivo) {
+  const accion = estaActivo ? "desactivar" : "activar";
+
+  if (!confirm(`¿Deseas ${accion} este usuario?`)) {
+    return;
+  }
+
+  const url = estaActivo
+    ? `/api/usuarios/${idUsuario}/`
+    : `/api/usuarios/${idUsuario}/activar/`;
+
+  const metodo = estaActivo ? "DELETE" : "POST";
+
+  try {
+    const respuesta = await fetch(url, {
+      method: metodo,
+      headers: {
+        "X-CSRFToken": obtenerCsrfToken()
+      }
+    });
+
+    if (!respuesta.ok) {
+      const resultado = await respuesta.json();
+      alert(obtenerMensajeError(resultado));
+      return;
+    }
+
+    showToast(`Usuario ${accion}do correctamente.`);
+    await renderUsers();
+
+  } catch (error) {
+    alert("No se pudo conectar con el servidor.");
+  }
+}function renderModule(module){const items={compras:["Nueva compra","Proveedores","Compras pendientes","Entregas"],ventas:["Nueva cotización","Clientes y empresas","Pendiente de despachar","Pendiente de cancelar","Devoluciones"],informacion:["Consultas","Reportes","Mantenimientos","Usuarios y roles","Historial de movimientos"]};content.innerHTML=`<div class="section-heading"><div><h2>${module.label}</h2><p>${module.desc}</p></div></div><section class="module-grid">${(items[module.id]||[]).map((name,i)=>`<article class="module-card"><div class="module-icon">${i+1}</div><h3>${name}</h3><p>Seleccioná la opción superior para abrir esta gestión.</p></article>`).join("")}</section>`;}
 function showToast(message){const toast=$("#toast");toast.textContent=message;toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),2200);}

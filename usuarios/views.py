@@ -1,74 +1,103 @@
+from django.contrib.auth.hashers import check_password, make_password
 from django.shortcuts import render
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from django.utils import timezone
+
+from rest_framework import status, viewsets
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 
 from .models import Usuario, Rol
 from .serializers import UsuarioSerializer, RolSerializer
 
-from django.http import JsonResponse
-from django.contrib.auth.hashers import check_password
-from django.views.decorators.http import require_POST
-from django.utils import timezone
 
-class RolViewSet(viewsets.ReadOnlyModelViewSet):
-    """Consulta de roles existentes"""
+class RolViewSet(viewsets.ModelViewSet):
+    """Permite listar, crear, editar y eliminar roles."""
+
     queryset = Rol.objects.all()
     serializer_class = RolSerializer
 
 
 class UsuarioViewSet(viewsets.ModelViewSet):
-    """Gestión completa de usuarios"""
-    queryset = Usuario.objects.all()
+    """Permite administrar los usuarios."""
+
+    queryset = Usuario.objects.select_related("idrol").all()
     serializer_class = UsuarioSerializer
 
-    def create(self, request, *args, **kwargs):
-        """
-        El alta de usuarios se delega al SP dbo.sp_Usuario_Crear para que
-        el cifrado de la contrasena ocurra dentro de la base de datos.
-        """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        datos = serializer.validated_data
- 
-        contrasena = request.data.get("contrasena", "")
-        if not contrasena:
-            return Response(
-                {"contrasena": ["Este campo es obligatorio."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
- 
-        resultado = seguridad.crear_usuario(
-            id_rol=datos["idrol"].idrol,
-            nombre_usuario=datos["nombreusuario"],
-            contrasena=contrasena,
-            nombres=datos["nombres"],
-            apellidos=datos["apellidos"],
-            correo=datos["correo"],
-        )
- 
-        if not resultado["ok"]:
-            return Response({"mensaje": resultado["mensaje"]},
-                            status=status.HTTP_400_BAD_REQUEST)
- 
-        usuario = Usuario.objects.get(pk=resultado["idUsuario"])
-        return Response(self.get_serializer(usuario).data,
-                        status=status.HTTP_201_CREATED)
-
     def destroy(self, request, *args, **kwargs):
+        """
+        Al eliminar un usuario, se desactiva en lugar de borrarlo
+        permanentemente de la base de datos.
+        """
         usuario = self.get_object()
         usuario.activo = False
-        usuario.save()
+        usuario.save(update_fields=["activo"])
 
         return Response(
-            {"mensaje": "Usuario desactivado exitosamente"},
+            {"mensaje": "Usuario desactivado correctamente."},
             status=status.HTTP_200_OK
         )
 
-@require_POST
+    @action(detail=True, methods=["post"], url_path="activar")
+    def activar(self, request, pk=None):
+        usuario = self.get_object()
+        usuario.activo = True
+        usuario.save(update_fields=["activo"])
+
+        return Response({
+            "mensaje": "Usuario activado correctamente.",
+            "usuario": self.get_serializer(usuario).data
+        })
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="cambiar-contrasena"
+    )
+    def cambiar_contrasena(self, request, pk=None):
+        usuario = self.get_object()
+        nueva_contrasena = request.data.get("contrasena", "")
+
+        if len(nueva_contrasena) < 8:
+            return Response(
+                {
+                    "contrasena": [
+                        "La contrasena debe tener al menos 8 caracteres."
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        usuario.contrasenaencriptada = make_password(nueva_contrasena)
+        usuario.save(update_fields=["contrasenaencriptada"])
+
+        return Response({
+            "mensaje": "Contrasena actualizada correctamente."
+        })
+
+
+@api_view(["POST"])
 def iniciar_sesion_api(request):
-    nombre_usuario = request.POST.get("username", "").strip()
-    contrasena = request.POST.get("password", "")
+    """
+    Valida el usuario y la contrasena enviada desde el formulario.
+    """
+    nombre_usuario = request.data.get(
+        "username",
+        request.data.get("nombreusuario", "")
+    ).strip()
+
+    contrasena = request.data.get(
+        "password",
+        request.data.get("contrasena", "")
+    )
+
+    if not nombre_usuario or not contrasena:
+        return Response(
+            {
+                "ok": False,
+                "mensaje": "Debe ingresar el usuario y la contrasena."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     try:
         usuario = Usuario.objects.select_related("idrol").get(
@@ -76,50 +105,64 @@ def iniciar_sesion_api(request):
             activo=True
         )
     except Usuario.DoesNotExist:
-        return JsonResponse({
-            "ok": False,
-            "mensaje": "El usuario o la contraseña no son correctos."
-        }, status=401)
+        return Response(
+            {
+                "ok": False,
+                "mensaje": "El usuario o la contrasena no son correctos."
+            },
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
+    # Compara la contrasena escrita con el hash almacenado.
     if not check_password(
-        contrasena,
-        usuario.contrasenaencriptada
+    contrasena,
+    usuario.contrasenaencriptada
     ):
-        return JsonResponse({
-            "ok": False,
-            "mensaje": "El usuario o la contraseña no son correctos."
-        }, status=401)
+        return Response(
+            {
+                "ok": False,
+                "mensaje": "El usuario o la contrasena no son correctos."
+            },
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
     usuario.ultimoacceso = timezone.now()
     usuario.save(update_fields=["ultimoacceso"])
 
-    # Guardar información en la sesión
+    rol_nombre = usuario.idrol.nombre if usuario.idrol else ""
+
+    # Guarda los datos del usuario en la sesion.
     request.session["usuario_id"] = usuario.idusuario
     request.session["usuario_nombre"] = usuario.nombreusuario
-    request.session["usuario_rol"] = usuario.idrol.nombre
+    request.session["usuario_rol"] = rol_nombre
 
-    nombre_completo = f"{usuario.nombres} {usuario.apellidos}".strip()
+    nombre_completo = (
+        f"{usuario.nombres} {usuario.apellidos}"
+    ).strip()
 
-    return JsonResponse({
+    return Response({
         "ok": True,
+        "mensaje": "Inicio de sesion correcto.",
         "usuario": {
             "id": usuario.idusuario,
             "username": usuario.nombreusuario,
             "name": nombre_completo,
-            "role": usuario.idrol.nombre
+            "role": rol_nombre
         }
     })
 
 
-@require_POST
+@api_view(["POST"])
 def cerrar_sesion_api(request):
     request.session.flush()
 
-    return JsonResponse({
+    return Response({
         "ok": True,
-        "mensaje": "Sesión cerrada correctamente."
+        "mensaje": "Sesion cerrada correctamente."
     })
 
-# Muestra la página de inicio de sesión
+
 def iniciar_sesion(request):
+    """Muestra la pantalla de inicio de sesion."""
+
     return render(request, "usuarios/login.html")
