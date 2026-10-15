@@ -22,4 +22,5 @@ urlpatterns = [
     path("", views.iniciar_sesion, name="login"),
     path("admin/", admin.site.urls),
     path("api/", include("usuarios.urls")),
+    path("api/cotizaciones/", include("app_cotizaciones.urls")),
 ]
