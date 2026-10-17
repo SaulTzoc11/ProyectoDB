@@ -1,0 +1,33 @@
+.product-grid { display: grid; grid-template-columns: repeat(3, minmax(210px, 1fr)); gap: 1rem; }
+.product-card { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: white; }
+.product-card { position: relative; }
+.product-color { height: 90px; background: linear-gradient(135deg, var(--blue), #84CFFD); }
+.product-card:nth-child(2) .product-color { background: linear-gradient(135deg, var(--green), #A5D889); }
+.product-card:nth-child(3) .product-color { background: linear-gradient(135deg, var(--wine), #E071A3); }
+.product-info { padding: 1rem; }
+.product-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.brand-tag { display: inline-block; margin-left: .4rem; padding: .22rem .5rem; border-radius: 999px; color: white; background: var(--wine); font-size: .72rem; font-weight: 800; }
+.info-circle { display: inline-grid; place-items: center; text-decoration: none; cursor: pointer; flex: 0 0 auto; width: 34px; height: 34px; border: 2px solid var(--blue); border-radius: 50%; color: var(--blue); background: white; font-weight: 900; }
+.color-swatch { width: 64px; height: 42px; display:grid; place-items:center; filter:drop-shadow(0 4px 5px rgba(1,58,111,.16)); }
+.product-card > .color-swatch { position:absolute; top:18px; right:14px; }
+.color-swatch svg { width:64px; height:42px; }
+.filter-panel { display: none; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: .9rem; margin: 0 0 1.25rem; padding: 1rem; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.filter-panel.open { display: grid; }
+.filter-panel label { margin: 0 0 .35rem; }
+.filter-panel select {
+  width: 100%; min-height: 48px; padding: .65rem 2.6rem .65rem .9rem;
+  border: 2px solid #D4E1EC; border-radius: 12px; color: var(--navy);
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23013A6F' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .85rem center;
+  appearance: none; cursor: pointer; font-weight: 700;
+  box-shadow: 0 4px 12px rgba(1,58,111,.06); transition: .2s ease;
+}
+.filter-panel select:hover { border-color: #7CB7E2; box-shadow: 0 6px 16px rgba(2,125,214,.12); }
+.filter-panel select:focus { outline: 3px solid rgba(2,125,214,.16); border-color: var(--blue); }
+.filter-panel select option { color: var(--navy); background: white; font-weight: 600; }
+.search-row { display: grid; grid-template-columns: minmax(220px, 1fr) auto auto; gap: .7rem; margin-bottom: 1rem; }
+.product-info h3 { margin: 0 0 .35rem; color: var(--navy); }
+.product-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: .83rem; }
+.product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.price { color: var(--navy); font-size: 1.15rem; font-weight: 900; }

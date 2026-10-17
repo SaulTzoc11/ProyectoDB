@@ -1,0 +1,4 @@
+.choice-group { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1rem 0 1.5rem; }
+.choice-card { position: relative; display: flex; align-items: center; gap: .65rem; min-width: 150px; margin: 0; padding: .8rem 1rem; border: 1px solid #C9DCEB; border-radius: 10px; background: white; color: var(--navy); cursor: pointer; }
+.choice-card:has(input:checked) { color: white; border-color: var(--blue); background: var(--blue); box-shadow: 0 8px 18px rgba(2,125,214,.18); }
+.choice-card input { width: 18px; min-height: 18px; margin: 0; accent-color: var(--green); }

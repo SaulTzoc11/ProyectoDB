@@ -1,0 +1,18 @@
+.detail-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 1rem; }
+.detail-section { padding: 1rem; border: 1px solid var(--line); border-radius: 12px; }
+.detail-section h3 { margin-top: 0; color: var(--navy); }
+/* Selector y detalle de productos */
+.selector-card { max-width:960px; }
+.product-selector-list { display:grid; gap:.65rem; }
+.product-select-option { display:grid; grid-template-columns:auto auto 1fr auto; align-items:center; gap:.85rem; margin:0; padding:.85rem; border:1px solid var(--line); border-radius:12px; cursor:pointer; transition:.2s; }
+.product-select-option:hover,.product-select-option:has(input:checked) { border-color:var(--blue); background:#F0F8FE; box-shadow:0 7px 16px rgba(2,125,214,.08); }
+.product-select-option input { width:18px; min-height:18px; margin:0; }
+.product-select-option span strong,.product-select-option span small { display:block; }.product-select-option span small { margin-top:.2rem; color:var(--muted); font-weight:500; }
+.product-select-option > b { color:var(--navy); }
+.primary-button.compact { width:auto; padding:0 1.5rem; margin-left:auto; }
+.product-detail-hero { display:flex; align-items:center; gap:1.25rem; margin-bottom:1.2rem; padding:1rem; border-radius:14px; background:#F5F9FC; }
+.product-detail-hero > div { width:92px; height:70px; display:grid; place-items:center; border-radius:16px; }.product-detail-hero > div .color-swatch,.product-detail-hero > div .color-swatch svg { width:76px; height:52px; }
+.product-detail-hero span { min-width:140px; }.product-detail-hero small,.product-detail-hero strong { display:block; }.product-detail-hero small { color:var(--muted); }.product-detail-hero strong { margin-top:.2rem; color:var(--navy); font-size:1.1rem; }
+.unit-chip { display:inline-block; margin:0 .35rem .45rem 0; padding:.45rem .7rem; border-radius:8px; color:var(--navy); background:#EAF4FC; font-weight:800; font-size:.82rem; }
+.price-line { display:flex; justify-content:space-between; padding:.65rem 0; border-bottom:1px solid var(--line); }.price-line strong { color:var(--navy); }
+.detail-buy { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-top:1.2rem; }

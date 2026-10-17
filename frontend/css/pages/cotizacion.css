@@ -1,0 +1,17 @@
+.cart-list { display: grid; gap: .75rem; margin: 1rem 0; }
+.cart-item { display: grid; grid-template-columns: 1fr auto; gap: 1rem; padding: 1rem; border: 1px solid var(--line); border-radius: 10px; }
+.cart-total { display: flex; justify-content: space-between; padding-top: 1rem; border-top: 2px solid var(--navy); color: var(--navy); font-size: 1.2rem; font-weight: 900; }
+/* Cotización */
+.quote-card { max-width:1200px; }
+.cart-item { grid-template-columns:minmax(280px,1fr) auto; align-items:center; padding:1.1rem; border-radius:14px; }
+.cart-product-main { display:grid; grid-template-columns:36px 36px 1fr; align-items:center; gap:.7rem; }.cart-product-main strong,.cart-product-main span,.cart-product-main small { display:block; }.cart-product-main span { margin-top:.25rem; color:var(--muted); font-size:.85rem; }
+.remove-button { width:34px; height:34px; border:0; border-radius:50%; color:white; background:var(--wine); font-size:1.25rem; font-weight:900; }
+.cart-controls { display:flex; align-items:center; gap:.8rem; }.discount-button { min-height:36px; padding:.45rem .7rem; border:1px solid var(--green); border-radius:8px; color:#34751C; background:#F2FAEE; font-weight:800; }
+.line-price { min-width:95px; text-align:right; }.line-price del,.line-price strong { display:block; }.line-price del { color:var(--muted); font-size:.78rem; }.line-price strong { color:var(--navy); font-size:1.1rem; }
+.discount-label { margin-top:.35rem; color:var(--green); font-weight:800; }
+.quote-summary { max-width:420px; margin:1.2rem 0 0 auto; }.quote-summary div { display:flex; justify-content:space-between; padding:.45rem .2rem; }.quote-summary .discount-total { color:var(--green); }.quote-summary .grand-total { margin-top:.35rem; padding-top:.8rem; border-top:2px solid var(--navy); color:var(--navy); font-size:1.25rem; }
+
+.dialogo { width: min(440px, 92vw); padding: 1.5rem; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+.dialogo::backdrop { background: rgba(16, 42, 67, .45); }
+.dialogo h3 { margin: 0 0 .25rem; color: var(--navy); }
+.dialogo .button-row { margin-top: 1rem; }

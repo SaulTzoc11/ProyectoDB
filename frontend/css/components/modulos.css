@@ -1,0 +1,11 @@
+.module-grid { display: grid; grid-template-columns: repeat(4, minmax(190px, 1fr)); gap: 1rem; }
+.module-card { min-height: 168px; padding: 1.25rem; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: 0 8px 22px rgba(1,58,111,.06); transition: transform .2s, box-shadow .2s; cursor: pointer; }
+.module-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.module-card .module-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px; color: white; background: var(--blue); font-size: 1.35rem; }
+.module-card:nth-child(4n+2) .module-icon { background: var(--green); }
+.module-card:nth-child(4n+3) .module-icon { background: var(--wine); }
+.module-card:nth-child(4n+4) .module-icon { background: var(--navy); }
+.module-card h3 { margin: 1rem 0 .35rem; color: var(--navy); }
+.module-card p { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.45; }
+
+.card-link { display:block; margin-top:1rem; color:var(--blue); font-size:.8rem; font-weight:800; }

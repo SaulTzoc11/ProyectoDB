@@ -1,0 +1,5 @@
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: .9rem .75rem; border-bottom: 1px solid var(--line); text-align: left; }
+.data-table th { color: var(--navy); background: #F6F9FC; font-size: .82rem; }
+
+.table-wrap { overflow-x: auto; }

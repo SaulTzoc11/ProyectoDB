@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cotización | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/catalogo.css">
+  <link rel="stylesheet" href="/css/pages/cotizacion.css">
+</head>
+<body class="app-view cargando" data-seccion="cotizacion">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="menu-button" data-accion="abrir-menu" aria-label="Abrir menú">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Cotización</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <main class="content">
+      <div class="section-heading">
+        <div>
+          <h2>Cotización</h2>
+          <p>Revise las cantidades, los descuentos y los productos antes de imprimir.</p>
+        </div>
+        <a class="action-button" href="/pages/catalogo.html">Agregar productos</a>
+      </div>
+
+      <section class="workspace-card quote-card">
+        <div id="listaCotizacion" class="cart-list"></div>
+
+        <div id="resumen" class="quote-summary" hidden>
+          <div><span>Subtotal</span><b id="resumenSubtotal"></b></div>
+          <div class="discount-total"><span>Descuentos</span><b id="resumenDescuento"></b></div>
+          <div class="grand-total"><span>Total estimado</span><b id="resumenTotal"></b></div>
+        </div>
+
+        <div id="acciones" class="button-row" hidden>
+          <button type="button" class="action-button wine" id="vaciar">Vaciar cotización</button>
+          <button type="button" class="action-button" id="imprimir">Imprimir cotización</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="dialogoDescuento" class="dialogo">
+    <form method="dialog" id="formularioDescuento">
+      <h3>Autorizar descuento</h3>
+      <p class="muted" data-campo="producto"></p>
+
+      <label for="claveDescuento">Contraseña de autorización</label>
+      <input id="claveDescuento" type="password" autocomplete="off" required>
+
+      <label for="porcentajeDescuento">Porcentaje de descuento (0 a 50)</label>
+      <input id="porcentajeDescuento" type="number" min="0" max="50" step="0.01" value="10" required>
+
+      <p id="errorDescuento" class="error" role="alert"></p>
+      <div class="button-row">
+        <button type="button" class="action-button wine" id="cancelarDescuento">Cancelar</button>
+        <button type="submit" class="action-button green">Aplicar descuento</button>
+      </div>
+    </form>
+  </dialog>
+
+  <template id="plantillaItem">
+    <article class="cart-item">
+      <div class="cart-product-main">
+        <button type="button" class="remove-button" data-accion="quitar" title="Quitar de la cotización" aria-label="Quitar de la cotización">&times;</button>
+        <a class="info-circle" data-elemento="detalle" title="Ver información" aria-label="Ver información">i</a>
+        <div>
+          <strong data-campo="nombre"></strong>
+          <span data-campo="detalle"></span>
+          <small class="discount-label" data-elemento="etiquetaDescuento" hidden></small>
+        </div>
+      </div>
+      <div class="cart-controls">
+        <div class="quantity-control">
+          <button type="button" data-accion="menos" aria-label="Disminuir cantidad">&minus;</button>
+          <output data-campo="cantidad"></output>
+          <button type="button" data-accion="mas" aria-label="Aumentar cantidad">+</button>
+        </div>
+        <button type="button" class="discount-button" data-accion="descuento">Aplicar descuento</button>
+        <div class="line-price">
+          <del data-campo="importeOriginal" hidden></del>
+          <strong data-campo="importe"></strong>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <template id="plantillaEstadoVacio">
+    <div class="empty-state"><h2 data-campo="titulo"></h2><p data-campo="detalle"></p></div>
+  </template>
+
+  <section id="areaImpresion" class="print-area" aria-hidden="true"></section>
+
+  <template id="plantillaDocumento">
+    <div class="document-sheet">
+      <div class="document-accent"></div>
+      <header class="print-header">
+        <div class="print-brand">
+          <img src="/assets/logo-sapo-pinturas.png" alt="Sapo Pinturas">
+          <div><b>SAPO <em>PINTURAS</em></b><span>Color en cada proyecto</span></div>
+        </div>
+        <div class="document-title"><span>DOCUMENTO COMERCIAL</span><h1>COTIZACIÓN</h1></div>
+        <div class="print-number"><span>FECHA</span><b data-campo="fecha"></b></div>
+      </header>
+      <section class="print-meta">
+        <div><span>ATENDIÓ</span><b data-campo="empleado"></b><small data-campo="rol"></small></div>
+      </section>
+      <table class="print-table">
+        <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unitario</th><th>Descuento</th><th>Importe</th></tr></thead>
+        <tbody data-elemento="filas"></tbody>
+      </table>
+      <section class="document-bottom">
+        <div class="document-note">
+          <b>Observaciones</b>
+          <p>Esta cotización es válida por 15 días. Los precios y las existencias están sujetos a disponibilidad.</p>
+          <span>Documento generado por el sistema comercial Sapo Pinturas.</span>
+        </div>
+        <div class="print-totals">
+          <p><span>Subtotal</span><b data-campo="subtotal"></b></p>
+          <p><span>Descuento</span><b data-campo="descuento"></b></p>
+          <p class="print-grand"><span>TOTAL</span><b data-campo="total"></b></p>
+        </div>
+      </section>
+    </div>
+  </template>
+
+  <template id="plantillaFilaDocumento">
+    <tr>
+      <td><b data-campo="nombre"></b><small data-campo="detalle"></small></td>
+      <td data-campo="cantidad"></td>
+      <td data-campo="precio"></td>
+      <td data-campo="descuento"></td>
+      <td><b data-campo="importe"></b></td>
+    </tr>
+  </template>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module" src="/js/paginas/cotizacion.js"></script>
+</body>
+</html>

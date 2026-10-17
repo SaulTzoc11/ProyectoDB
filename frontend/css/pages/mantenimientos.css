@@ -1,0 +1,112 @@
+.table-grid { display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: .75rem; }
+.table-link { padding: 1rem; border: 1px solid var(--line); border-radius: 10px; color: var(--navy); background: #F8FBFD; font-weight: 750; text-align: left; }
+.table-link:hover { border-color: var(--blue); background: #EDF7FE; }
+.maintenance-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; }.maintenance-toolbar input { max-width:420px; }.maintenance-toolbar span { color:var(--muted); font-size:.82rem; }
+.maintenance-groups { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }.maintenance-group { overflow:hidden; border:1px solid var(--line); border-radius:14px; }.maintenance-group h3 { display:flex; justify-content:space-between; margin:0; padding:.85rem 1rem; color:white; background:var(--navy); font-size:.95rem; }.maintenance-group h3 span { min-width:24px; height:24px; display:grid; place-items:center; border-radius:50%; background:rgba(255,255,255,.2); font-size:.72rem; }
+.maintenance-row { width:100%; display:grid; grid-template-columns:38px 1fr auto; align-items:center; gap:.65rem; padding:.75rem 1rem; border:0; border-bottom:1px solid var(--line); color:var(--ink); background:white; text-align:left; }.maintenance-row:last-child { border-bottom:0; }.maintenance-row:hover { background:#F0F8FE; }.maintenance-row span b,.maintenance-row span small { display:block; }.maintenance-row span small { margin-top:.15rem; color:var(--muted); font-size:.7rem; }.maintenance-row > strong { color:var(--blue); font-size:.76rem; }.table-symbol { width:34px; height:34px; display:grid; place-items:center; border-radius:8px; color:var(--blue); background:#EAF5FD; }
+
+/* Selector desplegable y formulario de mantenimientos */
+.maintenance-shell { max-width:1100px; margin:auto; }.table-picker { position:relative; border:1px solid #C9DCEB; border-radius:14px; background:white; }.table-picker summary { min-height:72px; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.2rem; list-style:none; cursor:pointer; }.table-picker summary::-webkit-details-marker { display:none; }.table-picker summary > span { display:flex; align-items:center; gap:.8rem; color:var(--navy); }.table-picker summary i { width:40px; height:40px; display:grid; place-items:center; border-radius:10px; color:white; background:var(--blue); font-style:normal; }.table-picker summary small { color:var(--muted); }.table-picker[open] summary { border-bottom:1px solid var(--line); }.picker-panel { position:relative; z-index:2; padding:1rem; background:#F8FBFD; }.picker-panel > input { margin-bottom:.8rem; }.table-picker .maintenance-groups { max-height:370px; display:block; overflow-y:auto; }.table-picker .maintenance-group { margin-bottom:.7rem; }.table-picker .maintenance-group h3 { padding:.65rem .85rem; background:#EAF4FC; color:var(--navy); }.table-picker .maintenance-group h3 span { color:var(--blue); background:white; }.table-picker .maintenance-row { grid-template-columns:32px 1fr auto; padding:.6rem .8rem; }.table-picker .table-symbol { width:30px; height:30px; }
+.maintenance-form { margin-top:1rem; padding:1.2rem; border:1px solid var(--line); border-radius:14px; background:white; box-shadow:0 10px 24px rgba(1,58,111,.07); }.empty-maintenance { padding:3rem 1rem; color:var(--muted); text-align:center; background:#F8FBFD; }.empty-maintenance h3 { margin:.5rem 0; color:var(--navy); }.empty-maintenance p { margin:0; }.maintenance-form-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-bottom:1rem; border-bottom:1px solid var(--line); }.maintenance-form-head > div { display:flex; align-items:center; gap:.7rem; }.maintenance-form-head small { color:var(--blue); font-weight:900; letter-spacing:.12em; }.maintenance-form-head h3 { margin:.15rem 0 0; color:var(--navy); }.close-form { padding:.45rem .7rem; border:1px solid #E9B7C9; border-radius:8px; color:var(--wine); background:#FFF5F8; font-weight:800; }.dynamic-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.85rem; margin-top:1rem; }.dynamic-fields label { margin:0; }.dynamic-fields input,.dynamic-fields select,.dynamic-fields textarea { width:100%; margin-top:.35rem; padding:.7rem; border:1px solid #C9D8E5; border-radius:9px; background:white; font:inherit; }.field-wide { grid-column:1/-1; }.field-check { display:flex; align-items:center; gap:.6rem; min-height:50px; }.field-check input { width:20px; min-height:20px; margin:0; }.form-actions { display:flex; justify-content:flex-end; gap:.7rem; margin-top:1rem; }.ghost-form-button { padding:.6rem 1rem; border:1px solid #C9D8E5; border-radius:9px; color:var(--navy); background:white; font-weight:800; }
+
+/* Registros de mantenimientos */
+
+.maintenance-records {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #d8e3ec;
+}
+
+
+.maintenance-records-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+
+.maintenance-records-head h3 {
+  margin: 0 0 4px;
+  color: #013a6f;
+}
+
+
+.maintenance-records-head p {
+  margin: 0;
+  color: #68798c;
+}
+
+
+.maintenance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+
+.maintenance-activate,
+.maintenance-delete {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+.maintenance-activate {
+  color: #ffffff;
+  background: #53962f;
+}
+
+
+.maintenance-delete {
+  color: #ffffff;
+  background: #8d0c44;
+}
+
+
+.maintenance-activate:hover,
+.maintenance-delete:hover,
+.edit-user:hover {
+  opacity: 0.85;
+}
+
+
+#maintenanceMessage {
+  margin-top: 12px;
+  font-weight: 700;
+}
+
+
+#maintenanceMessage.form-error {
+  color: #b42318;
+  background: #fff1f0;
+  border: 1px solid #f2b8b5;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+
+.maintenance-records .table-wrap {
+  overflow-x: auto;
+}
+
+
+.maintenance-records .data-table {
+  width: 100%;
+  min-width: 750px;
+}
+
+
+.maintenance-records .data-table td {
+  vertical-align: middle;
+}
+
+.dynamic-fields .field-check label { display: flex; align-items: center; gap: .6rem; margin-top: 1.6rem; }
+.dynamic-fields .field-check input { width: auto; margin: 0; }
+.tabla-grupo { margin-bottom: 1rem; }
+.tabla-no-disponible { display: flex; flex-direction: column; opacity: .55; cursor: not-allowed; }
+a.table-link { text-decoration: none; color: var(--navy); font-weight: 700; }

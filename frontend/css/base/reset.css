@@ -1,0 +1,7 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); background: var(--background); }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.hidden { display: none !important; }
+.eyebrow { color: var(--blue); font-size: .75rem; font-weight: 800; letter-spacing: .16em; margin: 0 0 .45rem; }
+.muted { color: var(--muted); }

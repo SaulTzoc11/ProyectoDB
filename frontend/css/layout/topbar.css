@@ -1,0 +1,11 @@
+.app-shell { min-width: 0; }
+.topbar { min-height: 88px; display: flex; align-items: center; gap: 1rem; padding: 1rem 2rem; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.96); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 4; }
+.topbar h1 { margin: 0; color: var(--navy); font-size: 1.45rem; }
+.top-actions { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+.cart-button { min-height: 42px; padding: .55rem .85rem; border: 1px solid #C9DDEB; border-radius: 10px; color: var(--navy); background: white; font-weight: 700; }
+.cart-button b { display: inline-grid; min-width: 22px; height: 22px; place-items: center; margin-left: .25rem; border-radius: 50%; color: white; background: var(--wine); font-size: .75rem; }
+.user-chip { padding-left: 1rem; border-left: 1px solid var(--line); }
+.user-chip span, .user-chip small { display: block; text-align: right; }
+.user-chip span { font-weight: 800; color: var(--navy); }
+.user-chip small { color: var(--muted); }
+.menu-button { display: none; border: 0; background: transparent; font-size: 1.4rem; }

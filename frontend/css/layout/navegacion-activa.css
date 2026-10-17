@@ -1,0 +1,25 @@
+body[data-seccion="inicio"] .nav-button[data-seccion="inicio"],
+body[data-seccion="catalogo"] .nav-button[data-seccion="catalogo"],
+body[data-seccion="compras"] .nav-button[data-seccion="compras"],
+body[data-seccion="ventas"] .nav-button[data-seccion="ventas"],
+body[data-seccion="informacion"] .nav-button[data-seccion="informacion"],
+body[data-seccion="cotizacion"] .nav-button[data-seccion="cotizacion"] {
+  color: white;
+  background: rgba(255, 255, 255, .12);
+  box-shadow: inset 3px 0 var(--green);
+}
+
+.nav-button { text-decoration: none; }
+.subnav-button { text-decoration: none; display: inline-flex; align-items: center; }
+
+body[data-subseccion="categorias"] .subnav-button[data-subseccion="categorias"],
+body[data-subseccion="producto"] .subnav-button[data-subseccion="producto"],
+body[data-subseccion="proveedores"] .subnav-button[data-subseccion="proveedores"],
+body[data-subseccion="clientes"] .subnav-button[data-subseccion="clientes"],
+body[data-subseccion="reportes"] .subnav-button[data-subseccion="reportes"],
+body[data-subseccion="mantenimientos"] .subnav-button[data-subseccion="mantenimientos"],
+body[data-subseccion="usuarios"] .subnav-button[data-subseccion="usuarios"] {
+  color: white;
+  border-color: var(--blue);
+  background: var(--blue);
+}

@@ -1,0 +1,6 @@
+label { display: block; margin: 1.1rem 0 .45rem; font-weight: 700; color: var(--navy); font-size: .9rem; }
+input { width: 100%; min-height: 50px; padding: .8rem 1rem; border: 1px solid #C9D8E5; border-radius: 10px; outline: none; background: white; }
+input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(2,125,214,.12); }
+.error { min-height: 1.25rem; color: #B42318; font-size: .86rem; }
+.workspace-toolbar { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: space-between; margin-bottom: 1rem; }
+.search-input { max-width: 360px; }

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/catalogo.css">
+</head>
+<body class="app-view cargando" data-seccion="catalogo" data-subseccion="categorias">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="menu-button" data-accion="abrir-menu" aria-label="Abrir menú">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Catálogo</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <!--# include virtual="/partials/subnav-catalogo.html" -->
+
+    <main class="content">
+      <div class="section-heading">
+        <div>
+          <h2>Catálogo por categoría</h2>
+          <p>Busque y filtre productos para agregarlos a una cotización.</p>
+        </div>
+      </div>
+
+      <section class="workspace-card">
+        <div class="choice-group" id="categorias"></div>
+
+        <div class="search-row">
+          <input id="busqueda" type="search" placeholder="Escriba un producto, una marca o un código" aria-label="Buscar producto">
+          <button type="button" class="action-button" id="botonBuscar">Buscar</button>
+          <button type="button" class="action-button wine" id="botonFiltros" aria-expanded="false">Filtros</button>
+        </div>
+
+        <div class="filter-panel" id="panelFiltros">
+          <div>
+            <label for="ordenPrecio">Precio</label>
+            <select id="ordenPrecio">
+              <option value="">Sin ordenar</option>
+              <option value="asc">Menor a mayor</option>
+              <option value="desc">Mayor a menor</option>
+            </select>
+          </div>
+          <div>
+            <label for="filtroMarca">Marca</label>
+            <select id="filtroMarca"><option value="">Todas</option></select>
+          </div>
+          <div>
+            <label for="filtroTipoPrecio">Tipo de cliente</label>
+            <select id="filtroTipoPrecio"></select>
+          </div>
+          <div>
+            <label for="filtroPresentacion">Presentación</label>
+            <select id="filtroPresentacion"><option value="">Todas</option></select>
+          </div>
+        </div>
+
+        <p id="mensajeCatalogo" class="muted" role="status"></p>
+        <section class="product-grid" id="productos"></section>
+      </section>
+    </main>
+  </div>
+
+  <template id="plantillaCategoria">
+    <label class="choice-card">
+      <input type="radio" name="categoria">
+      <span data-campo="nombre"></span>
+    </label>
+  </template>
+
+  <template id="plantillaProducto">
+    <article class="product-card">
+      <div class="product-color"></div>
+      <span class="color-swatch" data-elemento="color">
+        <svg viewBox="0 0 72 48" aria-hidden="true">
+          <path d="M6 31C14 15 28 10 45 12c8 1 15 5 21 12-5 1-8 4-11 9-12-4-24-3-37 3-6 3-11 1-12-5Z" fill="currentColor"/>
+          <path d="M12 34c14-7 29-8 45-3" fill="none" stroke="white" stroke-opacity=".72" stroke-width="2.8" stroke-linecap="round"/>
+          <circle cx="50" cy="18" r="2.2" fill="white"/>
+        </svg>
+      </span>
+      <div class="product-info">
+        <div class="product-heading">
+          <div>
+            <span class="status" data-campo="categoria"></span>
+            <span class="brand-tag" data-campo="marca"></span>
+            <h3 data-campo="nombre"></h3>
+          </div>
+          <a class="info-circle" data-elemento="detalle" title="Ver información específica" aria-label="Ver información específica">i</a>
+        </div>
+        <div class="product-meta">
+          <span data-campo="detalle"></span>
+          <span>Existencias: <span data-campo="stock"></span></span>
+        </div>
+        <div class="product-footer">
+          <span class="price" data-campo="precio"></span>
+          <div class="quantity-control">
+            <button type="button" data-accion="menos" aria-label="Disminuir cantidad">&minus;</button>
+            <output data-campo="cantidad">1</output>
+            <button type="button" data-accion="mas" aria-label="Aumentar cantidad">+</button>
+          </div>
+        </div>
+        <button type="button" class="primary-button" data-accion="agregar">Agregar a la cotización</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="plantillaEstadoVacio">
+    <div class="empty-state"><h2 data-campo="titulo"></h2><p data-campo="detalle"></p></div>
+  </template>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module" src="/js/paginas/catalogo.js"></script>
+</body>
+</html>

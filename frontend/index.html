@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema comercial de Sapo Pinturas">
+  <title>Sapo Pinturas | Sistema comercial</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/login.css">
+</head>
+<body>
+  <section class="login-view">
+    <div class="login-brand" aria-hidden="true">
+      <div class="hero-logo-wrap"><img class="hero-logo" src="/assets/logo-sapo-pinturas.png" alt=""></div>
+      <p class="eyebrow">SISTEMA COMERCIAL</p>
+      <h1>Color en cada proyecto</h1>
+      <p>Ventas, inventario y operaciones en un solo lugar.</p>
+      <div class="paint-stripes"><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <main class="login-panel">
+      <div class="login-card">
+        <div class="brand-lockup">
+          <img class="brand-logo" src="/assets/logo-sapo-pinturas.png" alt="Logo de Sapo Pinturas">
+          <div><strong>SAPO PINTURAS</strong><small>Acceso al sistema</small></div>
+        </div>
+        <h2>Bienvenido</h2>
+        <p class="muted">Ingrese sus credenciales para continuar.</p>
+
+        <form id="formularioLogin" novalidate>
+          <label for="usuario">Usuario</label>
+          <input id="usuario" name="username" autocomplete="username" placeholder="Ejemplo: gerente" required>
+
+          <label for="contrasena">Contraseña</label>
+          <div class="password-row">
+            <input id="contrasena" name="password" type="password" autocomplete="current-password" placeholder="Su contraseña" required>
+            <button id="mostrarContrasena" class="icon-button" type="button" aria-label="Mostrar contraseña">&#9673;</button>
+          </div>
+
+          <p id="errorLogin" class="error" role="alert"></p>
+          <button class="primary-button" type="submit">Ingresar al sistema <span>&rarr;</span></button>
+        </form>
+      </div>
+    </main>
+  </section>
+
+  <script type="module" src="/js/paginas/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ventas | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body class="app-view cargando" data-seccion="ventas">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="menu-button" data-accion="abrir-menu" aria-label="Abrir menú">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Ventas</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <!--# include virtual="/partials/subnav-ventas.html" -->
+
+    <main class="content">
+      <div class="section-heading">
+        <div>
+          <h2>Ventas</h2>
+          <p>Clientes, cotizaciones, despacho, pagos y devoluciones.</p>
+        </div>
+      </div>
+
+      <section class="module-grid">
+        <a class="module-card" href="/pages/clientes.html">
+          <div class="module-icon">1</div>
+          <h3>Clientes y empresas</h3>
+          <p>Consulte y administre los clientes registrados.</p>
+          <span class="card-link">Abrir &rarr;</span>
+        </a>
+        <a class="module-card" href="/pages/cotizacion.html">
+          <div class="module-icon">2</div>
+          <h3>Nueva cotización</h3>
+          <p>Arme una cotización con los productos del catálogo.</p>
+          <span class="card-link">Abrir &rarr;</span>
+        </a>
+        <article class="module-card">
+          <div class="module-icon">3</div>
+          <h3>Facturas, pagos y devoluciones</h3>
+          <p>Disponible próximamente.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/js/paginas/modulo.js"></script>
+</body>
+</html>

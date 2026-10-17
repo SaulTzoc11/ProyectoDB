@@ -1,0 +1,6 @@
+.primary-button { width: 100%; min-height: 52px; display: flex; justify-content: center; gap: .7rem; align-items: center; margin-top: 1.5rem; border: 0; border-radius: 10px; color: white; background: var(--blue); font-weight: 800; box-shadow: 0 10px 24px rgba(2,125,214,.22); }
+.primary-button:hover { background: #006BB9; }
+.button-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .75rem; margin-top: 1.2rem; }
+.action-button { min-height: 42px; padding: .6rem 1rem; border: 0; border-radius: 9px; color: white; background: var(--blue); font-weight: 700; }
+.action-button.green { background: var(--green); }
+.action-button.wine { background: var(--wine); }
