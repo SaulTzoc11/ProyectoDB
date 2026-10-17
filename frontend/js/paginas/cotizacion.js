@@ -1,4 +1,4 @@
-import { solicitar } from "../api.js";
+import { guardarCotizacion, obtenerLista, solicitar } from "../api.js";
 import * as carrito from "../carrito.js";
 import { iniciarPagina } from "../sesion.js";
 import {
@@ -17,8 +17,15 @@ const dialogo = document.querySelector("#dialogoDescuento");
 const formularioDescuento = document.querySelector("#formularioDescuento");
 const errorDescuento = document.querySelector("#errorDescuento");
 
+
+const selectCliente = document.querySelector("#clienteCotizacion");
+const observaciones = document.querySelector("#observacionesCotizacion");
+const botonGuardar = document.querySelector("#guardar");
+const mensajeGuardado = document.querySelector("#mensajeGuardado");
+
 let usuario = null;
 let itemEnDescuento = null;
+let codigoGuardado = null; 
 
 function actualizarContador() {
   document.querySelectorAll('[data-carrito="cantidad"]').forEach((n) => {
@@ -78,6 +85,11 @@ function dibujar() {
   vaciar(lista);
   actualizarContador();
 
+
+  codigoGuardado = null;
+  botonGuardar.disabled = false;
+  mensajeGuardado.textContent = "";
+
   if (!items.length) {
     mostrarEstadoVacio(lista, "La cotización está vacía", "Agregue productos desde el catálogo.");
     resumen.hidden = true;
@@ -95,6 +107,20 @@ function dibujar() {
   acciones.hidden = false;
 }
 
+
+async function cargarClientes() {
+  try {
+    const clientes = obtenerLista(await solicitar("/api/clientes/")); // ajusta la ruta si es otra
+    selectCliente.replaceChildren(new Option("-- Seleccione un cliente --", ""));
+    for (const c of clientes) {
+      
+      selectCliente.append(new Option(c.nombre ?? String(c), c.idcliente ?? c.id));
+    }
+  } catch (error) {
+    mensajeGuardado.textContent = error.message;
+  }
+}
+
 formularioDescuento.addEventListener("submit", async (evento) => {
   evento.preventDefault();
   errorDescuento.textContent = "";
@@ -107,7 +133,8 @@ formularioDescuento.addEventListener("submit", async (evento) => {
         porcentaje: document.querySelector("#porcentajeDescuento").value,
       },
     });
-    carrito.fijarDescuento(itemEnDescuento.id, respuesta.porcentaje);
+    
+    carrito.fijarDescuento(itemEnDescuento.id, respuesta.porcentaje, respuesta.token);
     dialogo.close();
     dibujar();
     mostrarAviso("Descuento autorizado y aplicado.");
@@ -123,6 +150,39 @@ document.querySelector("#vaciar").addEventListener("click", () => {
   dibujar();
 });
 
+
+botonGuardar.addEventListener("click", async () => {
+  const idCliente = Number(selectCliente.value);
+  const { lineas, tokensDescuento } = carrito.lineasParaGuardar();
+
+  if (!idCliente) {
+    mensajeGuardado.textContent = "Seleccione un cliente.";
+    return;
+  }
+  if (!lineas.length) {
+    mensajeGuardado.textContent = "La cotización no tiene productos.";
+    return;
+  }
+
+  botonGuardar.disabled = true; 
+  mensajeGuardado.textContent = "Guardando...";
+
+  try {
+    const respuesta = await guardarCotizacion({
+      idCliente,
+      observaciones: observaciones.value.trim() || null,
+      lineas,
+      tokensDescuento,
+    });
+    codigoGuardado = respuesta.codigoCotizacion;
+    mensajeGuardado.textContent = `Cotización ${codigoGuardado} guardada correctamente.`;
+    mostrarAviso(`Cotización ${codigoGuardado} guardada.`);
+  } catch (error) {
+    mensajeGuardado.textContent = error.message; 
+    botonGuardar.disabled = false;
+  }
+});
+
 document.querySelector("#imprimir").addEventListener("click", () => {
   const documento = clonarPlantilla("plantillaDocumento");
   const { subtotal, descuento, total } = carrito.totales();
@@ -135,6 +195,10 @@ document.querySelector("#imprimir").addEventListener("click", () => {
     descuento: `− ${formatearQuetzales(descuento)}`,
     total: formatearQuetzales(total),
   });
+
+
+  const campoCodigo = documento.querySelector('[data-campo="codigo"]');
+  if (campoCodigo) campoCodigo.textContent = codigoGuardado || "Sin guardar";
 
   documento.querySelector('[data-elemento="filas"]').append(
     ...carrito.obtenerItems().map((item) =>
@@ -157,3 +221,4 @@ document.querySelector("#imprimir").addEventListener("click", () => {
 
 usuario = await iniciarPagina();
 dibujar();
+cargarClientes();

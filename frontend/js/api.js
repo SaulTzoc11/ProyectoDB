@@ -66,3 +66,11 @@ export async function solicitar(ruta, { metodo = "GET", cuerpo } = {}) {
 export function obtenerLista(datos) {
   return Array.isArray(datos) ? datos : datos?.results || [];
 }
+
+
+export function guardarCotizacion({ idCliente, observaciones, lineas, tokensDescuento }) {
+  return solicitar("/api/cotizaciones/generar/", {
+    metodo: "POST",
+    cuerpo: { idCliente, observaciones, detalle: lineas, tokensDescuento },
+  });
+}

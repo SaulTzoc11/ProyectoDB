@@ -61,12 +61,14 @@ export function quitar(id) {
   guardar(leer().filter((item) => item.id !== id));
 }
 
-export function fijarDescuento(id, porcentaje) {
+export function fijarDescuento(id, porcentaje, token) {
   const items = leer();
   const item = items.find((x) => x.id === id);
   if (!item) return;
 
   item.descuento = Number(porcentaje);
+  
+  item.tokenDescuento = item.descuento > 0 ? token : undefined;
   guardar(items);
 }
 
@@ -83,4 +85,17 @@ export function totales() {
   );
 
   return { subtotal, descuento: subtotal - total, total };
+}
+
+
+export function lineasParaGuardar() {
+  const items = leer();
+  return {
+    lineas: items.map((i) => ({
+      idProducto: i.id,                 
+      cantidad: i.cantidad,
+      descuento: i.descuento || 0,      
+    })),
+    tokensDescuento: [...new Set(items.map((i) => i.tokenDescuento).filter(Boolean))],
+  };
 }

@@ -32,6 +32,14 @@
       </div>
 
       <section class="workspace-card quote-card">
+        <!-- NUEVO (cambio 1): cliente y observaciones -->
+        <div class="quote-client">
+          <label for="clienteCotizacion">Cliente</label>
+          <select id="clienteCotizacion" required></select>
+          <label for="observacionesCotizacion">Observaciones (opcional)</label>
+          <input id="observacionesCotizacion" type="text" maxlength="250">
+        </div>
+
         <div id="listaCotizacion" class="cart-list"></div>
 
         <div id="resumen" class="quote-summary" hidden>
@@ -40,10 +48,13 @@
           <div class="grand-total"><span>Total estimado</span><b id="resumenTotal"></b></div>
         </div>
 
+        <!-- CAMBIO (cambio 2): botón Guardar y mensaje -->
         <div id="acciones" class="button-row" hidden>
           <button type="button" class="action-button wine" id="vaciar">Vaciar cotización</button>
+          <button type="button" class="action-button green" id="guardar">Guardar cotización</button>
           <button type="button" class="action-button" id="imprimir">Imprimir cotización</button>
         </div>
+        <p id="mensajeGuardado" role="status"></p>
       </section>
     </main>
   </div>
@@ -112,6 +123,8 @@
       </header>
       <section class="print-meta">
         <div><span>ATENDIÓ</span><b data-campo="empleado"></b><small data-campo="rol"></small></div>
+        <!-- NUEVO (cambio 3): número de cotización -->
+        <div><span>COTIZACIÓN N°</span><b data-campo="codigo"></b></div>
       </section>
       <table class="print-table">
         <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unitario</th><th>Descuento</th><th>Importe</th></tr></thead>
