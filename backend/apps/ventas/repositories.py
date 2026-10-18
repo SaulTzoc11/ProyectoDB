@@ -48,11 +48,7 @@ def _mensaje(e: Exception) -> str:
 
 
 def generar_cotizacion_json(id_cliente, id_usuario, lineas, observaciones=None):
-    """Aqui es donde se ejecuta dbo.sp_GenerarCotizacionJson.
-
-    lineas = [(id_producto, cantidad, descuento_pct), ...]
-    Devuelve (idCotizacion, codigoCotizacion).
-    """
+    
     detalle = [
         {"idProducto": int(i), "cantidad": int(c), "descuento": float(d or 0)}
         for i, c, d in lineas
