@@ -74,3 +74,7 @@ export function guardarCotizacion({ idCliente, observaciones, lineas, tokensDesc
     cuerpo: { idCliente, observaciones, detalle: lineas, tokensDescuento },
   });
 }
+
+export function facturarVenta(cuerpo) {
+  return solicitar("/api/facturas/", { metodo: "POST", cuerpo });
+}

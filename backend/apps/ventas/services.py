@@ -77,3 +77,25 @@ def generar_cotizacion(id_usuario, id_cliente, detalle, observaciones=None, toke
 def confirmar_cotizacion(id_cotizacion, id_usuario):
     
     return repositories.confirmar_cotizacion(id_cotizacion, id_usuario)
+
+def _validar_descuentos(id_usuario, detalle, tokens_descuento):
+    """Misma regla que al cotizar: sobre 0 % hace falta un token de autorización vigente."""
+    pedido = max((Decimal(l["descuento"]) for l in detalle), default=Decimal("0"))
+    if pedido > DESCUENTO_MAXIMO:
+        raise DescuentoInvalido("El descuento no puede superar el 50 %.")
+    if pedido > 0 and pedido > _porcentaje_autorizado(id_usuario, tokens_descuento):
+        raise AutorizacionDenegada("Descuento no autorizado o autorización vencida.")
+
+
+def facturar(id_usuario, pagos, id_cotizacion=None, id_cliente=None,
+             detalle=None, observaciones=None, tokens_descuento=()):
+    """Facturar una cotización confirmada, o cotizar y facturar en el momento."""
+    lineas = None
+    if id_cotizacion is None:
+        _validar_descuentos(id_usuario, detalle, tokens_descuento)
+        lineas = [(l["idProducto"], l["cantidad"], l["descuento"]) for l in detalle]
+    return repositories.facturar_json(
+        id_usuario, pagos,
+        id_cotizacion=id_cotizacion, id_cliente=id_cliente,
+        detalle=lineas, observaciones=observaciones,
+    )

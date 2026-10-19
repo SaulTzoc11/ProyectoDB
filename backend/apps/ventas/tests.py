@@ -75,3 +75,60 @@ class AutorizacionDescuentoTests(TestCase):
 
         sin_sesion = APIClient().post(self.URL, {"clave": "clave-de-prueba", "porcentaje": 5}, format="json")
         self.assertIn(sin_sesion.status_code, (401, 403))
+
+class FacturacionTests(TestCase):
+    """El SP real se prueba con verificar_integracion; aquí se valida la capa HTTP/servicio."""
+
+    PAGO = {"idTipoPago": 1, "monto": "90.00"}
+
+    def _llamar(self, cuerpo, rol="Cajero"):
+        from unittest import mock
+
+        api = cliente_autenticado("caja", rol)
+        with mock.patch(
+            "apps.ventas.repositories.facturar_json",
+            return_value={"idFactura": 1, "noFactura": "FAC-2026-000001",
+                          "idCotizacion": 5, "total": "90.00"},
+        ) as sp:
+            respuesta = api.post("/api/facturas/", cuerpo, format="json")
+        return respuesta, sp
+
+    def test_factura_una_cotizacion_confirmada(self):
+        respuesta, sp = self._llamar({"idCotizacion": 5, "pagos": [self.PAGO]})
+        self.assertEqual(respuesta.status_code, 201)
+        self.assertEqual(respuesta.json()["noFactura"], "FAC-2026-000001")
+        self.assertEqual(sp.call_args.kwargs["id_cotizacion"], 5)
+
+    def test_sin_cotizacion_cotiza_en_el_momento(self):
+        cuerpo = {"idCliente": 3, "detalle": [{"idProducto": 7, "cantidad": 2}],
+                  "pagos": [self.PAGO]}
+        respuesta, sp = self._llamar(cuerpo)
+        self.assertEqual(respuesta.status_code, 201)
+        self.assertIsNone(sp.call_args.kwargs["id_cotizacion"])
+        self.assertEqual(sp.call_args.kwargs["detalle"], [(7, 2, 0)])
+
+    def test_rechaza_pedido_sin_cotizacion_ni_detalle(self):
+        respuesta, sp = self._llamar({"pagos": [self.PAGO]})
+        self.assertEqual(respuesta.status_code, 400)
+        sp.assert_not_called()
+
+    def test_descuento_sin_autorizacion_no_llega_al_sp(self):
+        cuerpo = {"idCliente": 3, "pagos": [self.PAGO],
+                  "detalle": [{"idProducto": 7, "cantidad": 1, "descuento": 10}]}
+        respuesta, sp = self._llamar(cuerpo)
+        self.assertEqual(respuesta.status_code, 403)
+        sp.assert_not_called()
+
+    def test_exige_al_menos_un_pago(self):
+        respuesta, sp = self._llamar({"idCotizacion": 5, "pagos": []})
+        self.assertEqual(respuesta.status_code, 400)
+        sp.assert_not_called()
+
+    def test_listas_de_apoyo_de_la_pantalla(self):
+        from unittest import mock
+
+        api = cliente_autenticado("caja", "Cajero")
+        with mock.patch("apps.ventas.repositories.listar_tipos_pago", return_value=[{"id": 1, "nombre": "Efectivo"}]):
+            self.assertEqual(api.get("/api/facturas/tipos-pago/").json()[0]["nombre"], "Efectivo")
+        with mock.patch("apps.ventas.repositories.cotizaciones_por_facturar", return_value=[]):
+            self.assertEqual(api.get("/api/facturas/pendientes/").json(), [])

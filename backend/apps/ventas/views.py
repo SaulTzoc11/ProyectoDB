@@ -9,6 +9,7 @@ from . import repositories, services
 from .serializers import (
     CotizacionSerializer,
     DetalleCotizacionSerializer,
+    FacturarSerializer,
     GenerarCotizacionSerializer,
 )
 
@@ -105,3 +106,38 @@ class DetalleCotizacionViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return repositories.detalles_de_usuario(self.request.user.idusuario)
+
+
+class FacturaViewSet(viewsets.ViewSet):
+    permission_classes = [PuedeOperarVentas]
+
+    def create(self, request):
+        entrada = FacturarSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        datos = entrada.validated_data
+
+        try:
+            resultado = services.facturar(
+                id_usuario=request.user.idusuario,
+                pagos=datos["pagos"],
+                id_cotizacion=datos.get("idCotizacion"),
+                id_cliente=datos.get("idCliente"),
+                detalle=datos.get("detalle"),
+                observaciones=datos.get("observaciones") or None,
+                tokens_descuento=datos["tokensDescuento"],
+            )
+        except services.AutorizacionDenegada as error:
+            return Response({"ok": False, "mensaje": str(error)}, status=status.HTTP_403_FORBIDDEN)
+        except (services.DescuentoInvalido, repositories.CotizacionError,
+                repositories.FacturaError) as error:
+            return Response({"ok": False, "mensaje": str(error)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"ok": True, **resultado}, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["get"], url_path="tipos-pago")
+    def tipos_pago(self, request):
+        return Response(repositories.listar_tipos_pago())
+
+    @action(detail=False, methods=["get"], url_path="pendientes")
+    def pendientes(self, request):
+        return Response(repositories.cotizaciones_por_facturar())

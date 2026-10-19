@@ -124,3 +124,80 @@ def confirmar_cotizacion(id_cotizacion, id_usuario):
             return {"idCotizacion": fila[0], "codigoCotizacion": fila[1], "estado": fila[2]}
     except DatabaseError as e:
         raise CotizacionError(_mensaje(e))
+
+class FacturaError(Exception):
+    """Error de negocio levantado por un THROW de sp_FacturarJson (o de los SP que invoca)."""
+
+
+def facturar_json(id_usuario, pagos, id_cotizacion=None, id_cliente=None,
+                  detalle=None, observaciones=None):
+    """Ejecuta dbo.sp_FacturarJson (transaccional: factura, detalle, PEPS, pagos y bitácora).
+
+    pagos   = [{"idTipoPago": 1, "monto": Decimal, "observaciones": str|None}, ...]
+    detalle = [(id_producto, cantidad, descuento_pct), ...]   # solo si no hay cotización
+    Devuelve {"idFactura", "noFactura", "idCotizacion", "total"}.
+    """
+    pagos_json = json.dumps([
+        {
+            "idTipoPago": int(p["idTipoPago"]),
+            "monto": float(p["monto"]),
+            "observaciones": p.get("observaciones") or None,
+        }
+        for p in pagos
+    ])
+    detalle_json = None
+    if id_cotizacion is None:
+        detalle_json = json.dumps([
+            {"idProducto": int(i), "cantidad": int(c), "descuento": float(d or 0)}
+            for i, c, d in detalle
+        ])
+    try:
+        with connection.cursor() as cur:
+            cur.execute(
+                "EXEC dbo.sp_FacturarJson @idUsuario=%s, @pagosJson=%s, @idCotizacion=%s, "
+                "@idCliente=%s, @detalleJson=%s, @observaciones=%s",
+                [
+                    int(id_usuario),
+                    pagos_json,
+                    int(id_cotizacion) if id_cotizacion is not None else None,
+                    int(id_cliente) if id_cliente is not None else None,
+                    detalle_json,
+                    observaciones,
+                ],
+            )
+            fila = cur.fetchone()
+            return {
+                "idFactura": fila[0],
+                "noFactura": fila[1],
+                "idCotizacion": fila[2],
+                "total": str(fila[3]),
+            }
+    except DatabaseError as e:
+        raise FacturaError(_mensaje(e))
+
+
+def listar_tipos_pago():
+    """Medios de pago activos para la pantalla de facturación."""
+    with connection.cursor() as cur:
+        cur.execute("SELECT idTipoPago, nombre FROM dbo.TIPO_PAGO WHERE activo = 1 ORDER BY nombre")
+        return [{"id": f[0], "nombre": f[1]} for f in cur.fetchall()]
+
+
+def cotizaciones_por_facturar():
+    """Cotizaciones Confirmadas que todavía no tienen factura."""
+    with connection.cursor() as cur:
+        cur.execute(
+            """
+            SELECT c.idCotizacion, c.codigoCotizacion, c.fecha, c.total, cl.nombreCliente
+            FROM dbo.COTIZACION c
+            JOIN dbo.ESTADO e   ON e.idEstado  = c.idEstado
+            JOIN dbo.CLIENTE cl ON cl.idCliente = c.idCliente
+            WHERE e.nombre = 'Confirmada'
+              AND NOT EXISTS (SELECT 1 FROM dbo.FACTURA f WHERE f.idCotizacion = c.idCotizacion)
+            ORDER BY c.fecha DESC
+            """
+        )
+        return [
+            {"id": f[0], "codigo": f[1], "fecha": f[2], "total": str(f[3]), "cliente": f[4]}
+            for f in cur.fetchall()
+        ]

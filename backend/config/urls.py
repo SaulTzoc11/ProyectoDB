@@ -6,6 +6,7 @@ from . import frontend
 urlpatterns = [
     path("api/reportes/", include("apps.reportes.urls")),
     path("api/cotizaciones/", include("apps.ventas.urls")),
+    path("api/facturas/", include("apps.ventas.urls_facturas")),
     path(
         "api/",
         include(

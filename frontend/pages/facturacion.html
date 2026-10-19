@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facturación | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/catalogo.css">
+  <link rel="stylesheet" href="/css/pages/cotizacion.css">
+  <link rel="stylesheet" href="/css/pages/facturacion.css">
+</head>
+<body class="app-view cargando" data-seccion="facturacion">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="menu-button" data-accion="abrir-menu" aria-label="Abrir menú">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Facturación</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <main class="content">
+      <div class="section-heading">
+        <div>
+          <h2>Facturación</h2>
+          <p>Facture una cotización confirmada o haga una venta directa con el carrito actual.</p>
+        </div>
+        <a class="action-button" href="/pages/catalogo.html">Agregar productos</a>
+      </div>
+
+      <section class="workspace-card quote-card">
+        <div id="facturaEmitida" class="quote-saved" hidden>
+          <h3>Factura <span id="noFacturaEmitida"></span> emitida correctamente</h3>
+          <p>El inventario se actualizó (salida del lote más antiguo) y los pagos quedaron registrados.</p>
+          <div class="button-row">
+            <button type="button" class="action-button green" id="nuevaFactura">Nueva factura</button>
+          </div>
+        </div>
+
+        <div class="quote-client">
+          <label for="origenFactura">Qué se va a facturar</label>
+          <select id="origenFactura"></select>
+
+          <div id="ventaDirecta" hidden>
+            <label for="clienteFactura">Cliente</label>
+            <select id="clienteFactura"></select>
+            <label for="observacionesFactura">Observaciones (opcional)</label>
+            <input id="observacionesFactura" type="text" maxlength="250">
+            <p class="muted" id="resumenCarrito"></p>
+          </div>
+        </div>
+
+        <h3 class="invoice-subtitle">Medios de pago</h3>
+        <div id="listaPagos" class="invoice-pays"></div>
+        <div class="button-row">
+          <button type="button" class="action-button" id="agregarPago">Agregar medio de pago</button>
+        </div>
+
+        <div class="quote-summary">
+          <div class="grand-total"><span>Total a pagar</span><b id="totalFactura"></b></div>
+          <div><span>Pagado</span><b id="totalPagado"></b></div>
+          <div><span>Diferencia</span><b id="diferenciaPago"></b></div>
+        </div>
+
+        <div class="button-row">
+          <button type="button" class="action-button green" id="facturar">Emitir factura</button>
+        </div>
+        <p id="mensajeFactura" class="error" role="alert"></p>
+      </section>
+    </main>
+  </div>
+
+  <template id="plantillaPago">
+    <div class="invoice-pay-row">
+      <select data-campo="tipo" aria-label="Medio de pago"></select>
+      <input data-campo="monto" type="number" min="0.01" step="0.01" placeholder="Monto" aria-label="Monto">
+      <input data-campo="observaciones" type="text" maxlength="100" placeholder="Referencia (opcional)" aria-label="Referencia">
+      <button type="button" class="remove-button" data-accion="quitarPago" title="Quitar pago" aria-label="Quitar pago">&times;</button>
+    </div>
+  </template>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module" src="/js/paginas/facturacion.js"></script>
+</body>
+</html>

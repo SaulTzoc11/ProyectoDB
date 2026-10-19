@@ -1,0 +1,7 @@
+/* Facturación */
+.quote-client select,
+.invoice-pay-row select { width: 100%; min-height: 50px; padding: .8rem 1rem; border: 1px solid #C9D8E5; border-radius: 10px; background: white; }
+.invoice-subtitle { margin: 1.4rem 0 .5rem; color: var(--navy); }
+.invoice-pays { display: grid; gap: .6rem; margin-bottom: .8rem; }
+.invoice-pay-row { display: grid; grid-template-columns: 180px 140px 1fr 36px; align-items: center; gap: .6rem; }
+@media (max-width: 720px) { .invoice-pay-row { grid-template-columns: 1fr 1fr; } }
