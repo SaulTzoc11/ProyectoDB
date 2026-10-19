@@ -1,4 +1,5 @@
 """apps/ventas/views.py  (reemplaza el tuyo: conserva todo y agrega la acción 'generar')"""
+from apps.reportes import repositories as repo_reportes
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -133,6 +134,14 @@ class FacturaViewSet(viewsets.ViewSet):
             return Response({"ok": False, "mensaje": str(error)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"ok": True, **resultado}, status=status.HTTP_201_CREATED)
+    
+    def retrieve(self, request, pk=None):
+        try:
+            return Response(repo_reportes.factura(pk))
+        except repo_reportes.FacturaNoEncontrada as error:
+            return Response({"ok": False, "mensaje": str(error)}, status=status.HTTP_404_NOT_FOUND)
+        except repo_reportes.ReporteError as error:
+            return Response({"ok": False, "mensaje": str(error)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=["get"], url_path="tipos-pago")
     def tipos_pago(self, request):

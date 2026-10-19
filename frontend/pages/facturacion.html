@@ -37,6 +37,7 @@
           <h3>Factura <span id="noFacturaEmitida"></span> emitida correctamente</h3>
           <p>El inventario se actualizó (salida del lote más antiguo) y los pagos quedaron registrados.</p>
           <div class="button-row">
+            <button type="button" class="action-button" id="imprimirFactura">Imprimir factura</button>
             <button type="button" class="action-button green" id="nuevaFactura">Nueva factura</button>
           </div>
         </div>
@@ -83,6 +84,65 @@
     </div>
   </template>
 
+  <section id="areaImpresion" class="print-area" aria-hidden="true"></section>
+
+  <template id="plantillaFactura">
+    <div class="document-sheet">
+      <div class="document-accent"></div>
+      <header class="print-header">
+        <div class="print-brand">
+          <img src="/assets/logo-sapo-pinturas.png" alt="Sapo Pinturas">
+          <div><b>SAPO <em>PINTURAS</em></b><span>Color en cada proyecto</span></div>
+        </div>
+        <div class="document-title"><span>DOCUMENTO COMERCIAL</span><h1>FACTURA</h1></div>
+        <div class="print-number"><span>FECHA</span><b data-campo="fecha"></b></div>
+      </header>
+      <section class="print-meta">
+        <div><span>EMITIÓ</span><b data-campo="empleado"></b></div>
+        <div><span>FACTURA N°</span><b data-campo="noFactura"></b></div>
+        <div><span>CLIENTE</span><b data-campo="cliente"></b><small data-campo="nit"></small></div>
+      </section>
+      <table class="print-table">
+        <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unitario</th><th>Descuento</th><th>Importe</th></tr></thead>
+        <tbody data-elemento="filas"></tbody>
+      </table>
+      <table class="print-table" style="margin-top:6mm">
+        <thead><tr><th>Medio de pago</th><th>Referencia</th><th>Monto</th></tr></thead>
+        <tbody data-elemento="pagos"></tbody>
+      </table>
+      <section class="document-bottom">
+        <div class="document-note">
+          <b>Observaciones</b>
+          <p data-campo="observaciones"></p>
+          <span>Documento generado por el sistema comercial Sapo Pinturas.</span>
+        </div>
+        <div class="print-totals">
+          <p><span>Subtotal</span><b data-campo="subtotal"></b></p>
+          <p><span>Descuento</span><b data-campo="descuento"></b></p>
+          <p class="print-grand"><span>TOTAL</span><b data-campo="total"></b></p>
+        </div>
+      </section>
+    </div>
+  </template>
+
+  <template id="plantillaFilaFactura">
+    <tr>
+      <td><b data-campo="nombre"></b></td>
+      <td data-campo="cantidad"></td>
+      <td data-campo="precio"></td>
+      <td data-campo="descuento"></td>
+      <td><b data-campo="importe"></b></td>
+    </tr>
+  </template>
+
+  <template id="plantillaFilaPago">
+    <tr>
+      <td data-campo="medio"></td>
+      <td data-campo="referencia"></td>
+      <td><b data-campo="monto"></b></td>
+    </tr>
+  </template>
+  
   <!--# include virtual="/partials/pie-pagina.html" -->
   <script type="module" src="/js/paginas/facturacion.js"></script>
 </body>

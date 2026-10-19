@@ -1,7 +1,7 @@
 import * as carrito from "../carrito.js";
 import { facturarVenta, solicitar } from "../api.js";
 import { iniciarPagina } from "../sesion.js";
-import { clonarPlantilla, formatearQuetzales, mostrarAviso } from "../ui.js";
+import { clonarPlantilla, formatearQuetzales, llenar, mostrarAviso } from "../ui.js";
 
 const origen = document.querySelector("#origenFactura");
 const bloqueDirecta = document.querySelector("#ventaDirecta");
@@ -15,6 +15,7 @@ const panelEmitida = document.querySelector("#facturaEmitida");
 
 let pendientes = [];
 let tiposPago = [];
+let ultimoNoFactura = null;
 
 const esDirecta = () => origen.value === "directa";
 
@@ -131,6 +132,7 @@ botonFacturar.addEventListener("click", async () => {
     const respuesta = await facturarVenta(cuerpo);
     if (esDirecta()) carrito.vaciar();
     document.querySelector("#noFacturaEmitida").textContent = respuesta.noFactura;
+    ultimoNoFactura = respuesta.noFactura;
     panelEmitida.hidden = false;
     mostrarAviso(`Factura ${respuesta.noFactura} emitida.`);
     await cargarDatos();
@@ -143,6 +145,58 @@ botonFacturar.addEventListener("click", async () => {
 
 document.querySelector("#nuevaFactura").addEventListener("click", () => {
   panelEmitida.hidden = true;
+});
+async function imprimirFactura(noFactura) {
+  const { factura, detalle, pagos } = await solicitar(`/api/facturas/${encodeURIComponent(noFactura)}/`);
+  const documento = clonarPlantilla("plantillaFactura");
+  const monto = (v) => formatearQuetzales(Number(v));
+
+  llenar(documento, {
+    fecha: new Date(factura.fecha).toLocaleDateString("es-GT"),
+    empleado: factura.empleado,
+    noFactura: factura.noFactura,
+    cliente: factura.cliente,
+    nit: factura.nit ? `NIT: ${factura.nit}` : "",
+    observaciones: factura.observaciones || "Gracias por su compra.",
+    subtotal: monto(factura.subtotal),
+    descuento: `− ${monto(Number(factura.subtotal) - Number(factura.total))}`,
+    total: monto(factura.total),
+  });
+
+  documento.querySelector('[data-elemento="filas"]').append(
+    ...detalle.map((l) =>
+      llenar(clonarPlantilla("plantillaFilaFactura"), {
+        nombre: [l.producto, l.presentacion].filter(Boolean).join(" · "),
+        cantidad: l.cantidad,
+        precio: monto(l.precioUnitario),
+        descuento: `${Number(l.descuento)}%`,
+        importe: monto(l.subtotal),
+      })
+    )
+  );
+  documento.querySelector('[data-elemento="pagos"]').append(
+    ...pagos.map((p) =>
+      llenar(clonarPlantilla("plantillaFilaPago"), {
+        medio: p.medioPago,
+        referencia: p.observaciones || "",
+        monto: monto(p.monto),
+      })
+    )
+  );
+
+  document.querySelector("#areaImpresion").replaceChildren(documento);
+  document.body.classList.add("printing-document");
+  window.print();
+  setTimeout(() => document.body.classList.remove("printing-document"), 500);
+}
+
+document.querySelector("#imprimirFactura").addEventListener("click", async () => {
+  if (!ultimoNoFactura) return;
+  try {
+    await imprimirFactura(ultimoNoFactura);
+  } catch (error) {
+    mensaje.textContent = error.message;
+  }
 });
 
 await iniciarPagina();
