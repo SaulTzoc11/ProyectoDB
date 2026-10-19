@@ -1,0 +1,10 @@
+Credenciales 
+CAJERO 
+
+Usuario: alvasol
+Contraseña:12345678
+
+Gerente 
+
+Usuario: gerente
+Contraseña: Gerente123
