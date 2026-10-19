@@ -76,3 +76,33 @@ class ReportesTests(TestCase):
             )
         self.assertEqual(respuesta.status_code, 400)
         self.assertIn("rango", respuesta.json()["mensaje"])
+
+
+@override_settings(ROOT_URLCONF=__name__)
+class FinanzasTests(TestCase):
+    def test_finanzas_solo_para_gerente(self):
+        api = cliente_autenticado("caja", "Cajero")
+        for ruta in ("estado-resultados", "valor-inventario", "iva", "cuentas-por-pagar"):
+            self.assertEqual(api.get(f"/api/reportes/finanzas/{ruta}/").status_code, 403, ruta)
+
+    def test_estado_resultados_envia_fechas_y_tasa_por_defecto(self):
+        api = cliente_autenticado("jefe", "Gerente")
+        with mock.patch(f"{RUTA}.estado_resultados", return_value=[]) as sp:
+            r = api.get("/api/reportes/finanzas/estado-resultados/?desde=2026-10-01&hasta=2026-10-31")
+        self.assertEqual(r.status_code, 200)
+        desde, hasta, tasa = sp.call_args.args
+        self.assertEqual((str(desde), str(hasta), str(tasa)), ("2026-10-01", "2026-10-31", "12"))
+
+    def test_tasa_de_iva_fuera_de_rango_se_rechaza(self):
+        api = cliente_autenticado("jefe", "Gerente")
+        with mock.patch(f"{RUTA}.iva") as sp:
+            r = api.get("/api/reportes/finanzas/iva/?desde=2026-10-01&hasta=2026-10-31&tasaIva=150")
+        self.assertEqual(r.status_code, 400)
+        sp.assert_not_called()
+
+    def test_cuentas_por_pagar_acepta_sin_fechas(self):
+        api = cliente_autenticado("jefe", "Gerente")
+        with mock.patch(f"{RUTA}.cuentas_por_pagar", return_value=[]) as sp:
+            r = api.get("/api/reportes/finanzas/cuentas-por-pagar/")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(sp.call_args.args, (None, None))

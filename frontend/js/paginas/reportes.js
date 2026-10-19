@@ -13,16 +13,23 @@ const FORMATOS = {
   moneda: (v) => formatearQuetzales(v),
   fecha: (v) => (v ? formatoFecha.format(new Date(v)) : "—"),
   fechaHora: (v) => (v ? formatoFechaHora.format(new Date(v)) : "—"),
+  porcentaje: (v) => `${(Number(v) || 0).toFixed(2)} %`,
+  cantidad: (v) => String(Number(v) || 0),
 };
+
+const NUMERICOS = new Set(["moneda", "entero", "porcentaje", "cantidad"]);
+// Reportes cuyas fechas son opcionales (sin fechas = todo el historial).
+const FECHAS_OPCIONALES = new Set(["menos-vendidos", "cuentas-por-pagar"]);
 
 const REPORTES = [
   {
     id: "total-facturado",
+    grupo: "Ventas e inventario",
     titulo: "Total facturado",
     descripcion: "Monto facturado entre dos fechas, con el desglose por medio de pago.",
     filtros: ["desde", "hasta"],
     ruta: "/api/reportes/total-facturado/",
-    totales: true,
+    totales: "primera",
     columnas: [
       { campo: "concepto", titulo: "Concepto" },
       { campo: "monto", titulo: "Monto", tipo: "moneda" },
@@ -30,6 +37,7 @@ const REPORTES = [
   },
   {
     id: "mas-ingresos",
+    grupo: "Ventas e inventario",
     titulo: "Productos que más generan",
     descripcion: "Productos que más dinero generan entre dos fechas (ingreso neto de devoluciones).",
     filtros: ["desde", "hasta", "top"],
@@ -44,6 +52,7 @@ const REPORTES = [
   },
   {
     id: "mas-vendidos",
+    grupo: "Ventas e inventario",
     titulo: "Productos más vendidos",
     descripcion: "Productos con más unidades vendidas entre dos fechas.",
     filtros: ["desde", "hasta", "top"],
@@ -58,6 +67,7 @@ const REPORTES = [
   },
   {
     id: "inventario",
+    grupo: "Ventas e inventario",
     titulo: "Inventario actual",
     descripcion: "Existencias por lote. 'Orden de salida' 1 es el lote más antiguo, el primero que debe venderse (PEPS).",
     filtros: [],
@@ -77,6 +87,7 @@ const REPORTES = [
   },
   {
     id: "menos-vendidos",
+    grupo: "Ventas e inventario",
     titulo: "Productos con menos ventas",
     descripcion: "Productos que menos se venden, incluidos los que nunca se han vendido. Sin fechas se usa todo el historial.",
     filtros: ["desde", "hasta", "top"],
@@ -91,6 +102,7 @@ const REPORTES = [
   },
   {
     id: "sin-stock",
+    grupo: "Ventas e inventario",
     titulo: "Productos sin stock",
     descripcion: "Productos activos sin existencia que hay que comprar a los proveedores.",
     filtros: [],
@@ -104,7 +116,81 @@ const REPORTES = [
     ],
   },
   {
+    id: "estado-resultados",
+    grupo: "Finanzas",
+    titulo: "Estado de resultados",
+    descripcion: "Ventas, devoluciones, IVA, costo de ventas (PEPS) y utilidad bruta del periodo. Los precios de venta se toman con IVA incluido.",
+    filtros: ["desde", "hasta", "tasaIva"],
+    ruta: "/api/reportes/finanzas/estado-resultados/",
+    columnas: [
+      { campo: "concepto", titulo: "Concepto" },
+      { campo: "monto", titulo: "Monto", tipoCampo: "tipo" },
+    ],
+  },
+  {
+    id: "utilidad-producto",
+    grupo: "Finanzas",
+    titulo: "Utilidad por producto",
+    descripcion: "Productos que más utilidad dejan: ingreso sin IVA menos costo PEPS. Las líneas sin costo registrado cuentan con costo 0.",
+    filtros: ["desde", "hasta", "top", "tasaIva"],
+    ruta: "/api/reportes/finanzas/utilidad-por-producto/",
+    columnas: [
+      { campo: "posicion", titulo: "#", tipo: "entero" },
+      { campo: "producto", titulo: "Producto" },
+      { campo: "cantidadNeta", titulo: "Cantidad", tipo: "entero" },
+      { campo: "ingresoSinIva", titulo: "Ingreso sin IVA", tipo: "moneda" },
+      { campo: "costo", titulo: "Costo", tipo: "moneda" },
+      { campo: "utilidad", titulo: "Utilidad", tipo: "moneda" },
+      { campo: "margenPorcentaje", titulo: "Margen", tipo: "porcentaje" },
+      { campo: "lineasSinCosto", titulo: "Sin costo", tipo: "entero" },
+    ],
+  },
+  {
+    id: "valor-inventario",
+    grupo: "Finanzas",
+    titulo: "Valor del inventario",
+    descripcion: "Valor de las existencias a su costo de adquisición, por categoría.",
+    filtros: [],
+    ruta: "/api/reportes/finanzas/valor-inventario/",
+    totales: "ultima",
+    columnas: [
+      { campo: "categoria", titulo: "Categoría" },
+      { campo: "productos", titulo: "Productos con existencia", tipo: "entero" },
+      { campo: "unidades", titulo: "Unidades", tipo: "entero" },
+      { campo: "valorInventario", titulo: "Valor", tipo: "moneda" },
+    ],
+  },
+  {
+    id: "cuentas-por-pagar",
+    grupo: "Finanzas",
+    titulo: "Cuentas por pagar",
+    descripcion: "Compras por proveedor. 'Por pagar' es una estimación: el sistema no registra pagos a proveedores, así que se toma todo lo recibido. Sin fechas se usa todo el historial.",
+    filtros: ["desde", "hasta"],
+    ruta: "/api/reportes/finanzas/cuentas-por-pagar/",
+    columnas: [
+      { campo: "proveedor", titulo: "Proveedor" },
+      { campo: "compras", titulo: "Compras", tipo: "entero" },
+      { campo: "totalOrdenado", titulo: "Ordenado", tipo: "moneda" },
+      { campo: "valorRecibido", titulo: "Recibido", tipo: "moneda" },
+      { campo: "valorPendienteRecibir", titulo: "Pendiente de recibir", tipo: "moneda" },
+      { campo: "porPagarEstimado", titulo: "Por pagar (estimado)", tipo: "moneda" },
+    ],
+  },
+  {
+    id: "iva",
+    grupo: "Finanzas",
+    titulo: "IVA del periodo",
+    descripcion: "IVA débito de las ventas netas, IVA crédito de lo recibido de proveedores (costos sin IVA) y diferencia por pagar.",
+    filtros: ["desde", "hasta", "tasaIva"],
+    ruta: "/api/reportes/finanzas/iva/",
+    columnas: [
+      { campo: "concepto", titulo: "Concepto" },
+      { campo: "monto", titulo: "Monto", tipo: "moneda" },
+    ],
+  },
+  {
     id: "factura",
+    grupo: "Ventas e inventario",
     titulo: "Buscar factura",
     descripcion: "Detalle de una factura, sus medios de pago y el empleado que la emitió.",
     filtros: ["noFactura"],
@@ -155,18 +241,21 @@ function construirTabla(columnas, filas, { totales = false } = {}) {
   const cabecera = tabla.createTHead().insertRow();
   columnas.forEach((col) => {
     const th = elemento("th", col.titulo);
-    if (col.tipo === "moneda" || col.tipo === "entero") th.className = "num";
+    if (NUMERICOS.has(col.tipo) || col.tipoCampo) th.className = "num";
     cabecera.append(th);
   });
 
   const cuerpo = tabla.createTBody();
   filas.forEach((fila, indice) => {
     const tr = cuerpo.insertRow();
-    if (totales && indice === 0) tr.className = "total-row";
+    const esTotal = (totales === "primera" && indice === 0)
+      || (totales === "ultima" && indice === filas.length - 1);
+    if (esTotal) tr.className = "total-row";
     columnas.forEach((col) => {
-      const formato = FORMATOS[col.tipo || "texto"];
+      const tipo = col.tipoCampo ? fila[col.tipoCampo] : col.tipo;
+      const formato = FORMATOS[tipo || "texto"] || FORMATOS.texto;
       const td = elemento("td", formato(fila[col.campo]));
-      if (col.tipo === "moneda" || col.tipo === "entero") td.className = "num";
+      if (NUMERICOS.has(tipo)) td.className = "num";
       tr.append(td);
     });
   });
@@ -237,10 +326,14 @@ function validar(reporte, valores) {
   if (reporte.filtros.includes("noFactura") && !valores.noFactura?.trim()) {
     return "Escriba el número de factura.";
   }
-  const exigeFechas = reporte.filtros.includes("desde") && reporte.id !== "menos-vendidos";
+  const opcionales = FECHAS_OPCIONALES.has(reporte.id);
+  const exigeFechas = reporte.filtros.includes("desde") && !opcionales;
   if (exigeFechas && (!valores.desde || !valores.hasta)) return "Seleccione las fechas desde y hasta.";
-  if (reporte.id === "menos-vendidos" && Boolean(valores.desde) !== Boolean(valores.hasta)) {
+  if (opcionales && Boolean(valores.desde) !== Boolean(valores.hasta)) {
     return "Indique ambas fechas o ninguna.";
+  }
+  if (reporte.filtros.includes("tasaIva") && !(Number(valores.tasaIva) >= 0 && Number(valores.tasaIva) <= 100)) {
+    return "La tasa de IVA debe estar entre 0 y 100.";
   }
   if (valores.desde && valores.hasta && valores.desde > valores.hasta) {
     return "La fecha 'desde' no puede ser mayor que 'hasta'.";
@@ -298,13 +391,20 @@ function seleccionar(reporte) {
   if (!reporte.filtros.length) consultar();
 }
 
+const grupos = new Map();
 REPORTES.forEach((reporte) => {
+  if (!grupos.has(reporte.grupo)) {
+    const caja = elemento("div", undefined, "report-group");
+    caja.append(elemento("span", reporte.grupo, "report-group-label"));
+    grupos.set(reporte.grupo, caja);
+    pestanas.append(caja);
+  }
   const boton = elemento("button", reporte.titulo, "report-tab");
   boton.type = "button";
   boton.dataset.id = reporte.id;
   boton.setAttribute("role", "tab");
   boton.addEventListener("click", () => seleccionar(reporte));
-  pestanas.append(boton);
+  grupos.get(reporte.grupo).append(boton);
 });
 
 const hoy = new Date();

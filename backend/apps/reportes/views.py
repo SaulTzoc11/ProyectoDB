@@ -78,3 +78,34 @@ class ProductosSinStockView(ReporteView):
 class FacturaView(ReporteView):
     def consultar(self, request, no_factura):
         return repositories.factura(no_factura)
+
+
+# --- Finanzas ---------------------------------------------------------------
+
+class EstadoResultadosView(ReporteView):
+    def consultar(self, request):
+        d = _rango(request)
+        return repositories.estado_resultados(d["desde"], d["hasta"], d["tasaIva"])
+
+
+class UtilidadPorProductoView(ReporteView):
+    def consultar(self, request):
+        d = _rango(request)
+        return repositories.utilidad_por_producto(d["desde"], d["hasta"], d["top"], d["tasaIva"])
+
+
+class ValorInventarioView(ReporteView):
+    def consultar(self, request):
+        return repositories.valor_inventario()
+
+
+class CuentasPorPagarView(ReporteView):
+    def consultar(self, request):
+        d = _rango(request, RangoOpcionalSerializer)
+        return repositories.cuentas_por_pagar(d["desde"], d["hasta"])
+
+
+class IvaView(ReporteView):
+    def consultar(self, request):
+        d = _rango(request)
+        return repositories.iva(d["desde"], d["hasta"], d["tasaIva"])

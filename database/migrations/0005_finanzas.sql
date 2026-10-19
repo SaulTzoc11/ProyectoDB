@@ -522,26 +522,23 @@ GO
 
 
 /* ---------------------------------------------------------------------------
-   11. PERMISOS: solo si app_django existe y no es quien ejecuta el script ni el
-       propietario de la base (el propietario ya tiene todos los permisos y
-       SQL Server rechaza el GRANT con "Cannot grant, deny, or revoke...").
+   11. PERMISOS: si el usuario de la aplicacion es dbo/propietario, el GRANT
+       falla con "Cannot grant... to dbo" y se ignora: ya tiene todos los permisos.
    ---------------------------------------------------------------------------*/
 IF DATABASE_PRINCIPAL_ID('app_django') IS NOT NULL
-   AND DATABASE_PRINCIPAL_ID('app_django') <> USER_ID()      -- no darse permisos a si mismo
-   AND IS_ROLEMEMBER('db_owner', 'app_django') <> 1          -- el propietario ya tiene todo
 BEGIN
-    GRANT SELECT  ON dbo.DETALLE_FACTURA_LOTE TO app_django;
-    GRANT INSERT  ON dbo.DETALLE_FACTURA_LOTE TO app_django;
-    GRANT UPDATE  ON dbo.DETALLE_FACTURA_LOTE TO app_django;
-    GRANT SELECT  ON dbo.vw_LineaFacturaCosto TO app_django;
-    GRANT SELECT  ON dbo.fn_ResumenVentas     TO app_django;
-    GRANT EXECUTE ON dbo.sp_ConsumirLotesPEPS          TO app_django;
-    GRANT EXECUTE ON dbo.sp_RevertirLotesFactura       TO app_django;
-    GRANT EXECUTE ON dbo.sp_Finanzas_EstadoResultados  TO app_django;
-    GRANT EXECUTE ON dbo.sp_Finanzas_UtilidadPorProducto TO app_django;
-    GRANT EXECUTE ON dbo.sp_Finanzas_ValorInventario   TO app_django;
-    GRANT EXECUTE ON dbo.sp_Finanzas_CuentasPorPagar   TO app_django;
-    GRANT EXECUTE ON dbo.sp_Finanzas_Iva               TO app_django;
+    BEGIN TRY GRANT SELECT  ON dbo.DETALLE_FACTURA_LOTE TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT INSERT  ON dbo.DETALLE_FACTURA_LOTE TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT UPDATE  ON dbo.DETALLE_FACTURA_LOTE TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT SELECT  ON dbo.vw_LineaFacturaCosto TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT SELECT  ON dbo.fn_ResumenVentas     TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT EXECUTE ON dbo.sp_ConsumirLotesPEPS          TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT EXECUTE ON dbo.sp_RevertirLotesFactura       TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT EXECUTE ON dbo.sp_Finanzas_EstadoResultados  TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT EXECUTE ON dbo.sp_Finanzas_UtilidadPorProducto TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT EXECUTE ON dbo.sp_Finanzas_ValorInventario   TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT EXECUTE ON dbo.sp_Finanzas_CuentasPorPagar   TO app_django; END TRY BEGIN CATCH END CATCH
+    BEGIN TRY GRANT EXECUTE ON dbo.sp_Finanzas_Iva               TO app_django; END TRY BEGIN CATCH END CATCH
 END
 GO
 

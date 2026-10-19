@@ -511,8 +511,6 @@ GO
    13. PERMISOS: solo si existe el usuario de la aplicacion (app_django).
    ---------------------------------------------------------------------------*/
 IF DATABASE_PRINCIPAL_ID('app_django') IS NOT NULL
-   AND DATABASE_PRINCIPAL_ID('app_django') <> USER_ID()      -- no darse permisos a si mismo
-   AND IS_ROLEMEMBER('db_owner', 'app_django') <> 1          -- el propietario ya tiene todo
 BEGIN
     GRANT SELECT ON dbo.vw_FacturaVigente      TO app_django;
     GRANT SELECT ON dbo.vw_ProductoDescripcion TO app_django;

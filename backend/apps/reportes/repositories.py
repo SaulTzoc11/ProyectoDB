@@ -63,3 +63,25 @@ def factura(no_factura):
         "detalle": _ejecutar("sp_Reporte_FacturaDetalle", [no_factura]),
         "pagos": _ejecutar("sp_Reporte_FacturaPagos", [no_factura]),
     }
+
+
+# --- Finanzas ---------------------------------------------------------------
+
+def estado_resultados(desde, hasta, tasa_iva):
+    return _ejecutar("sp_Finanzas_EstadoResultados", [desde, hasta, tasa_iva])
+
+
+def utilidad_por_producto(desde, hasta, top, tasa_iva):
+    return _ejecutar("sp_Finanzas_UtilidadPorProducto", [desde, hasta, top, tasa_iva])
+
+
+def valor_inventario():
+    return _ejecutar("sp_Finanzas_ValorInventario")
+
+
+def cuentas_por_pagar(desde=None, hasta=None):
+    return _ejecutar("sp_Finanzas_CuentasPorPagar", [desde, hasta])
+
+
+def iva(desde, hasta, tasa_iva):
+    return _ejecutar("sp_Finanzas_Iva", [desde, hasta, tasa_iva])

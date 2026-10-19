@@ -5,6 +5,9 @@ class RangoFechasSerializer(serializers.Serializer):
     desde = serializers.DateField()
     hasta = serializers.DateField()
     top = serializers.IntegerField(required=False, min_value=1, max_value=500, default=10)
+    tasaIva = serializers.DecimalField(
+        required=False, max_digits=5, decimal_places=2, min_value=0, max_value=100, default=12
+    )
 
     def validate(self, datos):
         if datos["desde"] > datos["hasta"]:
