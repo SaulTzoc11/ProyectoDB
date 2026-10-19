@@ -1,0 +1,77 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>Ingreso a bodega | Sapo Pinturas</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+
+<body class="app-view cargando" data-seccion="compras">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="menu-button"
+              data-accion="abrir-menu">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Ingreso a bodega</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <!--# include virtual="/partials/subnav-compras.html" -->
+
+    <main class="content">
+      <section class="workspace-card">
+        <h2>Registrar recepción de productos</h2>
+        <p>Selecciona una orden con productos pendientes.</p>
+
+        <form id="formIngreso">
+          <label for="orden">Orden de compra</label>
+          <select id="orden" required>
+            <option value="">Cargando órdenes...</option>
+          </select>
+
+          <h3>Productos pendientes</h3>
+
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-spacing:12px">
+              <thead>
+                <tr>
+                  <th>Producto (ID)</th>
+                  <th>Pendiente</th>
+                  <th>Recibir</th>
+                  <th>Costo real (Q)</th>
+                  <th>Estante</th>
+                </tr>
+              </thead>
+              <tbody id="productosPendientes"></tbody>
+            </table>
+          </div>
+
+          <label for="observaciones">Observaciones</label>
+          <input id="observaciones" maxlength="250"
+                 placeholder="Ej. Primera entrega del proveedor">
+
+          <p id="mensajeIngreso" role="alert"></p>
+
+          <div class="button-row">
+            <button type="submit" class="action-button green"
+                    id="guardarIngreso">
+              Registrar ingreso
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module"
+          src="/js/paginas/ingreso-bodega.js"></script>
+</body>
+</html>

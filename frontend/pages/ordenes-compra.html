@@ -1,0 +1,223 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Órdenes de compra | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <style>
+    .oc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .oc-tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+    }
+
+    .oc-tabla th, .oc-tabla td {
+      padding: 12px;
+      border-bottom: 1px solid #dde6ef;
+      text-align: left;
+    }
+
+    .oc-tabla input {
+      min-width: 95px;
+    }
+
+    .oc-total {
+      text-align: right;
+      font-size: 23px;
+      font-weight: bold;
+      margin-top: 22px;
+    }
+
+    .oc-exito {
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      background: #e6f6e8;
+      color: #17632a;
+    }
+
+    .oc-exito[hidden] { display: none; }
+
+    @media (max-width: 700px) {
+      .oc-grid { grid-template-columns: 1fr; }
+      .oc-tabla { font-size: 13px; }
+    }
+  </style>
+</head>
+
+<body class="app-view cargando" data-seccion="compras">
+
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+
+    <header class="topbar">
+      <button type="button" class="menu-button"
+              data-accion="abrir-menu"
+              aria-label="Abrir menú">&#9776;</button>
+
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Órdenes de compra</h1>
+      </div>
+
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <!--# include virtual="/partials/subnav-compras.html" -->
+
+    <main class="content">
+
+      <div class="section-heading">
+        <div>
+          <h2>Nueva orden de compra</h2>
+          <p>Registra los productos que solicitarás a un proveedor.</p>
+        </div>
+      </div>
+
+      <section class="workspace-card">
+
+        <div id="ordenCreada" class="oc-exito" hidden>
+          <h3>Orden generada correctamente</h3>
+          <p>Número de orden:
+            <strong id="numeroOrden"></strong>
+          </p>
+          <p>Total:
+            <strong id="totalOrdenCreada"></strong>
+          </p>
+          <p>La orden quedó pendiente de recepción.</p>
+        </div>
+
+        <form id="formularioOrden">
+
+          <h3>Datos de la compra</h3>
+
+          <div class="oc-grid">
+            <div>
+              <label for="proveedor">Proveedor *</label>
+              <select id="proveedor" required>
+                <option value="">Cargando proveedores...</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="fechaOrden">Fecha de solicitud</label>
+              <input type="date" id="fechaOrden" readonly>
+            </div>
+          </div>
+
+          <label for="observaciones">Observaciones</label>
+          <input
+            id="observaciones"
+            type="text"
+            maxlength="250"
+            placeholder="Ej. Reabastecimiento de pintura"
+          >
+
+          <h3 style="margin-top:28px;">Productos de la orden</h3>
+
+          <div class="oc-grid">
+            <div>
+              <label for="producto">Producto *</label>
+              <select id="producto">
+                <option value="">Cargando productos...</option>
+              </select>
+            </div>
+
+            <div style="display:flex; align-items:end;">
+              <button type="button"
+                      class="action-button"
+                      id="agregarProducto">
+                Agregar producto
+              </button>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="oc-tabla">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Costo unitario (Q)</th>
+                  <th>Subtotal</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="detalleOrden">
+                <tr id="sinProductos">
+                  <td colspan="5">
+                    Todavía no has agregado productos.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="oc-total">
+            Total: <span id="totalOrden">Q0.00</span>
+          </div>
+
+          <p id="mensajeOrden" class="error" role="alert"></p>
+
+          <div class="button-row">
+            <button type="reset" class="action-button"
+                    id="limpiarOrden">
+              Limpiar
+            </button>
+
+            <button type="submit"
+                    class="action-button green"
+                    id="guardarOrden">
+              Generar orden de compra
+            </button>
+          </div>
+
+        </form>
+        
+        <section class="workspace-card" style="margin-top: 24px;">
+        <h2>Órdenes de compra registradas</h2>
+
+        <button type="button"
+                class="action-button"
+                id="actualizarOrdenes">
+            Actualizar listado
+        </button>
+
+        <div style="overflow-x:auto;">
+            <table class="oc-tabla">
+            <thead>
+                <tr>
+                <th>Número de orden</th>
+                <th>Proveedor</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody id="listadoOrdenes">
+                <tr>
+                <td colspan="5">Cargando órdenes...</td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module" src="/js/paginas/ordenes-compra.js"></script>
+</body>
+</html>
