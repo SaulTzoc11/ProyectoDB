@@ -4,6 +4,7 @@ from django.urls import include, path, re_path
 from . import frontend
 
 urlpatterns = [
+    path("api/reportes/", include("apps.reportes.urls")),
     path("api/cotizaciones/", include("apps.ventas.urls")),
     path(
         "api/",
