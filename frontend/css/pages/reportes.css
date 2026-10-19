@@ -1,0 +1,26 @@
+.report-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem; }
+.report-tab {
+  padding: .6rem 1rem; border: 1px solid #C9D8E5; border-radius: 999px;
+  background: white; color: var(--navy); font-weight: 700; font-size: .88rem; cursor: pointer;
+}
+.report-tab[aria-selected="true"] { color: white; background: var(--blue); border-color: var(--blue); }
+
+.report-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem; margin: 1rem 0; }
+.report-filters > div { min-width: 170px; }
+.report-filters [hidden] { display: none; }
+.report-filters label { margin-top: 0; }
+
+.report-block { margin-top: 1.5rem; }
+.report-block h4 { margin: 0 0 .5rem; color: var(--navy); }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table tr.total-row td { font-weight: 800; background: #F6F9FC; }
+
+.invoice-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .75rem 1.5rem; margin: 0; }
+.invoice-summary div { padding: .6rem 0; border-bottom: 1px solid var(--line); }
+.invoice-summary dt { color: #5B7083; font-size: .8rem; }
+.invoice-summary dd { margin: .15rem 0 0; font-weight: 700; color: var(--navy); }
+.invoice-void { color: #B42318; }
+
+@media print {
+  .report-tabs, .report-filters, #imprimir { display: none !important; }
+}

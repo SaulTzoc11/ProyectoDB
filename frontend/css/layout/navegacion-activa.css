@@ -3,6 +3,7 @@ body[data-seccion="catalogo"] .nav-button[data-seccion="catalogo"],
 body[data-seccion="compras"] .nav-button[data-seccion="compras"],
 body[data-seccion="ventas"] .nav-button[data-seccion="ventas"],
 body[data-seccion="informacion"] .nav-button[data-seccion="informacion"],
+body[data-seccion="reportes"] .nav-button[data-seccion="reportes"],
 body[data-seccion="cotizacion"] .nav-button[data-seccion="cotizacion"] {
   color: white;
   background: rgba(255, 255, 255, .12);
