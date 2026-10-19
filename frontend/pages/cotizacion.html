@@ -32,6 +32,17 @@
       </div>
 
       <section class="workspace-card quote-card">
+        <!-- NUEVO: aparece después de guardar la cotización -->
+        <div id="cotizacionGuardada" class="quote-saved" hidden>
+          <h3>Cotización <span id="codigoGuardada"></span> guardada correctamente</h3>
+          <p id="estadoGuardada">Estado: Pendiente. Confírmela cuando el cliente la acepte.</p>
+          <div class="button-row">
+            <button type="button" class="action-button green" id="confirmarGuardada">Confirmar cotización</button>
+            <button type="button" class="action-button" id="imprimirGuardada">Imprimir cotización guardada</button>
+            <button type="button" class="action-button green" id="nuevaCotizacion">Nueva cotización</button>
+          </div>
+        </div>
+
         <!-- NUEVO (cambio 1): cliente y observaciones -->
         <div class="quote-client">
           <label for="clienteCotizacion">Cliente</label>
@@ -52,7 +63,6 @@
         <div id="acciones" class="button-row" hidden>
           <button type="button" class="action-button wine" id="vaciar">Vaciar cotización</button>
           <button type="button" class="action-button green" id="guardar">Guardar cotización</button>
-          <button type="button" class="action-button" id="imprimir">Imprimir cotización</button>
         </div>
         <p id="mensajeGuardado" role="status"></p>
       </section>
@@ -125,6 +135,7 @@
         <div><span>ATENDIÓ</span><b data-campo="empleado"></b><small data-campo="rol"></small></div>
         <!-- NUEVO (cambio 3): número de cotización -->
         <div><span>COTIZACIÓN N°</span><b data-campo="codigo"></b></div>
+        <div><span>CLIENTE</span><b data-campo="cliente"></b><small data-campo="nit"></small></div>
       </section>
       <table class="print-table">
         <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unitario</th><th>Descuento</th><th>Importe</th></tr></thead>

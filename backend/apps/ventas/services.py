@@ -52,17 +52,16 @@ def _porcentaje_autorizado(id_usuario, tokens):
     for token in tokens:
         try:
             datos = signing.loads(token, salt=_SALT, max_age=_VIGENCIA_SEGUNDOS)
-        except signing.BadSignature:                 
+        except signing.BadSignature:                  
             continue
         if datos["u"] == id_usuario:
             maximo = max(maximo, Decimal(datos["p"]))
     return maximo
 
 
-#aqui es donde se genera la cotizacion
+
 def generar_cotizacion(id_usuario, id_cliente, detalle, observaciones=None, tokens_descuento=()):
-    """detalle = lista de dicts validados: {idProducto, cantidad, descuento}
-    Devuelve (idCotizacion, codigoCotizacion)."""
+   
     pedido = max((Decimal(l["descuento"]) for l in detalle), default=Decimal("0"))
 
     if pedido > DESCUENTO_MAXIMO:
@@ -72,3 +71,9 @@ def generar_cotizacion(id_usuario, id_cliente, detalle, observaciones=None, toke
 
     lineas = [(l["idProducto"], l["cantidad"], l["descuento"]) for l in detalle]
     return repositories.generar_cotizacion_json(id_cliente, id_usuario, lineas, observaciones)
+
+
+
+def confirmar_cotizacion(id_cotizacion, id_usuario):
+    
+    return repositories.confirmar_cotizacion(id_cotizacion, id_usuario)

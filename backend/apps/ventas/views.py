@@ -1,5 +1,4 @@
-
-
+"""apps/ventas/views.py  (reemplaza el tuyo: conserva todo y agrega la acción 'generar')"""
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -41,14 +40,15 @@ class CotizacionViewSet(viewsets.ReadOnlyModelViewSet):
         return Response({
             "ok": True,
             "porcentaje": str(porcentaje),
-           
+            
             "token": services.emitir_token_descuento(request.user.idusuario, porcentaje),
         })
 
+    
     @action(detail=False, methods=["post"], url_path="generar")
     def generar(self, request):
         entrada = GenerarCotizacionSerializer(data=request.data)
-        entrada.is_valid(raise_exception=True)        
+        entrada.is_valid(raise_exception=True)         
         datos = entrada.validated_data
 
         try:
@@ -68,6 +68,35 @@ class CotizacionViewSet(viewsets.ReadOnlyModelViewSet):
             {"ok": True, "idCotizacion": id_cotizacion, "codigoCotizacion": codigo},
             status=status.HTTP_201_CREATED,
         )
+
+    
+    @action(detail=True, methods=["get"], url_path="impresion")
+    def impresion(self, request, pk=None):
+        self.get_object()     
+        datos = repositories.obtener_cotizacion_impresion(pk)
+        if datos is None:
+            return Response(
+                {"ok": False, "mensaje": "Cotización no encontrada."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(datos)
+
+   
+    @action(detail=False, methods=["get"], url_path="clientes")
+    def clientes(self, request):
+        return Response(repositories.listar_clientes_activos())
+
+    @action(detail=True, methods=["post"], url_path="confirmar")
+    def confirmar(self, request, pk=None):
+        self.get_object()      
+        try:
+            resultado = services.confirmar_cotizacion(pk, request.user.idusuario)
+        except repositories.CotizacionError as error:
+            return Response(
+                {"ok": False, "mensaje": str(error)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({"ok": True, **resultado})
 
 
 class DetalleCotizacionViewSet(viewsets.ReadOnlyModelViewSet):

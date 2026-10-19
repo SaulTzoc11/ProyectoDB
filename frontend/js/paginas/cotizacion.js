@@ -1,4 +1,4 @@
-import { guardarCotizacion, obtenerLista, solicitar } from "../api.js";
+import { guardarCotizacion, solicitar } from "../api.js";
 import * as carrito from "../carrito.js";
 import { iniciarPagina } from "../sesion.js";
 import {
@@ -17,15 +17,21 @@ const dialogo = document.querySelector("#dialogoDescuento");
 const formularioDescuento = document.querySelector("#formularioDescuento");
 const errorDescuento = document.querySelector("#errorDescuento");
 
-
 const selectCliente = document.querySelector("#clienteCotizacion");
 const observaciones = document.querySelector("#observacionesCotizacion");
 const botonGuardar = document.querySelector("#guardar");
 const mensajeGuardado = document.querySelector("#mensajeGuardado");
 
+
+const panelGuardada = document.querySelector("#cotizacionGuardada");
+const textoCodigoGuardada = document.querySelector("#codigoGuardada");
+const estadoGuardada = document.querySelector("#estadoGuardada");
+const botonConfirmar = document.querySelector("#confirmarGuardada");
+
 let usuario = null;
 let itemEnDescuento = null;
-let codigoGuardado = null; 
+
+let cotizacionGuardada = null;
 
 function actualizarContador() {
   document.querySelectorAll('[data-carrito="cantidad"]').forEach((n) => {
@@ -85,8 +91,6 @@ function dibujar() {
   vaciar(lista);
   actualizarContador();
 
-
-  codigoGuardado = null;
   botonGuardar.disabled = false;
   mensajeGuardado.textContent = "";
 
@@ -110,15 +114,58 @@ function dibujar() {
 
 async function cargarClientes() {
   try {
-    const clientes = obtenerLista(await solicitar("/api/clientes/")); // ajusta la ruta si es otra
+    const clientes = await solicitar("/api/cotizaciones/clientes/");
     selectCliente.replaceChildren(new Option("-- Seleccione un cliente --", ""));
     for (const c of clientes) {
       
-      selectCliente.append(new Option(c.nombre ?? String(c), c.idcliente ?? c.id));
+      selectCliente.append(new Option(`${c.nombre} — NIT: ${c.nit} (${c.tipo})`, c.id));
+    }
+    if (!clientes.length) {
+      mensajeGuardado.textContent = "No hay clientes activos registrados.";
     }
   } catch (error) {
     mensajeGuardado.textContent = error.message;
   }
+}
+
+function asignar(raiz, campo, valor) {
+  const nodo = raiz.querySelector(`[data-campo="${campo}"]`);
+  if (nodo) nodo.textContent = valor ?? "";
+}
+
+
+function imprimirDocumento({ cabecera, detalle }) {
+  const documento = clonarPlantilla("plantillaDocumento");
+
+  llenar(documento, {
+    fecha: new Date(cabecera.fecha).toLocaleDateString("es-GT"),
+    empleado: cabecera.empleado,
+    rol: cabecera.rol,
+    subtotal: formatearQuetzales(Number(cabecera.subtotal)),
+    descuento: `− ${formatearQuetzales(Number(cabecera.descuento))}`,
+    total: formatearQuetzales(Number(cabecera.total)),
+  });
+  asignar(documento, "codigo", cabecera.codigoCotizacion);
+  asignar(documento, "cliente", cabecera.nombreCliente);
+  asignar(documento, "nit", cabecera.nit ? `NIT: ${cabecera.nit}` : "");
+
+  documento.querySelector('[data-elemento="filas"]').append(
+    ...detalle.map((linea) =>
+      llenar(clonarPlantilla("plantillaFilaDocumento"), {
+        nombre: linea.producto,
+        detalle: [linea.marca, linea.presentacion, linea.color].filter(Boolean).join(" · "),
+        cantidad: linea.cantidad,
+        precio: formatearQuetzales(Number(linea.precioUnitario)),
+        descuento: `${Number(linea.descuento)}%`,
+        importe: formatearQuetzales(Number(linea.subtotal)),
+      })
+    )
+  );
+
+  document.querySelector("#areaImpresion").replaceChildren(documento);
+  document.body.classList.add("printing-document");
+  window.print();
+  setTimeout(() => document.body.classList.remove("printing-document"), 500);
 }
 
 formularioDescuento.addEventListener("submit", async (evento) => {
@@ -174,49 +221,62 @@ botonGuardar.addEventListener("click", async () => {
       lineas,
       tokensDescuento,
     });
-    codigoGuardado = respuesta.codigoCotizacion;
-    mensajeGuardado.textContent = `Cotización ${codigoGuardado} guardada correctamente.`;
-    mostrarAviso(`Cotización ${codigoGuardado} guardada.`);
+
+    
+    cotizacionGuardada = {
+      id: respuesta.idCotizacion,
+      codigo: respuesta.codigoCotizacion,
+    };
+    carrito.vaciar();
+    selectCliente.value = "";
+    observaciones.value = "";
+    textoCodigoGuardada.textContent = cotizacionGuardada.codigo;
+    panelGuardada.hidden = false;
+    estadoGuardada.textContent = "Estado: Pendiente. Confírmela cuando el cliente la acepte.";
+    botonConfirmar.disabled = false;
+    dibujar();
+    mostrarAviso(`Cotización ${cotizacionGuardada.codigo} guardada.`);
   } catch (error) {
     mensajeGuardado.textContent = error.message; 
     botonGuardar.disabled = false;
   }
 });
 
-document.querySelector("#imprimir").addEventListener("click", () => {
-  const documento = clonarPlantilla("plantillaDocumento");
-  const { subtotal, descuento, total } = carrito.totales();
+document.querySelector("#imprimirGuardada").addEventListener("click", async (evento) => {
+  if (!cotizacionGuardada) return;
+  const boton = evento.currentTarget;
+  boton.disabled = true;
+  try {
+    const datos = await solicitar(`/api/cotizaciones/${cotizacionGuardada.id}/impresion/`);
+    imprimirDocumento(datos);
+  } catch (error) {
+    mostrarAviso(error.message);
+  } finally {
+    boton.disabled = false;
+  }
+});
 
-  llenar(documento, {
-    fecha: new Date().toLocaleDateString("es-GT"),
-    empleado: usuario.name,
-    rol: usuario.role,
-    subtotal: formatearQuetzales(subtotal),
-    descuento: `− ${formatearQuetzales(descuento)}`,
-    total: formatearQuetzales(total),
-  });
+
+botonConfirmar.addEventListener("click", async () => {
+  if (!cotizacionGuardada) return;
+  if (!window.confirm(`¿Confirmar la cotización ${cotizacionGuardada.codigo}?`)) return;
+
+  botonConfirmar.disabled = true;
+  try {
+    await solicitar(`/api/cotizaciones/${cotizacionGuardada.id}/confirmar/`, { metodo: "POST" });
+    estadoGuardada.textContent = "Estado: Confirmada. Lista para facturar.";
+    mostrarAviso(`Cotización ${cotizacionGuardada.codigo} confirmada.`);
+  } catch (error) {
+    estadoGuardada.textContent = error.message;
+    botonConfirmar.disabled = false;
+  }
+});
 
 
-  const campoCodigo = documento.querySelector('[data-campo="codigo"]');
-  if (campoCodigo) campoCodigo.textContent = codigoGuardado || "Sin guardar";
-
-  documento.querySelector('[data-elemento="filas"]').append(
-    ...carrito.obtenerItems().map((item) =>
-      llenar(clonarPlantilla("plantillaFilaDocumento"), {
-        nombre: item.nombre,
-        detalle: `${item.marca} · ${item.detalle}`,
-        cantidad: item.cantidad,
-        precio: formatearQuetzales(item.precio),
-        descuento: `${item.descuento || 0}%`,
-        importe: formatearQuetzales(item.precio * item.cantidad * (1 - (item.descuento || 0) / 100)),
-      })
-    )
-  );
-
-  document.querySelector("#areaImpresion").replaceChildren(documento);
-  document.body.classList.add("printing-document");
-  window.print();
-  setTimeout(() => document.body.classList.remove("printing-document"), 500);
+document.querySelector("#nuevaCotizacion").addEventListener("click", () => {
+  cotizacionGuardada = null;
+  panelGuardada.hidden = true;
+  selectCliente.focus();
 });
 
 usuario = await iniciarPagina();
