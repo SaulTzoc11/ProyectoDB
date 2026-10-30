@@ -15,3 +15,38 @@
 .dialogo::backdrop { background: rgba(16, 42, 67, .45); }
 .dialogo h3 { margin: 0 0 .25rem; color: var(--navy); }
 .dialogo .button-row { margin-top: 1rem; }
+/* Estilo para el combobox de clientes */
+#clienteCotizacion {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  color: var(--navy);
+  background-color: white;
+  border: 1px solid #C9DCEB;
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  
+  /* Flecha desplegable personalizada usando tu variable o color azul */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23027DD6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.1em;
+  padding-right: 2.5rem;
+  
+  transition: all 0.2s ease;
+}
+
+/* Estado al seleccionarlo/enfocarlo (con la misma sombra y borde de tus tarjetas) */
+#clienteCotizacion:focus {
+  border-color: var(--blue);
+  box-shadow: 0 8px 18px rgba(2, 125, 214, 0.18);
+}
+
+/* Estilo para las opciones del desplegable */
+#clienteCotizacion option {
+  color: var(--navy);
+  background-color: white;
+  padding: 0.5rem;
+}
