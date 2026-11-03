@@ -1,6 +1,6 @@
 from django.utils import timezone
 from rest_framework import serializers
-
+from decimal import Decimal
 from apps.inventario import repositories as inventario
 
 from . import repositories
@@ -14,6 +14,7 @@ from .models import (
     Producto,
     ProductoGeneral,
     TipoPrecio,
+    TipoPago,
 )
 
 
@@ -50,13 +51,40 @@ class PresentacionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["idpresentacion"]
 
-    def validate_cantidad(self, valor):
-        if valor <= 0:
+    
+    PERMITIDAS = {
+        "1 cubeta": (Decimal("5.0000"), "galones"),
+        "1 galón": (Decimal("1.0000"), "galón"),
+        "1/16 galón": (Decimal("0.0625"), "galón"),
+        "1/2 galón": (Decimal("0.5000"), "galón"),
+        "1/32 galón": (Decimal("0.0313"), "galón"),
+        "1/4 galón": (Decimal("0.2500"), "galón"),
+        "1/8 galón": (Decimal("0.1250"), "galón"),
+        "Unidad": (Decimal("1.0000"), "unidad"),
+    }
+
+    def validate(self, attrs):
+        actual = self.instance
+
+        nombre = attrs.get(
+            "nombre", actual.nombre if actual else ""
+        )
+        cantidad = attrs.get(
+            "cantidad", actual.cantidad if actual else None
+        )
+        unidad = attrs.get(
+            "unidadmedida",
+            actual.unidadmedida if actual else ""
+        )
+
+        if (cantidad, unidad) != self.PERMITIDAS.get(nombre):
             raise serializers.ValidationError(
-                "La cantidad debe ser mayor que cero."
+                "La presentación debe coincidir con "
+                "una de las ocho opciones autorizadas."
             )
 
-        return valor
+        return attrs
+
 
 
 class ColorSerializer(serializers.ModelSerializer):
@@ -264,7 +292,17 @@ class PrecioSerializer(serializers.ModelSerializer):
             "idprecio",
             "fechaasignacion",
         ]
+    def validate_idestado(self, valor):
+        permitidos = {"vigente", "inactivo"}
 
+        if valor.nombre.strip().casefold() not in permitidos:
+            raise serializers.ValidationError(
+                "Para un precio solo se permite "
+                "el estado Vigente o Inactivo."
+            )
+
+        return valor
+        
     def validate_precio(self, valor):
         if valor <= 0:
             raise serializers.ValidationError(
@@ -276,3 +314,17 @@ class PrecioSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data["fechaasignacion"] = timezone.now()
         return super().create(validated_data)
+    
+
+class TipoPagoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoPago
+        fields = [
+            "idtipopago",
+            "nombre",
+            "descripcion",
+            "activo",
+        ]
+        read_only_fields = ["idtipopago", "activo"]
+
+

@@ -13,8 +13,16 @@ from apps.nucleo.permissions import SoloGerente
 
 from . import repositories, services
 from .authentication import CLAVE_SESION
-from .serializers import RolSerializer, SesionSerializer, UsuarioSerializer
-
+from apps.nucleo.viewsets import MantenimientoViewSet
+from .serializers import (
+    RolSerializer,
+    SesionSerializer,
+    UsuarioSerializer,
+    TipoMovimientoSerializer,
+    MotivoSerializer,
+    AccionSerializer,
+    TablaSerializer,
+)
 MENSAJE_CREDENCIALES = "El usuario o la contraseña no son correctos."
 
 
@@ -22,6 +30,32 @@ class RolViewSet(viewsets.ModelViewSet):
     queryset = repositories.listar_roles()
     serializer_class = RolSerializer
     permission_classes = [SoloGerente]
+
+
+
+class TipoMovimientoViewSet(MantenimientoViewSet):
+    queryset = repositories.tipos_movimiento()
+    serializer_class = TipoMovimientoSerializer
+    permission_classes = [SoloGerente]
+
+
+class MotivoViewSet(MantenimientoViewSet):
+    queryset = repositories.motivos()
+    serializer_class = MotivoSerializer
+    permission_classes = [SoloGerente]
+
+
+class AccionViewSet(MantenimientoViewSet):
+    queryset = repositories.acciones()
+    serializer_class = AccionSerializer
+    permission_classes = [SoloGerente]
+
+
+class TablaViewSet(MantenimientoViewSet):
+    queryset = repositories.tablas_sistema()
+    serializer_class = TablaSerializer
+    permission_classes = [SoloGerente]
+
 
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -123,3 +157,5 @@ def token_csrf(request):
 @permission_classes([IsAuthenticated])
 def sesion_actual(request):
     return Response(SesionSerializer(request.user).data)
+
+

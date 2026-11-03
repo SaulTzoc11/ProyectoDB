@@ -15,4 +15,10 @@ router.register(
 router.register("productos", views.ProductoViewSet, basename="producto")
 router.register("precios", views.PrecioViewSet, basename="precio")
 
+router.register(
+    "tipos-pago",
+    views.TipoPagoViewSet,
+    basename="tipo-pago"
+)
+
 urlpatterns = router.urls

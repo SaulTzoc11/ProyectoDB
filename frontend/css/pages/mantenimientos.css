@@ -110,3 +110,44 @@
 .tabla-grupo { margin-bottom: 1rem; }
 .tabla-no-disponible { display: flex; flex-direction: column; opacity: .55; cursor: not-allowed; }
 a.table-link { text-decoration: none; color: var(--navy); font-weight: 700; }
+
+.maintenance-actions .edit-user {
+  background: #027dd6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.maintenance-actions .edit-user:hover {
+  background: #006bb9;
+}
+
+.maintenance-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.maintenance-records-head input[type="search"] {
+  width: 100%;
+  max-width: 380px;
+  min-height: 42px;
+  border: 1px solid #c9d8e5;
+  border-radius: 9px;
+  padding: 10px 14px;
+  background: white;
+  font: inherit;
+}
+
+@media (max-width: 700px) {
+  .maintenance-records-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .maintenance-records-head input[type="search"] {
+    max-width: none;
+  }
+}

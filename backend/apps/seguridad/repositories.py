@@ -1,6 +1,13 @@
 from django.utils import timezone
 
-from .models import Rol, Usuario
+from .models import (
+    Rol,
+    Usuario,
+    TipoMovimiento,
+    Motivo,
+    Accion,
+    Tabla,
+)
 
 
 def listar_usuarios():
@@ -52,4 +59,36 @@ def reiniciar_intentos(usuario):
     usuario.ultimoacceso = timezone.now()
     usuario.save(
         update_fields=["intentosfallidos", "bloqueadohasta", "ultimoacceso"]
+    )
+
+
+def tipos_movimiento():
+    return (
+        TipoMovimiento.objects
+        .all()
+        .order_by("nombre")
+    )
+
+
+def motivos():
+    return (
+        Motivo.objects
+        .all()
+        .order_by("descripcion")
+    )
+
+
+def acciones():
+    return (
+        Accion.objects
+        .all()
+        .order_by("nombre")
+    )
+
+
+def tablas_sistema():
+    return (
+        Tabla.objects
+        .all()
+        .order_by("nombre")
     )

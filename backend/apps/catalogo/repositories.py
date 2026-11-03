@@ -8,6 +8,7 @@ from .models import (
     Producto,
     ProductoGeneral,
     TipoPrecio,
+    TipoPago,
 )
 
 ESTADO_VIGENTE = "Vigente"
@@ -80,3 +81,11 @@ def precios_vigentes(producto):
         .select_related("idtipoprecio", "idestado")
         .order_by("idtipoprecio__nombre")
     )
+
+def tipos_pago():
+    return (
+        TipoPago.objects
+        .all()
+        .order_by("nombre")
+    )
+

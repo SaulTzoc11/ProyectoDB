@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from . import passwords
-from .models import Rol, Usuario
+from .models import Rol, Usuario, TipoMovimiento, Motivo, Accion, Tabla
 from . import services
 
 
@@ -74,3 +74,43 @@ class SesionSerializer(serializers.Serializer):
     username = serializers.CharField(source="nombreusuario")
     name = serializers.CharField(source="nombre_completo")
     role = serializers.CharField(source="idrol.nombre")
+
+class TipoMovimientoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoMovimiento
+        fields = [
+            "idtipomovimiento",
+            "nombre",
+            "descripcion",
+        ]
+        read_only_fields = ["idtipomovimiento"]
+
+class MotivoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Motivo
+        fields = [
+            "idmotivo",
+            "descripcion",
+        ]
+        read_only_fields = ["idmotivo"]
+
+
+class AccionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Accion
+        fields = [
+            "idaccion",
+            "nombre",
+            "descripcion",
+        ]
+        read_only_fields = ["idaccion"]
+
+
+class TablaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tabla
+        fields = [
+            "idtabla",
+            "nombre",
+        ]
+        read_only_fields = ["idtabla"]

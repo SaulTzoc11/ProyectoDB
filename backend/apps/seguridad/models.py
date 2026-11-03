@@ -49,3 +49,65 @@ class Usuario(models.Model):
 
     def __str__(self):
         return self.nombreusuario
+
+class TipoMovimiento(models.Model):
+    idtipomovimiento = models.AutoField(
+        db_column="idTipoMovimiento", primary_key=True
+    )
+    nombre = models.CharField(max_length=50, unique=True)
+    descripcion = models.CharField(
+        max_length=150, blank=True, null=True
+    )
+
+    class Meta:
+        managed = False
+        db_table = "TIPO_MOVIMIENTO"
+
+    def __str__(self):
+        return self.nombre
+
+class Motivo(models.Model):
+    idmotivo = models.AutoField(
+        db_column="idMotivo", primary_key=True
+    )
+    descripcion = models.CharField(
+        max_length=250, unique=True
+    )
+
+    class Meta:
+        managed = False
+        db_table = "MOTIVO"
+
+    def __str__(self):
+        return self.descripcion
+
+
+class Accion(models.Model):
+    idaccion = models.AutoField(
+        db_column="idAccion", primary_key=True
+    )
+    nombre = models.CharField(max_length=30, unique=True)
+    descripcion = models.CharField(
+        max_length=150, blank=True, null=True
+    )
+
+    class Meta:
+        managed = False
+        db_table = "ACCION"
+
+    def __str__(self):
+        return self.nombre
+
+
+class Tabla(models.Model):
+    idtabla = models.AutoField(
+        db_column="idTabla", primary_key=True
+    )
+    nombre = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        managed = False
+        db_table = "TABLA"
+
+    def __str__(self):
+        return self.nombre

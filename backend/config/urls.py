@@ -1,9 +1,14 @@
 from django.conf import settings
 from django.urls import include, path, re_path
-
+from apps.nucleo.consultas_mantenimientos import ConsultaMantenimientoView
 from . import frontend
 
 urlpatterns = [
+    path(
+                        "api/consulta-mantenimientos/<str:tabla>/",
+                        ConsultaMantenimientoView.as_view(),
+                        name="consulta-mantenimiento",
+                    ),
     path("api/reportes/", include("apps.reportes.urls")),
     path("api/cotizaciones/", include("apps.ventas.urls")),
     path("api/facturas/", include("apps.ventas.urls_facturas")),
@@ -15,6 +20,8 @@ urlpatterns = [
                 path("", include("apps.catalogo.urls")),
                 path("", include("apps.clientes.urls")),
                 path("", include("apps.compras.urls")),
+                path("", include("apps.inventario.urls")),
+                
             ]
         ),
     ),

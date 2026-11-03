@@ -264,3 +264,27 @@ class Precio(models.Model):
 
     def __str__(self):
         return f"{self.idproducto} - Q{self.precio}"
+    
+
+
+
+
+class TipoPago(models.Model):
+    idtipopago = models.AutoField(
+        db_column="idTipoPago", primary_key=True
+    )
+    nombre = models.CharField(max_length=20, unique=True)
+    descripcion = models.CharField(
+        max_length=150, blank=True, null=True
+    )
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        managed = False
+        db_table = "TIPO_PAGO"
+
+    def __str__(self):
+        return self.nombre
+
+
+

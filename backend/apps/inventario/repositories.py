@@ -1,5 +1,9 @@
 from django.db import connection
 
+from .models import (
+    Bodega,
+    Estante,
+)
 CONSULTA_EXISTENCIAS = """
     SELECT B.nombre, E.codigoEstante, SUM(L.cantidadDisponible)
     FROM LOTE AS L
@@ -30,3 +34,14 @@ def existencias_de_producto(id_producto):
         "stock": sum(ubicacion["cantidad"] for ubicacion in ubicaciones),
         "ubicaciones": ubicaciones,
     }
+
+def bodegas():
+    return Bodega.objects.all().order_by("nombre")
+
+def estantes():
+    return (
+        Estante.objects
+        .select_related("idbodega")
+        .all()
+        .order_by("codigoestante")
+    )
