@@ -136,6 +136,8 @@ class Command(BaseCommand):
             USE [{self.nombre_bd}];
             IF DATABASE_PRINCIPAL_ID(N'{nombre_sql}') IS NULL
                 CREATE USER [{login}] FOR LOGIN [{login}];
+            ELSE
+                ALTER USER [{login}] WITH LOGIN = [{login}];
             ALTER ROLE db_datareader ADD MEMBER [{login}];
             ALTER ROLE db_datawriter ADD MEMBER [{login}];
             ALTER ROLE db_ddladmin ADD MEMBER [{login}];
