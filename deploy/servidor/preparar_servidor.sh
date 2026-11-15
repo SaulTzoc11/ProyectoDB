@@ -23,7 +23,11 @@ echo "== Fail2ban"
 install -m 644 "$DIR/jail.local" /etc/fail2ban/jail.local
 systemctl enable --now fail2ban
 systemctl restart fail2ban
-fail2ban-client status
+for i in $(seq 1 20); do
+  fail2ban-client ping >/dev/null 2>&1 && break
+  sleep 1
+done
+fail2ban-client status || true
 
 echo "== Dokploy"
 if ! docker service ls 2>/dev/null | grep -q dokploy; then
