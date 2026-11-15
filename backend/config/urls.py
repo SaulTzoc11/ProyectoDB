@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.urls import include, path, re_path
 from apps.nucleo.consultas_mantenimientos import ConsultaMantenimientoView
-from . import frontend
+from . import frontend, salud
 
 urlpatterns = [
+    path("api/salud/", salud.vivo, name="salud-vivo"),
+    path("api/salud/bd/", salud.listo, name="salud-listo"),
     path(
                         "api/consulta-mantenimientos/<str:tabla>/",
                         ConsultaMantenimientoView.as_view(),

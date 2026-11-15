@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels: {app: api}
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0      # nunca baja de 2 pods listos: actualización sin cortes
+      maxSurge: 1
+  selector:
+    matchLabels: {app: api}
+  template:
+    metadata:
+      labels: {app: api}
+    spec:
+      terminationGracePeriodSeconds: 30
+      initContainers:
+        # Crea/migra la base antes de que el pod reciba tráfico (usa un bloqueo
+        # en SQL Server, así que varias réplicas pueden correrlo a la vez).
+        - name: migrador
+          image: sapo-pinturas-api
+          command: ["python", "manage.py", "inicializar_bd", "--espera", "300"]
+          envFrom:
+            - configMapRef: {name: sapo-config}
+            - secretRef: {name: sapo-secretos}
+      containers:
+        - name: api
+          image: sapo-pinturas-api
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef: {name: sapo-config}
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom: {secretKeyRef: {name: sapo-secretos, key: DJANGO_SECRET_KEY}}
+            - name: DB_PASSWORD
+              valueFrom: {secretKeyRef: {name: sapo-secretos, key: DB_PASSWORD}}
+            - name: DESCUENTO_CLAVE
+              valueFrom: {secretKeyRef: {name: sapo-secretos, key: DESCUENTO_CLAVE}}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {memory: 512Mi}
+          readinessProbe:
+            httpGet:
+              path: /api/salud/bd/
+              port: 8000
+              httpHeaders: [{name: Host, value: localhost}]
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/salud/
+              port: 8000
+              httpHeaders: [{name: Host, value: localhost}]
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "5"]   # deja que el Service lo saque antes de apagar
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  labels: {app: api}
+spec:
+  selector: {app: api}
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: {app: api}

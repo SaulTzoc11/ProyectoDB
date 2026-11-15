@@ -1,3 +1,5 @@
+# Se construye desde la raíz del repositorio:
+#   docker build -f backend/Dockerfile -t <usuario>/sapo-pinturas-api .
 FROM python:3.12-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -14,10 +16,18 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Scripts SQL para `manage.py inicializar_bd` (quedan en /database).
+COPY database /database
+COPY backend/ .
+
+ARG VERSION=dev
+ENV VERSION_APP=${VERSION}
 
 EXPOSE 8000
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://localhost:8000/api/salud/ || exit 1
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", \
+     "--graceful-timeout", "20", "--access-logfile", "-"]

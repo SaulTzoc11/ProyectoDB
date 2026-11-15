@@ -1,0 +1,30 @@
+# Cuenta con token permanente para que GitHub Actions despliegue en el cluster.
+# (Los kubeconfig que descarga DigitalOcean vencen a los pocos días.)
+# Proyecto académico: se le da cluster-admin para poder aplicar el Namespace.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: github-actions
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: github-actions
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: github-actions
+    namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-actions-token
+  namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: github-actions
+type: kubernetes.io/service-account-token

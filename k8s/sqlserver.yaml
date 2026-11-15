@@ -1,0 +1,64 @@
+# SQL Server con almacenamiento persistente (1 réplica: la alta disponibilidad
+# que pide el proyecto es la de la aplicación).
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  labels: {app: db}
+spec:
+  selector: {app: db}
+  ports:
+    - port: 1433
+      targetPort: 1433
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+spec:
+  serviceName: db
+  replicas: 1
+  selector:
+    matchLabels: {app: db}
+  template:
+    metadata:
+      labels: {app: db}
+    spec:
+      securityContext:
+        fsGroup: 10001
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: sqlserver
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          ports:
+            - containerPort: 1433
+          env:
+            - {name: ACCEPT_EULA, value: "Y"}
+            - {name: MSSQL_PID, value: Express}
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: sapo-secretos, key: DB_ADMIN_PASSWORD}
+          resources:
+            requests: {cpu: 250m, memory: 1536Mi}
+            limits: {memory: 2Gi}
+          readinessProbe:
+            exec:
+              command: ["/bin/sh", "-c", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$MSSQL_SA_PASSWORD\" -C -b -Q 'SELECT 1' -o /dev/null"]
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket: {port: 1433}
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          volumeMounts:
+            - name: datos
+              mountPath: /var/opt/mssql
+  volumeClaimTemplates:
+    - metadata:
+        name: datos
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi

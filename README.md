@@ -52,7 +52,9 @@ Django lee el `.env` de la raíz automáticamente. Una variable ya definida en e
 
 ## Puesta en marcha con Docker (opcional)
 
-`docker compose up -d --build api web` y abrir http://localhost:8080. En este modo nginx sirve el front y reenvía `/api` al backend. La base local de pruebas se levanta con `docker compose --profile bd-local up -d db`.
+`cp .env.example .env`, `docker compose up -d` y abrir http://localhost:8080. Levanta SQL Server, crea y migra `PintureriaDB` (servicio `migrador`), Django con recarga automática y nginx sirviendo el front y reenviando `/api` al backend.
+
+El pipeline de despliegue (Docker Hub, Dokploy y Kubernetes) está documentado en `docs/DEVOPS.md`.
 
 ## Base de datos
 

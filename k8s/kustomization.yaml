@@ -1,0 +1,21 @@
+# Opción A: Kubernetes.   kubectl apply -k k8s/
+# El pipeline cambia newTag por el commit que se acaba de construir.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: sapo-pinturas
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - sqlserver.yaml
+  - api.yaml
+  - web.yaml
+  - ingress.yaml
+
+images:
+  - name: sapo-pinturas-api
+    newName: sapopinturas/sapo-pinturas-api
+    newTag: latest
+  - name: sapo-pinturas-web
+    newName: sapopinturas/sapo-pinturas-web
+    newTag: latest

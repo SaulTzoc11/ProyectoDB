@@ -1,0 +1,23 @@
+# kube-prometheus-stack reducido para un cluster pequeño.
+# Grafana: https://grafana.tudominio.com  (usuario admin; cambiar la contraseña).
+alertmanager:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 3d
+    resources:
+      requests: {cpu: 100m, memory: 400Mi}
+      limits: {memory: 1Gi}
+
+grafana:
+  adminPassword: cambiar-esta-clave
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+    hosts: [grafana.tudominio.com]
+    tls:
+      - secretName: grafana-tls
+        hosts: [grafana.tudominio.com]
