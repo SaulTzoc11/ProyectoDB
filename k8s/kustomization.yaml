@@ -14,8 +14,8 @@ resources:
 
 images:
   - name: sapo-pinturas-api
-    newName: sapopinturas/sapo-pinturas-api
+    newName: saultzoc11/sapo-pinturas-api
     newTag: latest
   - name: sapo-pinturas-web
-    newName: sapopinturas/sapo-pinturas-web
+    newName: saultzoc11/sapo-pinturas-web
     newTag: latest
