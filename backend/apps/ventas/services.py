@@ -99,3 +99,8 @@ def facturar(id_usuario, pagos, id_cotizacion=None, id_cliente=None,
         id_cotizacion=id_cotizacion, id_cliente=id_cliente,
         detalle=lineas, observaciones=observaciones,
     )
+
+def anular_factura(no_factura, id_usuario, motivo=None):
+    """Anula por número de factura: monto en 0 y el inventario regresa a sus lotes."""
+    motivo = (motivo or "").strip()[:150] or None
+    return repositories.anular_factura(no_factura.strip(), id_usuario, motivo)
