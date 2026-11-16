@@ -51,11 +51,11 @@ class MantenimientoTests(TestCase):
         self.assertTrue(color.activo)
 
     def test_eliminar_sin_campo_activo_borra_el_registro(self):
-        categoria = Categoria.objects.create(nombre="Barnices")
+        marca = Marca.objects.create(nombre="Barnices")
         self.assertEqual(
-            self.api.delete(f"/api/categorias/{categoria.pk}/").status_code, 204
+            self.api.delete(f"/api/marcas/{marca.pk}/").status_code, 204
         )
-        self.assertFalse(Categoria.objects.filter(pk=categoria.pk).exists())
+        self.assertFalse(Marca.objects.filter(pk=marca.pk).exists())
 
     def test_activar_en_tabla_sin_campo_activo_devuelve_400(self):
         categoria = Categoria.objects.create(nombre="Esmaltes")
