@@ -175,6 +175,26 @@ def facturar_json(id_usuario, pagos, id_cotizacion=None, id_cliente=None,
     except DatabaseError as e:
         raise FacturaError(_mensaje(e))
 
+def anular_factura(no_factura, id_usuario, motivo=None):
+    """Ejecuta dbo.sp_AnularFactura (transaccional: estado, monto en 0, inventario y bitácora).
+
+    Devuelve {"idFactura", "noFactura", "totalAnulado", "estado"}.
+    """
+    try:
+        with connection.cursor() as cur:
+            cur.execute(
+                "EXEC dbo.sp_AnularFactura @noFactura=%s, @idUsuario=%s, @motivo=%s",
+                [str(no_factura), int(id_usuario), motivo],
+            )
+            fila = cur.fetchone()
+            return {
+                "idFactura": fila[0],
+                "noFactura": fila[1],
+                "totalAnulado": str(fila[2]),
+                "estado": fila[3],
+            }
+    except DatabaseError as e:
+        raise FacturaError(_mensaje(e))
 
 def listar_tipos_pago():
     """Medios de pago activos para la pantalla de facturación."""

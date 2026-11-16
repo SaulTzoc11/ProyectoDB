@@ -304,7 +304,43 @@ function mostrarFactura(datos) {
   piezas.push(bloque("Medios de pago", datos.pagos.length
     ? construirTabla(COLUMNAS_PAGOS, datos.pagos)
     : elemento("p", "La factura no tiene pagos registrados.", "muted")));
+    if (f.estado === "Emitida") piezas.push(bloqueAnulacion(f));
   resultado.replaceChildren(...piezas);
+}
+
+function bloqueAnulacion(factura) {
+  const caja = elemento("div", undefined, "invoice-cancel");
+  const etiqueta = elemento("label", "Motivo de la anulación (opcional)");
+  const motivo = elemento("input");
+  motivo.id = "motivoAnulacion";
+  motivo.maxLength = 150;
+  etiqueta.htmlFor = motivo.id;
+  const boton = elemento("button", "Anular factura", "action-button wine");
+  boton.type = "button";
+  const fila = elemento("div", undefined, "button-row");
+  fila.append(boton);
+  caja.append(etiqueta, motivo, fila);
+
+  boton.addEventListener("click", async () => {
+    const aviso = `¿Anular la factura ${factura.noFactura} por ${formatearQuetzales(factura.total)}?\n`
+      + "Su monto quedará en cero y los productos regresarán al inventario. No se puede deshacer.";
+    if (!window.confirm(aviso)) return;
+
+    boton.disabled = true;
+    errorReporte.textContent = "";
+    try {
+      await solicitar(`/api/facturas/${encodeURIComponent(factura.noFactura)}/anular/`, {
+        metodo: "POST",
+        cuerpo: { motivo: motivo.value.trim() },
+      });
+      await consultar(); // vuelve a cargar la factura: estado Anulada y total en cero
+    } catch (error) {
+      errorReporte.textContent = error instanceof ErrorApi ? error.message : "No se pudo anular la factura.";
+      boton.disabled = false;
+    }
+  });
+
+  return bloque("Anulación", caja);
 }
 
 function leerValores() {

@@ -22,7 +22,8 @@
 .invoice-summary dt { color: #5B7083; font-size: .8rem; }
 .invoice-summary dd { margin: .15rem 0 0; font-weight: 700; color: var(--navy); }
 .invoice-void { color: #B42318; }
+.invoice-cancel { display: grid; gap: .4rem; max-width: 480px; }
 
 @media print {
-  .report-tabs, .report-filters, #imprimir { display: none !important; }
+  .report-tabs, .report-filters, #imprimir, .invoice-cancel { display: none !important; }
 }

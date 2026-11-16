@@ -1,4 +1,5 @@
 """apps/ventas/views.py  (reemplaza el tuyo: conserva todo y agrega la acción 'generar')"""
+from apps.nucleo.permissions import PuedeOperarVentas, SoloGerente
 from apps.reportes import repositories as repo_reportes
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -150,3 +151,13 @@ class FacturaViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="pendientes")
     def pendientes(self, request):
         return Response(repositories.cotizaciones_por_facturar())
+
+    @action(detail=True, methods=["post"], url_path="anular", permission_classes=[SoloGerente])
+    def anular(self, request, pk=None):
+        try:
+            resultado = services.anular_factura(
+                pk, request.user.idusuario, request.data.get("motivo")
+            )
+        except repositories.FacturaError as error:
+            return Response({"ok": False, "mensaje": str(error)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"ok": True, **resultado})
