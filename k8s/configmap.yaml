@@ -1,0 +1,19 @@
+# Configuración no secreta. Cambiar sapo.tudominio.com por el dominio real.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sapo-config
+data:
+  DJANGO_DEBUG: "0"
+  DJANGO_ALLOWED_HOSTS: "sapo.tudominio.com,localhost,127.0.0.1"
+  DJANGO_CSRF_TRUSTED_ORIGINS: "https://sapo.tudominio.com"
+  DJANGO_COOKIES_SEGURAS: "1"
+  DJANGO_PROXY_SSL: "1"
+  DB_NAME: PintureriaDB
+  DB_HOST: db
+  DB_PORT: "1433"
+  DB_USER: app_django
+  DB_DRIVER: ODBC Driver 18 for SQL Server
+  DB_EXTRA_PARAMS: TrustServerCertificate=yes
+  DB_ADMIN_USER: sa
+  GERENTE_USUARIO: gerente

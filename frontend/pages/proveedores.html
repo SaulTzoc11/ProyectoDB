@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proveedores | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/mantenimientos.css">
+</head>
+<body class="app-view cargando" data-seccion="compras" data-subseccion="proveedores" data-tabla="PROVEEDOR">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="menu-button" data-accion="abrir-menu" aria-label="Abrir menú">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Proveedores</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <!--# include virtual="/partials/subnav-compras.html" -->
+
+    <main class="content maintenance-shell">
+      <section id="seccionTablas" hidden>
+        <div class="section-heading">
+          <div>
+            <h2>Mantenimientos</h2>
+            <p>Seleccione la tabla que desea administrar.</p>
+          </div>
+        </div>
+        <div id="gruposTablas"></div>
+      </section>
+
+      <section id="seccionTabla" hidden>
+        <div class="section-heading">
+          <div>
+            <h2 data-campo="titulo"></h2>
+            <p>Cree, modifique, desactive o elimine registros.</p>
+          </div>
+          <a class="action-button" id="volverTablas" href="/pages/mantenimientos.html">Cambiar de tabla</a>
+        </div>
+
+        <form id="formularioRegistro" class="workspace-card maintenance-form" novalidate>
+          <h3 id="tituloFormulario">Nuevo registro</h3>
+          <div id="camposFormulario" class="dynamic-fields"></div>
+          <p id="mensajeFormulario" class="error" role="alert"></p>
+          <div class="form-actions">
+            <button type="button" class="action-button wine" id="cancelarEdicion" hidden>Cancelar edición</button>
+            <button type="submit" class="action-button green" id="guardar">Guardar registro</button>
+          </div>
+        </form>
+
+        <section class="workspace-card maintenance-records">
+          <div class="maintenance-records-head">
+            <div>
+              <h3>Registros existentes</h3>
+              <p class="muted" data-campo="total"></p>
+            </div>
+          </div>
+          <div id="registros"></div>
+        </section>
+      </section>
+
+      <p id="mensajePagina" class="muted" role="status"></p>
+    </main>
+  </div>
+
+  <template id="plantillaGrupo">
+    <section class="workspace-card tabla-grupo">
+      <h3 data-campo="nombre"></h3>
+      <div class="table-grid" data-elemento="tablas"></div>
+    </section>
+  </template>
+
+  <template id="plantillaEnlaceTabla">
+    <a class="table-link"><span data-campo="nombre"></span></a>
+  </template>
+
+  <template id="plantillaTablaNoDisponible">
+    <span class="table-link tabla-no-disponible"><span data-campo="nombre"></span><small>Próximamente</small></span>
+  </template>
+
+  <template id="plantillaCampoTexto">
+    <div class="campo"><label></label><input></div>
+  </template>
+
+  <template id="plantillaCampoAreaTexto">
+    <div class="campo field-wide"><label></label><textarea rows="3"></textarea></div>
+  </template>
+
+  <template id="plantillaCampoSeleccion">
+    <div class="campo"><label></label><select></select></div>
+  </template>
+
+  <template id="plantillaCampoCasilla">
+    <div class="campo field-check"><label><input type="checkbox"><span></span></label></div>
+  </template>
+
+  <template id="plantillaTablaRegistros">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr data-elemento="encabezados"></tr></thead>
+        <tbody data-elemento="filas"></tbody>
+      </table>
+    </div>
+  </template>
+
+  <template id="plantillaFilaRegistro">
+    <tr>
+      <td class="maintenance-actions" data-elemento="acciones">
+        <button type="button" class="edit-user" data-accion="editar">Editar</button>
+        <button type="button" class="maintenance-activate" data-accion="activar" hidden>Activar</button>
+        <button type="button" class="maintenance-delete" data-accion="eliminar">Eliminar</button>
+      </td>
+    </tr>
+  </template>
+
+  <template id="plantillaEstadoVacio">
+    <div class="empty-state"><h2 data-campo="titulo"></h2><p data-campo="detalle"></p></div>
+  </template>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module" src="/js/paginas/mantenimientos.js"></script>
+</body>
+</html>

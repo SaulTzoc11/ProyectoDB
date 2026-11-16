@@ -1,0 +1,24 @@
+.login-view { min-height: 100vh; display: grid; grid-template-columns: 1.05fr .95fr; background: white; }
+.login-brand { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 1.25rem 8vw 1.75rem; color: white; background: linear-gradient(145deg, rgba(1,58,111,.97), rgba(2,125,214,.9)); }
+.login-brand::after { content: ""; position: absolute; width: 520px; height: 520px; border-radius: 50%; right: -210px; bottom: -210px; border: 68px solid rgba(255,255,255,.09); }
+.login-brand .eyebrow { color: #BCE6FF; }
+.login-brand h1 { max-width: 540px; font-size: clamp(2.5rem, 3.65vw, 4.25rem); line-height: .98; margin: .35rem 0 .9rem; letter-spacing: -.045em; }
+.login-brand > p:not(.eyebrow) { max-width: 470px; font-size: 1.15rem; color: #DCEFFE; }
+.hero-logo-wrap { position: relative; z-index: 1; width: clamp(440px, 28vw, 540px); min-height: 0; margin: -1.25rem 0 -.35rem; display: grid; place-items: center; background:transparent; filter:drop-shadow(0 22px 28px rgba(0,0,0,.25)); }
+.hero-logo { width: 100%; height: auto; object-fit: contain; }
+.paint-stripes { position: relative; z-index: 1; left: auto; bottom: auto; display: flex; gap: .55rem; margin-top: 1rem; }
+.paint-stripes i { display: block; width: 54px; height: 8px; border-radius: 20px; background: var(--blue); }
+.paint-stripes i:nth-child(2) { background: var(--green); width: 39px; }
+.paint-stripes i:nth-child(3) { background: #F4B52E; width: 25px; }
+.paint-stripes i:nth-child(4) { background: var(--wine); width: 70px; }
+.login-panel { display: grid; place-items: center; padding: 3rem; }
+.login-card { width: min(440px, 100%); }
+.brand-lockup { display: flex; align-items: center; gap: .9rem; margin-bottom: 3rem; color: var(--navy); }
+.brand-lockup strong { display: block; font-size: 1.05rem; }
+.brand-lockup small { color: var(--muted); }
+.brand-logo { width: 86px; height: 68px; object-fit: contain; }
+.login-card h2 { color: var(--navy); font-size: 2.2rem; margin: 0 0 .35rem; }
+.login-card form { margin-top: 2rem; }
+.password-row { position: relative; }
+.password-row input { padding-right: 3.2rem; }
+.icon-button { position: absolute; right: .45rem; top: .42rem; width: 40px; height: 40px; border: 0; border-radius: 8px; color: var(--navy); background: transparent; }

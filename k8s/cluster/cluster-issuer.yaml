@@ -1,0 +1,15 @@
+# Se aplica una sola vez después de instalar cert-manager. Cambiar el correo.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: correo-del-equipo@ejemplo.com
+    privateKeySecretRef:
+      name: letsencrypt-cuenta
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: nginx

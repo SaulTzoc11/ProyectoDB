@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+.vscode
+.env
+Credenciales.txt
+k8s
+docs
+**/__pycache__
+**/*.pyc
+**/.venv
+**/venv

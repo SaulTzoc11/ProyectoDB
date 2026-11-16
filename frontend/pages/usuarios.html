@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios y roles | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/usuarios.css">
+</head>
+<body class="app-view cargando" data-seccion="informacion" data-subseccion="usuarios">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="menu-button" data-accion="abrir-menu" aria-label="Abrir menú">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Usuarios y roles</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <!--# include virtual="/partials/subnav-informacion.html" -->
+
+    <main class="content">
+      <div class="section-heading users-heading">
+        <div>
+          <span class="users-kicker">SEGURIDAD Y ACCESOS</span>
+          <h2>Usuarios y roles</h2>
+          <p>Administre quién puede acceder al sistema y qué función cumple dentro de él.</p>
+        </div>
+        <button type="button" class="action-button" id="nuevoUsuario">+ Nuevo usuario</button>
+      </div>
+
+      <section class="user-stats">
+        <article><span>Usuarios activos</span><b id="totalActivos">-</b></article>
+        <article><span>Usuarios registrados</span><b id="totalUsuarios">-</b></article>
+        <article><span>Roles configurados</span><b id="totalRoles">-</b></article>
+      </section>
+
+      <section class="workspace-card user-form-card hidden" id="contenedorFormulario"></section>
+
+      <section class="workspace-card user-list">
+        <div class="user-list-header">
+          <span>Usuario</span>
+          <span>Nombre de acceso</span>
+          <span>Rol asignado</span>
+          <span>Estado</span>
+          <span>Acciones</span>
+        </div>
+        <div id="listaUsuarios"></div>
+      </section>
+
+      <p id="mensajePagina" class="muted" role="status"></p>
+    </main>
+  </div>
+
+  <template id="plantillaFormularioUsuario">
+    <div>
+      <div class="user-form-header">
+        <div>
+          <h3 data-campo="titulo"></h3>
+          <p data-campo="descripcion"></p>
+        </div>
+        <button type="button" data-accion="cerrar" aria-label="Cerrar formulario">&times;</button>
+      </div>
+
+      <form class="user-form" novalidate>
+        <div>
+          <label for="u_nombres">Nombres *</label>
+          <input id="u_nombres" name="nombres" maxlength="50" required>
+        </div>
+        <div>
+          <label for="u_apellidos">Apellidos *</label>
+          <input id="u_apellidos" name="apellidos" maxlength="50" required>
+        </div>
+        <div>
+          <label for="u_correo">Correo electrónico *</label>
+          <input id="u_correo" name="correo" type="email" maxlength="100" required>
+        </div>
+        <div>
+          <label for="u_usuario">Nombre de usuario *</label>
+          <input id="u_usuario" name="nombreusuario" maxlength="50" autocomplete="off" required>
+        </div>
+        <div>
+          <label for="u_rol">Rol *</label>
+          <select id="u_rol" name="idrol" required></select>
+        </div>
+        <div>
+          <label for="u_contrasena" data-campo="etiquetaContrasena"></label>
+          <input id="u_contrasena" name="contrasena" type="password" autocomplete="new-password">
+        </div>
+        <div class="field-check">
+          <label><input type="checkbox" name="activo" checked> Usuario activo</label>
+        </div>
+
+        <p class="user-form-error" role="alert"></p>
+
+        <div class="form-actions">
+          <button type="button" class="action-button wine" data-accion="cancelar">Cancelar</button>
+          <button type="submit" class="action-button green" data-accion="guardar">Guardar usuario</button>
+        </div>
+      </form>
+    </div>
+  </template>
+
+  <template id="plantillaUsuario">
+    <article class="user-row">
+      <div class="user-person">
+        <i data-campo="inicial"></i>
+        <span><b data-campo="nombreCompleto"></b><small data-campo="correo"></small></span>
+      </div>
+      <code data-campo="usuario"></code>
+      <span class="role-badge" data-campo="rol"></span>
+      <span data-elemento="estado"><i></i><span data-campo="estado"></span></span>
+      <div class="user-actions">
+        <button type="button" class="edit-user" data-accion="editar">Editar</button>
+        <button type="button" class="toggle-user" data-accion="estado"></button>
+      </div>
+    </article>
+  </template>
+
+  <template id="plantillaEstadoVacio">
+    <p class="empty-users" data-campo="titulo"></p>
+  </template>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module" src="/js/paginas/usuarios.js"></script>
+</body>
+</html>

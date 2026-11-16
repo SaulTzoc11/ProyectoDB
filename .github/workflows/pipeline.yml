@@ -1,0 +1,132 @@
+# Pipeline DevOps: pruebas -> build -> Docker Hub -> producción (Dokploy y/o Kubernetes).
+# Secretos y variables que hay que crear en GitHub: ver docs/DEVOPS.md.
+name: Pipeline DevOps
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: despliegue-produccion
+  cancel-in-progress: false
+
+env:
+  IMAGEN_API: ${{ vars.DOCKERHUB_USUARIO }}/sapo-pinturas-api
+  IMAGEN_WEB: ${{ vars.DOCKERHUB_USUARIO }}/sapo-pinturas-web
+
+jobs:
+  pruebas:
+    name: 1. Pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Dependencias
+        run: |
+          sudo apt-get install -y --no-install-recommends unixodbc
+          pip install -r backend/requirements.txt
+      - name: Pruebas del backend (SQLite en memoria)
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings_test
+        run: python manage.py test apps
+
+  imagenes:
+    name: 2-3. Build y subida al registry
+    needs: pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USUARIO }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Imagen api
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          build-args: VERSION=${{ github.sha }}
+          tags: |
+            ${{ env.IMAGEN_API }}:${{ github.sha }}
+            ${{ env.IMAGEN_API }}:latest
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api,mode=max
+      - name: Imagen web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/web.Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGEN_WEB }}:${{ github.sha }}
+            ${{ env.IMAGEN_WEB }}:latest
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max
+
+  dokploy:
+    name: 4. Despliegue Dokploy (Docker)
+    needs: imagenes
+    if: vars.DESPLEGAR_DOKPLOY == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pedir a Dokploy que redespliegue el stack
+        run: |
+          curl -fsS -X POST "${{ secrets.DOKPLOY_URL }}/api/compose.deploy" \
+            -H "x-api-key: ${{ secrets.DOKPLOY_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"composeId\": \"${{ secrets.DOKPLOY_COMPOSE_ID }}\", \"title\": \"Commit ${GITHUB_SHA::7}\"}"
+      - name: Esperar a que responda la versión nueva
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS "https://${{ vars.DOMINIO_DOKPLOY }}/api/salud/bd/"; then exit 0; fi
+            sleep 10
+          done
+          echo "La aplicación no respondió" && exit 1
+
+  kubernetes:
+    name: 4. Despliegue Kubernetes
+    needs: imagenes
+    if: vars.DESPLEGAR_K8S == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - name: Acceso al cluster
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl version
+      - name: Secretos de la aplicación
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl -n sapo-pinturas create secret generic sapo-secretos \
+            --from-literal=DJANGO_SECRET_KEY='${{ secrets.DJANGO_SECRET_KEY }}' \
+            --from-literal=DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
+            --from-literal=DB_ADMIN_PASSWORD='${{ secrets.DB_ADMIN_PASSWORD }}' \
+            --from-literal=DESCUENTO_CLAVE='${{ secrets.DESCUENTO_CLAVE }}' \
+            --from-literal=GERENTE_CONTRASENA='${{ secrets.GERENTE_CONTRASENA }}' \
+            --dry-run=client -o yaml | kubectl apply -f -
+      - name: Fijar la imagen del commit
+        working-directory: k8s
+        run: |
+          curl -sSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz | tar xz
+          ./kustomize edit set image \
+            sapo-pinturas-api=${{ env.IMAGEN_API }}:${{ github.sha }} \
+            sapo-pinturas-web=${{ env.IMAGEN_WEB }}:${{ github.sha }}
+          rm kustomize
+      - name: Rolling update
+        run: |
+          kubectl apply -k k8s/
+          kubectl -n sapo-pinturas rollout status statefulset/db --timeout=10m
+          kubectl -n sapo-pinturas rollout status deployment/api --timeout=10m
+          kubectl -n sapo-pinturas rollout status deployment/web --timeout=5m
+          kubectl -n sapo-pinturas get pods -o wide

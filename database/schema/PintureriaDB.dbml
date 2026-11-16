@@ -1,0 +1,388 @@
+// Pegar en https://dbdiagram.io/d
+Project PintureriaDB {
+  database_type: 'SQL Server'
+}
+
+Table PRESENTACION {
+  idPresentacion int [pk, increment]
+  nombre varchar(50) [not null, unique]
+  cantidad decimal(6,4) [not null]
+  unidadMedida varchar(20) [not null]
+}
+
+Table MARCA {
+  idMarca int [pk, increment]
+  nombre varchar(50) [not null, unique]
+  descripcion varchar(250) [null]
+}
+
+Table CATEGORIA {
+  idCategoria int [pk, increment]
+  nombre varchar(50) [not null, unique]
+  descripcion varchar(250) [null]
+}
+
+Table COLOR {
+  idColor int [pk, increment]
+  nombre varchar(50) [not null, unique]
+  codigoHex char(7) [null]
+  activo bit [not null, default: 1]
+}
+
+Table TIPO_PRECIO {
+  idTipoPrecio int [pk, increment]
+  nombre varchar(50) [not null, unique]
+  descripcion varchar(150) [null]
+  activo bit [not null, default: 1]
+}
+
+Table TIPO_CLIENTE {
+  idTipoCliente int [pk, increment]
+  nombre varchar(20) [not null, unique]
+  descripcion varchar(150) [null]
+}
+
+Table PROVEEDOR {
+  idProveedor int [pk, increment]
+  nombreProveedor varchar(150) [not null]
+  nit varchar(10) [not null, unique]
+  nombreContacto varchar(150) [null]
+  telefono varchar(20) [null]
+  correo varchar(100) [null]
+  direccion varchar(250) [null]
+  activo bit [not null, default: 1]
+}
+
+Table BODEGA {
+  idBodega int [pk, increment]
+  nombre varchar(50) [not null, unique]
+  direccion varchar(250) [null]
+  descripcion varchar(150) [null]
+  activo bit [not null, default: 1]
+}
+
+Table TIPO_MOVIMIENTO {
+  idTipoMovimiento int [pk, increment]
+  nombre varchar(50) [not null, unique]
+  descripcion varchar(150) [null]
+}
+
+Table TIPO_PAGO {
+  idTipoPago int [pk, increment]
+  nombre varchar(20) [not null, unique]
+  descripcion varchar(150) [null]
+  activo bit [not null, default: 1]
+}
+
+Table MOTIVO {
+  idMotivo int [pk, increment]
+  descripcion varchar(250) [not null, unique]
+}
+
+Table ESTADO {
+  idEstado int [pk, increment]
+  nombre varchar(50) [not null, unique]
+}
+
+Table ROL {
+  idRol int [pk, increment]
+  nombre varchar(50) [not null, unique]
+}
+
+Table ACCION {
+  idAccion int [pk, increment]
+  nombre varchar(30) [not null, unique]
+  descripcion varchar(150) [null]
+}
+
+Table TABLA {
+  idTabla int [pk, increment]
+  nombre varchar(100) [not null, unique]
+}
+
+Table PRODUCTO_GENERAL {
+  idProductoGeneral int [pk, increment]
+  idMarca int [not null]
+  idCategoria int [not null]
+  nombre varchar(100) [not null]
+  descripcion varchar(250) [null]
+  activo bit [not null, default: 1]
+}
+
+Table CLIENTE {
+  idCliente int [pk, increment]
+  idTipoCliente int [not null]
+  nombreCliente varchar(150) [not null]
+  nit varchar(10) [not null, unique]
+  telefono varchar(20) [null]
+  correo varchar(100) [null]
+  direccion varchar(250) [null]
+  nombreContacto varchar(150) [null]
+  activo bit [not null, default: 1]
+}
+
+Table ESTANTE {
+  idEstante int [pk, increment]
+  idBodega int [not null]
+  codigoEstante varchar(20) [not null]
+  descripcion varchar(150) [null]
+  activo bit [not null, default: 1]
+
+  indexes {
+    (idBodega, codigoEstante) [unique]
+  }
+}
+
+Table USUARIO {
+  idUsuario int [pk, increment]
+  idRol int [not null]
+  nombreUsuario varchar(50) [not null, unique]
+  contrasenaEncriptada varchar(250) [not null]
+  nombres varchar(50) [not null]
+  apellidos varchar(50) [not null]
+  correo varchar(100) [not null, unique]
+  ultimoAcceso datetime [null]
+  activo bit [not null, default: 1]
+  intentosFallidos tinyint [not null, default: 0]
+  bloqueadoHasta datetime [null]
+}
+
+Table PRODUCTO {
+  idProducto int [pk, increment]
+  idProductoGeneral int [not null]
+  idPresentacion int [not null]
+  idColor int [null]
+  codigoProducto varchar(50) [not null, unique]
+  codigoBarras varchar(50) [null, unique]
+  activo bit [not null, default: 1]
+
+  indexes {
+    (idProductoGeneral, idPresentacion, idColor) [unique]
+  }
+}
+
+Table PRECIO {
+  idPrecio int [pk, increment]
+  idTipoPrecio int [not null]
+  idProducto int [not null]
+  idEstado int [not null]
+  precio decimal(10,2) [not null]
+  fechaAsignacion datetime [not null, default: `getdate()`]
+}
+
+Table COMPRA {
+  idCompra int [pk, increment]
+  idProveedor int [not null]
+  idUsuario int [not null]
+  idEstado int [not null]
+  codigoCompra varchar(20) [not null, unique]
+  fechaCompra datetime [not null, default: `getdate()`]
+  total decimal(10,2) [not null]
+  observaciones varchar(250) [null]
+}
+
+Table DETALLE_COMPRA {
+  idDetalleCompra int [pk, increment]
+  idCompra int [not null]
+  idProducto int [not null]
+  idEstado int [not null]
+  cantidad int [not null]
+  costoUnitario decimal(10,2) [not null]
+  subtotal decimal(10,2) [not null]
+
+  indexes {
+    (idCompra, idProducto) [unique]
+  }
+}
+
+Table ENTREGA {
+  idEntrega int [pk, increment]
+  idCompra int [not null]
+  idUsuario int [not null]
+  idEstado int [not null]
+  codigoEntrega varchar(30) [not null, unique]
+  fechaEntrega datetime [not null, default: `getdate()`]
+  observaciones varchar(250) [null]
+}
+
+Table DETALLE_ENTREGA {
+  idDetalleEntrega int [pk, increment]
+  idEntrega int [not null]
+  idDetalleCompra int [not null]
+  cantidadEntregada int [not null]
+  costoUnitarioReal decimal(10,2) [not null]
+
+  indexes {
+    (idEntrega, idDetalleCompra) [unique]
+  }
+}
+
+Table LOTE {
+  idLote int [pk, increment]
+  idDetalleEntrega int [not null]
+  idEstante int [not null]
+  idEstado int [not null]
+  codigoLote varchar(50) [not null, unique]
+  fechaIngreso datetime [not null, default: `getdate()`]
+  cantidadInicial int [not null]
+  cantidadDisponible int [not null]
+}
+
+Table MODIFICACION_INVENTARIO {
+  idModificacionInventario int [pk, increment]
+  idLote int [not null]
+  idTipoMovimiento int [not null]
+  idUsuario int [not null]
+  fecha datetime [not null, default: `getdate()`]
+  cantidad int [not null]
+  observaciones varchar(250) [null]
+}
+
+Table COTIZACION {
+  idCotizacion int [pk, increment]
+  idCliente int [not null]
+  idUsuario int [not null]
+  idEstado int [not null]
+  codigoCotizacion varchar(30) [not null, unique]
+  fecha datetime [not null, default: `getdate()`]
+  subtotal decimal(12,2) [not null]
+  descuento decimal(12,2) [not null, default: 0]
+  total decimal(12,2) [not null]
+  observaciones varchar(250) [null]
+}
+
+Table DETALLE_COTIZACION {
+  idDetalleCotizacion int [pk, increment]
+  idCotizacion int [not null]
+  idProducto int [not null]
+  cantidad int [not null]
+  precioUnitario decimal(10,2) [not null]
+  descuento decimal(5,2) [not null, default: 0]
+  subtotal decimal(10,2) [not null]
+
+  indexes {
+    (idCotizacion, idProducto) [unique]
+  }
+}
+
+Table FACTURA {
+  idFactura int [pk, increment]
+  idCliente int [not null]
+  idUsuario int [not null]
+  idCotizacion int [null, unique]
+  idEstado int [not null]
+  noFactura varchar(50) [not null, unique]
+  fecha datetime [not null, default: `getdate()`]
+  subtotal decimal(10,2) [not null]
+  descuento decimal(5,2) [not null, default: 0]
+  total decimal(10,2) [not null]
+  observaciones varchar(250) [null]
+}
+
+Table DETALLE_FACTURA {
+  idDetalleFactura int [pk, increment]
+  idFactura int [not null]
+  idProducto int [not null]
+  cantidad int [not null]
+  precioUnitario decimal(10,2) [not null]
+  descuento decimal(5,2) [not null, default: 0]
+  subtotal decimal(10,2) [not null]
+
+  indexes {
+    (idFactura, idProducto) [unique]
+  }
+}
+
+Table PAGO {
+  idPago int [pk, increment]
+  idFactura int [not null]
+  idTipoPago int [not null]
+  idUsuario int [not null]
+  monto decimal(10,2) [not null]
+  observaciones varchar(100) [null]
+  fecha datetime [not null, default: `getdate()`]
+}
+
+Table DEVOLUCION {
+  idDevolucion int [pk, increment]
+  idFactura int [not null]
+  idUsuario int [not null]
+  idMotivo int [not null]
+  idEstado int [not null]
+  codigoDevolucion varchar(30) [not null, unique]
+  fecha datetime [not null, default: `getdate()`]
+  total decimal(10,2) [not null]
+}
+
+Table DETALLE_DEVOLUCION {
+  idDevolucion int [not null]
+  idDetalleFactura int [not null]
+  cantidad int [not null]
+  montoCobrado decimal(10,2) [not null]
+  subtotal decimal(10,2) [not null]
+
+  indexes {
+    (idDevolucion, idDetalleFactura) [pk]
+  }
+}
+
+Table MOVIMIENTO {
+  idMovimiento int [pk, increment]
+  idUsuario int [not null]
+  idAccion int [not null]
+  idTabla int [not null]
+  fecha datetime [not null, default: `getdate()`]
+  informacionModificada varchar(255) [not null]
+}
+
+Ref: PRODUCTO_GENERAL.idMarca > MARCA.idMarca
+Ref: PRODUCTO_GENERAL.idCategoria > CATEGORIA.idCategoria
+Ref: CLIENTE.idTipoCliente > TIPO_CLIENTE.idTipoCliente
+Ref: ESTANTE.idBodega > BODEGA.idBodega
+Ref: USUARIO.idRol > ROL.idRol
+Ref: PRODUCTO.idProductoGeneral > PRODUCTO_GENERAL.idProductoGeneral
+Ref: PRODUCTO.idPresentacion > PRESENTACION.idPresentacion
+Ref: PRODUCTO.idColor > COLOR.idColor
+Ref: PRECIO.idTipoPrecio > TIPO_PRECIO.idTipoPrecio
+Ref: PRECIO.idProducto > PRODUCTO.idProducto
+Ref: PRECIO.idEstado > ESTADO.idEstado
+Ref: COMPRA.idProveedor > PROVEEDOR.idProveedor
+Ref: COMPRA.idUsuario > USUARIO.idUsuario
+Ref: COMPRA.idEstado > ESTADO.idEstado
+Ref: DETALLE_COMPRA.idCompra > COMPRA.idCompra
+Ref: DETALLE_COMPRA.idProducto > PRODUCTO.idProducto
+Ref: DETALLE_COMPRA.idEstado > ESTADO.idEstado
+Ref: ENTREGA.idCompra > COMPRA.idCompra
+Ref: ENTREGA.idUsuario > USUARIO.idUsuario
+Ref: ENTREGA.idEstado > ESTADO.idEstado
+Ref: DETALLE_ENTREGA.idEntrega > ENTREGA.idEntrega
+Ref: DETALLE_ENTREGA.idDetalleCompra > DETALLE_COMPRA.idDetalleCompra
+Ref: LOTE.idDetalleEntrega > DETALLE_ENTREGA.idDetalleEntrega
+Ref: LOTE.idEstante > ESTANTE.idEstante
+Ref: LOTE.idEstado > ESTADO.idEstado
+Ref: MODIFICACION_INVENTARIO.idLote > LOTE.idLote
+Ref: MODIFICACION_INVENTARIO.idTipoMovimiento > TIPO_MOVIMIENTO.idTipoMovimiento
+Ref: MODIFICACION_INVENTARIO.idUsuario > USUARIO.idUsuario
+Ref: COTIZACION.idCliente > CLIENTE.idCliente
+Ref: COTIZACION.idUsuario > USUARIO.idUsuario
+Ref: COTIZACION.idEstado > ESTADO.idEstado
+Ref: DETALLE_COTIZACION.idCotizacion > COTIZACION.idCotizacion
+Ref: DETALLE_COTIZACION.idProducto > PRODUCTO.idProducto
+Ref: FACTURA.idCliente > CLIENTE.idCliente
+Ref: FACTURA.idUsuario > USUARIO.idUsuario
+Ref: FACTURA.idCotizacion > COTIZACION.idCotizacion
+Ref: FACTURA.idEstado > ESTADO.idEstado
+Ref: DETALLE_FACTURA.idFactura > FACTURA.idFactura
+Ref: DETALLE_FACTURA.idProducto > PRODUCTO.idProducto
+Ref: PAGO.idFactura > FACTURA.idFactura
+Ref: PAGO.idTipoPago > TIPO_PAGO.idTipoPago
+Ref: PAGO.idUsuario > USUARIO.idUsuario
+Ref: DEVOLUCION.idFactura > FACTURA.idFactura
+Ref: DEVOLUCION.idUsuario > USUARIO.idUsuario
+Ref: DEVOLUCION.idMotivo > MOTIVO.idMotivo
+Ref: DEVOLUCION.idEstado > ESTADO.idEstado
+Ref: DETALLE_DEVOLUCION.idDevolucion > DEVOLUCION.idDevolucion
+Ref: DETALLE_DEVOLUCION.idDetalleFactura > DETALLE_FACTURA.idDetalleFactura
+Ref: MOVIMIENTO.idUsuario > USUARIO.idUsuario
+Ref: MOVIMIENTO.idAccion > ACCION.idAccion
+Ref: MOVIMIENTO.idTabla > TABLA.idTabla

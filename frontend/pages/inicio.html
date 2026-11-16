@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/inicio.css">
+</head>
+<body class="app-view cargando" data-seccion="inicio">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="menu-button" data-accion="abrir-menu" aria-label="Abrir menú">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Panel principal</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <main class="content">
+      <section class="home-hero">
+        <div class="home-copy">
+          <span class="home-kicker">PANEL PRINCIPAL</span>
+          <h2>¡Hola, <span data-sesion="primer-nombre"></span>!</h2>
+          <p>Gestione ventas, compras, inventario y clientes desde un solo lugar.</p>
+          <div class="hero-actions">
+            <a class="action-button" href="/pages/catalogo.html">Explorar catálogo</a>
+            <a class="ghost-button" href="/pages/cotizacion.html">Nueva cotización</a>
+          </div>
+        </div>
+        <img src="/assets/logo-sapo-pinturas.png" alt="Logo de Sapo Pinturas">
+      </section>
+
+      <img class="home-art-banner" src="/assets/barra.png" alt="Colores para cada idea">
+
+      <section class="quick-stats" aria-label="Resumen">
+        <article><i>&#9638;</i><span><small>Productos activos</small><b id="totalProductos">-</b></span></article>
+        <article><i>&#9636;</i><span><small>Productos en cotización</small><b id="totalCotizacion">0</b></span></article>
+        <article><i>&#9679;</i><span><small>Clientes activos</small><b id="totalClientes">-</b></span></article>
+        <article><i>!</i><span><small>Productos sin existencias</small><b id="totalSinStock">-</b></span></article>
+      </section>
+
+      <div class="section-heading">
+        <div>
+          <h2>¿Qué desea hacer?</h2>
+          <p>Elija un módulo para comenzar.</p>
+        </div>
+      </div>
+
+      <section class="module-grid">
+        <a class="module-card" href="/pages/catalogo.html">
+          <div class="module-icon">&#9638;</div>
+          <h3>Catálogo</h3>
+          <p>Productos, precios, presentaciones y existencias.</p>
+          <span class="card-link">Abrir módulo &rarr;</span>
+        </a>
+        <a class="module-card" href="/pages/compras.html">
+          <div class="module-icon">&#8681;</div>
+          <h3>Compras</h3>
+          <p>Proveedores, compras y recepción de entregas.</p>
+          <span class="card-link">Abrir módulo &rarr;</span>
+        </a>
+        <a class="module-card" href="/pages/ventas.html">
+          <div class="module-icon">$</div>
+          <h3>Ventas</h3>
+          <p>Clientes, cotizaciones, despacho, pagos y devoluciones.</p>
+          <span class="card-link">Abrir módulo &rarr;</span>
+        </a>
+        <a class="module-card" href="/pages/informacion.html">
+          <div class="module-icon">&#9432;</div>
+          <h3>Información</h3>
+          <p>Mantenimientos, usuarios y roles.</p>
+          <span class="card-link">Abrir módulo &rarr;</span>
+        </a>
+      </section>
+    </main>
+  </div>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module" src="/js/paginas/inicio.js"></script>
+</body>
+</html>

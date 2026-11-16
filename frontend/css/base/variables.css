@@ -1,0 +1,12 @@
+:root {
+  --blue: #027DD6;
+  --navy: #013A6F;
+  --green: #53962F;
+  --wine: #8D0C44;
+  --ink: #102A43;
+  --muted: #64748B;
+  --line: #DDE7F0;
+  --surface: #FFFFFF;
+  --background: #F3F7FA;
+  --shadow: 0 18px 50px rgba(1, 58, 111, .14);
+}

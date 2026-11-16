@@ -1,0 +1,8 @@
+.subnav { min-height: 62px; display: flex; align-items: center; gap: .55rem; padding: .65rem 2rem; border-bottom: 1px solid var(--line); background: white; overflow-x: auto; position: sticky; top: 88px; z-index: 3; scrollbar-width: thin; }
+.subnav:empty { display: none; }
+.subnav-button { flex: 0 0 auto; min-height: 39px; padding: .55rem .9rem; border: 1px solid #C8D9E7; border-radius: 9px; color: var(--navy); background: white; font-size: .86rem; font-weight: 750; }
+.subnav-button:hover, .subnav-button.active { color: white; border-color: var(--blue); background: var(--blue); }
+.subnav.catalogo .subnav-button:hover, .subnav.catalogo .subnav-button.active { border-color: var(--blue); background: var(--blue); }
+.subnav.compras .subnav-button:hover, .subnav.compras .subnav-button.active { border-color: var(--wine); background: var(--wine); }
+.subnav.ventas .subnav-button:hover, .subnav.ventas .subnav-button.active { border-color: var(--green); background: var(--green); }
+.subnav.informacion .subnav-button:hover, .subnav.informacion .subnav-button.active { color:var(--navy); border-color:#F4B52E; background:#F4B52E; box-shadow:0 6px 15px rgba(244,181,46,.24); }

@@ -1,0 +1,91 @@
+# Entorno de DESARROLLO LOCAL (cada integrante del equipo).
+#
+#   cp .env.example .env            # una sola vez
+#   docker compose pull             # baja la misma imagen que usa todo el equipo
+#   docker compose up -d            # levanta db + migrador + api + web
+#
+#   http://localhost:8080  -> nginx (front) + /api hacia Django
+#   http://localhost:8000  -> Django directo (también sirve el front)
+#
+# El código de backend/ y frontend/ se monta como volumen: los cambios se ven al
+# guardar (runserver recarga solo; nginx sirve los HTML/CSS/JS del disco).
+# Producción usa deploy/dokploy/docker-compose.yml o k8s/.
+
+x-imagen-api: &imagen-api
+  image: ${DOCKERHUB_USUARIO:-sapopinturas}/sapo-pinturas-api:${TAG:-latest}
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+
+x-entorno-api: &entorno-api
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    DB_HOST: db
+    DB_PORT: "1433"
+    DB_ADMIN_PASSWORD: ${DB_ADMIN_PASSWORD:-Pintureria#2026Sa}
+    DJANGO_DEBUG: "1"
+    DJANGO_COOKIES_SEGURAS: "0"
+    DJANGO_PROXY_SSL: "0"
+    DIR_SQL: /database
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Express
+      MSSQL_SA_PASSWORD: ${DB_ADMIN_PASSWORD:-Pintureria#2026Sa}
+    ports:
+      - "1433:1433"
+    volumes:
+      - datos_sqlserver:/var/opt/mssql
+      - ./:/backup:ro
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -b -Q 'SELECT 1' -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # Crea la base (si no existe), aplica database/migrations y el primer gerente. Termina y sale.
+  migrador:
+    <<: [*imagen-api, *entorno-api]
+    command: ["python", "manage.py", "inicializar_bd"]
+    volumes:
+      - ./backend:/app
+      - ./database:/database:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: [*imagen-api, *entorno-api]
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    volumes:
+      - ./backend:/app
+      - ./frontend:/frontend:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrador:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  web:
+    image: nginx:1.27-alpine
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+volumes:
+  datos_sqlserver:

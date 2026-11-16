@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Información de producto | Sapo Pinturas</title>
+  <link rel="icon" type="image/png" href="/assets/logo-sapo-pinturas.png">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/catalogo.css">
+  <link rel="stylesheet" href="/css/pages/producto.css">
+</head>
+<body class="app-view cargando" data-seccion="catalogo" data-subseccion="producto">
+  <!--# include virtual="/partials/barra-lateral.html" -->
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="menu-button" data-accion="abrir-menu" aria-label="Abrir menú">&#9776;</button>
+      <div>
+        <p class="eyebrow">SAPO PINTURAS</p>
+        <h1>Información de producto</h1>
+      </div>
+      <!--# include virtual="/partials/acciones-usuario.html" -->
+    </header>
+
+    <!--# include virtual="/partials/subnav-catalogo.html" -->
+
+    <main class="content">
+      <section id="seccionSelector" hidden>
+        <div class="section-heading">
+          <div>
+            <h2>Información específica de un producto</h2>
+            <p>Seleccione un producto para consultar su presentación, precios y existencias.</p>
+          </div>
+        </div>
+        <section class="workspace-card selector-card">
+          <div class="product-selector-list" id="listaSelector"></div>
+          <a class="primary-button compact" id="verProducto" href="#">Ver información del producto</a>
+        </section>
+      </section>
+
+      <section id="seccionDetalle" hidden>
+        <div class="section-heading">
+          <div>
+            <h2 data-campo="nombre"></h2>
+            <p data-campo="resumen"></p>
+          </div>
+          <a class="action-button" href="/pages/catalogo.html">Volver al catálogo</a>
+        </div>
+
+        <section class="workspace-card">
+          <div class="product-detail-hero">
+            <div id="muestraColor">
+              <span class="color-swatch">
+                <svg viewBox="0 0 72 48" aria-hidden="true">
+                  <path d="M6 31C14 15 28 10 45 12c8 1 15 5 21 12-5 1-8 4-11 9-12-4-24-3-37 3-6 3-11 1-12-5Z" fill="currentColor"/>
+                  <path d="M12 34c14-7 29-8 45-3" fill="none" stroke="white" stroke-opacity=".72" stroke-width="2.8" stroke-linecap="round"/>
+                  <circle cx="50" cy="18" r="2.2" fill="white"/>
+                </svg>
+              </span>
+            </div>
+            <span><small>Color registrado</small><strong data-campo="color"></strong></span>
+            <span><small>Existencias totales</small><strong data-campo="stock"></strong></span>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h3>Existencias por ubicación</h3>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead><tr><th>Bodega y estante</th><th>Cantidad</th></tr></thead>
+                  <tbody id="tablaUbicaciones"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h3>Presentación</h3>
+              <div><span class="unit-chip" data-campo="presentacion"></span></div>
+              <h3>Precios por tipo de cliente</h3>
+              <div id="listaPrecios"></div>
+              <div class="detail-buy">
+                <div class="quantity-control">
+                  <button type="button" id="menos" aria-label="Disminuir cantidad">&minus;</button>
+                  <output id="cantidad">1</output>
+                  <button type="button" id="mas" aria-label="Aumentar cantidad">+</button>
+                </div>
+                <button type="button" class="action-button green" id="agregar">Agregar a la cotización</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <p id="mensajeProducto" class="muted" role="status"></p>
+    </main>
+  </div>
+
+  <template id="plantillaOpcionProducto">
+    <label class="product-select-option">
+      <input type="radio" name="producto">
+      <span class="color-swatch">
+        <svg viewBox="0 0 72 48" aria-hidden="true">
+          <path d="M6 31C14 15 28 10 45 12c8 1 15 5 21 12-5 1-8 4-11 9-12-4-24-3-37 3-6 3-11 1-12-5Z" fill="currentColor"/>
+        </svg>
+      </span>
+      <span><strong data-campo="nombre"></strong><small data-campo="detalle"></small></span>
+      <b data-campo="stock"></b>
+    </label>
+  </template>
+
+  <template id="plantillaUbicacion">
+    <tr><td data-campo="lugar"></td><td data-campo="cantidad"></td></tr>
+  </template>
+
+  <template id="plantillaPrecio">
+    <div class="price-line"><span data-campo="tipo"></span><strong data-campo="valor"></strong></div>
+  </template>
+
+  <template id="plantillaEstadoVacio">
+    <div class="empty-state"><h2 data-campo="titulo"></h2><p data-campo="detalle"></p></div>
+  </template>
+
+  <!--# include virtual="/partials/pie-pagina.html" -->
+  <script type="module" src="/js/paginas/producto.js"></script>
+</body>
+</html>

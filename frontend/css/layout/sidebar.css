@@ -1,0 +1,17 @@
+.app-view { min-height: 100vh; display: grid; grid-template-columns: 260px 1fr; }
+.sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; color: white; background: var(--navy); box-shadow: 8px 0 30px rgba(1,58,111,.12); z-index: 5; }
+.sidebar-brand { min-height: 88px; display: flex; align-items: center; gap: .75rem; padding: 1rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,.12); }
+.sidebar-brand strong, .sidebar-brand span { display: block; letter-spacing: .08em; }
+.sidebar-brand span { color: #8CD3FF; font-size: .76rem; }
+#mainNav { padding: 1rem .7rem; overflow-y: auto; }
+.nav-button { width: 100%; min-height: 46px; display: flex; align-items: center; gap: .8rem; margin: .17rem 0; padding: .7rem .9rem; border: 0; border-radius: 9px; color: #DCEFFE; background: transparent; text-align: left; }
+.nav-button:hover, .nav-button.active { color: white; background: rgba(255,255,255,.12); }
+.nav-button.active { box-shadow: inset 3px 0 var(--green); }
+.nav-icon { width: 24px; text-align: center; }
+.sidebar-footer { margin-top: auto; display: grid; grid-template-columns: 38px 1fr 34px; align-items: center; gap: .6rem; padding: 1rem; border-top: 1px solid rgba(255,255,255,.12); }
+.sidebar-footer strong, .sidebar-footer span { display: block; font-size: .78rem; }
+.sidebar-footer span { color: #AFCADF; margin-top: .12rem; }
+.avatar { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: var(--green); font-weight: 900; }
+.logout-button { width: 34px; height: 34px; border: 0; border-radius: 8px; color: white; background: rgba(255,255,255,.1); }
+
+.sidebar-logo { width: 82px; height: 64px; object-fit: contain; padding: 0; background: transparent; filter: drop-shadow(0 4px 8px rgba(0,0,0,.18)); }

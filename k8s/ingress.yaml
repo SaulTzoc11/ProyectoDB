@@ -1,0 +1,23 @@
+# Requiere ingress-nginx y cert-manager (ver k8s/cluster/). Cambiar el dominio.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sapo-pinturas
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [sapo.tudominio.com]
+      secretName: sapo-pinturas-tls
+  rules:
+    - host: sapo.tudominio.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port: {number: 80}
