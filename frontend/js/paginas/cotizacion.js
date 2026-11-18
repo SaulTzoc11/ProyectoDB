@@ -3,6 +3,7 @@ import * as carrito from "../carrito.js";
 import { iniciarPagina } from "../sesion.js";
 import {
   clonarPlantilla,
+  confirmar,
   formatearQuetzales,
   llenar,
   mostrarAviso,
@@ -27,6 +28,19 @@ const panelGuardada = document.querySelector("#cotizacionGuardada");
 const textoCodigoGuardada = document.querySelector("#codigoGuardada");
 const estadoGuardada = document.querySelector("#estadoGuardada");
 const botonConfirmar = document.querySelector("#confirmarGuardada");
+const insigniaGuardada = document.querySelector("#insigniaGuardada");
+const enlaceFacturar = document.querySelector("#irFacturar");
+
+function marcarEstadoGuardada(confirmada) {
+  insigniaGuardada.textContent = confirmada ? "Confirmada" : "Pendiente";
+  insigniaGuardada.className = `quote-badge ${confirmada ? "confirmada" : "pendiente"}`;
+  estadoGuardada.textContent = confirmada
+    ? "Lista para facturar."
+    : "Confírmela cuando el cliente la acepte.";
+  botonConfirmar.hidden = confirmada;
+  botonConfirmar.disabled = false;
+  enlaceFacturar.hidden = !confirmada;
+}
 
 let usuario = null;
 let itemEnDescuento = null;
@@ -232,8 +246,7 @@ botonGuardar.addEventListener("click", async () => {
     observaciones.value = "";
     textoCodigoGuardada.textContent = cotizacionGuardada.codigo;
     panelGuardada.hidden = false;
-    estadoGuardada.textContent = "Estado: Pendiente. Confírmela cuando el cliente la acepte.";
-    botonConfirmar.disabled = false;
+    marcarEstadoGuardada(false);
     dibujar();
     mostrarAviso(`Cotización ${cotizacionGuardada.codigo} guardada.`);
   } catch (error) {
@@ -259,12 +272,18 @@ document.querySelector("#imprimirGuardada").addEventListener("click", async (eve
 
 botonConfirmar.addEventListener("click", async () => {
   if (!cotizacionGuardada) return;
-  if (!window.confirm(`¿Confirmar la cotización ${cotizacionGuardada.codigo}?`)) return;
+  const acepta = await confirmar({
+    titulo: "Confirmar cotización",
+    mensaje: `¿El cliente aceptó la cotización ${cotizacionGuardada.codigo}?`,
+    detalle: "Al confirmarla quedará lista para facturar.",
+    aceptar: "Sí, confirmar",
+  });
+  if (!acepta) return;
 
   botonConfirmar.disabled = true;
   try {
     await solicitar(`/api/cotizaciones/${cotizacionGuardada.id}/confirmar/`, { metodo: "POST" });
-    estadoGuardada.textContent = "Estado: Confirmada. Lista para facturar.";
+    marcarEstadoGuardada(true);
     mostrarAviso(`Cotización ${cotizacionGuardada.codigo} confirmada.`);
   } catch (error) {
     estadoGuardada.textContent = error.message;

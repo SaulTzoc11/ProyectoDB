@@ -17,3 +17,54 @@
   .footer-wave { position:absolute; inset:0; overflow:hidden; }.footer-wave span { position:absolute; width:130%; height:44mm; left:-15%; border-radius:50% 50% 0 0; }.footer-wave span:nth-child(1) { top:4mm; background:#027DD6; transform:rotate(2deg); }.footer-wave span:nth-child(2) { top:10mm; left:-8%; background:#53962F; transform:rotate(-2deg); opacity:.96; }.footer-wave span:nth-child(3) { top:14mm; background:#013A6F; transform:rotate(1deg); }
   .footer-content { position:absolute; z-index:2; left:17mm; right:17mm; bottom:8mm; display:grid; grid-template-columns:55px 1fr auto; align-items:center; gap:.8rem; }.footer-content img { width:52px; height:42px; object-fit:contain; padding:0; background:transparent; }.footer-content p { margin:0; }.footer-content b,.footer-content small { display:block; }.footer-content b { letter-spacing:.18em; font-size:.68rem; }.footer-content small { margin-top:.18rem; color:#CDE8FB; font-size:.58rem; }.footer-contact { color:#CDE8FB; font-size:.62rem; text-align:right; }
 }
+
+/* Factura impresa (formato comercial de Guatemala). Solo se ve dentro de .print-area. */
+.factura-gt { position: relative; box-sizing: border-box; width: 210mm; min-height: 297mm; padding: 16mm 16mm 26mm; color: #1F2D3D; background: white; font-size: 9.5pt; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.factura-gt::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, #027DD6 0 37%, #53962F 37% 62%, #F4B52E 62% 78%, #8D0C44 78%); }
+.factura-gt p { margin: 0; }
+.factura-gt .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.fgt-encabezado { display: flex; justify-content: space-between; gap: 10mm; padding-bottom: 6mm; border-bottom: 1px solid #C8D3DE; }
+.fgt-emisor { display: flex; gap: 4mm; align-items: flex-start; }
+.fgt-emisor img { width: 24mm; height: 21mm; object-fit: contain; }
+.fgt-emisor b { display: block; margin-bottom: 1mm; color: #013A6F; font-size: 13pt; letter-spacing: .06em; }
+.fgt-emisor p { color: #4A5B6C; font-size: 8.5pt; }
+.fgt-documento { min-width: 62mm; text-align: right; }
+.fgt-documento h1 { margin: 0 0 2mm; color: #013A6F; font-size: 20pt; letter-spacing: .12em; }
+.fgt-documento dl { display: grid; gap: .6mm; margin: 0; }
+.fgt-documento dl div { display: flex; justify-content: space-between; gap: 6mm; }
+.fgt-documento dt { color: #64748B; font-size: 8.5pt; }
+.fgt-documento dd { margin: 0; color: #102A43; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.fgt-receptor { display: grid; grid-template-columns: 1.6fr .8fr 1fr; gap: 6mm; padding: 5mm 0; border-bottom: 1px solid #C8D3DE; }
+.fgt-receptor span { display: block; margin-bottom: .8mm; color: #64748B; font-size: 7.5pt; letter-spacing: .08em; text-transform: uppercase; }
+.fgt-receptor b { display: block; color: #102A43; font-size: 10pt; }
+.fgt-receptor p { margin-top: .6mm; color: #4A5B6C; font-size: 8.5pt; }
+
+.fgt-anulada { margin-top: 5mm; padding: 2mm; border: 1.5px solid #B42318; border-radius: 2mm; color: #B42318; font-weight: 900; letter-spacing: .3em; text-align: center; }
+.fgt-anulada[hidden] { display: none; }
+
+.fgt-tabla { width: 100%; margin-top: 6mm; border-collapse: collapse; }
+.fgt-tabla th { padding: 2mm 2mm; border-bottom: 1.5px solid #013A6F; color: #013A6F; font-size: 7.5pt; font-weight: 800; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+.fgt-tabla td { padding: 2.6mm 2mm; border-bottom: 1px solid #E3E9EF; vertical-align: top; }
+.fgt-tabla td:first-child, .fgt-tabla th:first-child { width: 12mm; text-align: center; }
+.fgt-tabla td small { display: block; margin-top: .5mm; color: #64748B; font-size: 7.5pt; }
+
+.fgt-cierre { display: grid; grid-template-columns: 1fr 72mm; gap: 10mm; margin-top: 5mm; }
+.fgt-pagos h2 { margin: 0 0 1.5mm; color: #64748B; font-size: 7.5pt; letter-spacing: .08em; text-transform: uppercase; }
+.fgt-pagos table { width: 100%; max-width: 85mm; border-collapse: collapse; }
+.fgt-pagos td { padding: 1.4mm 0; border-bottom: 1px dashed #D5DEE7; }
+.fgt-pagos td small { margin-left: 2mm; color: #64748B; font-size: 7.5pt; }
+.fgt-totales p { display: flex; justify-content: space-between; padding: 1.3mm 0; font-variant-numeric: tabular-nums; }
+.fgt-totales p:nth-child(2) b { color: #3E7E1F; }
+.fgt-totales .fgt-total { margin: 1.5mm 0; padding: 2.5mm 3mm; border-radius: 1.5mm; color: white; background: #013A6F; font-size: 12pt; }
+.fgt-totales .fgt-iva { padding: .6mm 0; color: #64748B; font-size: 8pt; }
+.fgt-totales .fgt-iva b { font-weight: 600; }
+
+.fgt-letras { margin-top: 5mm; padding: 2.5mm 3mm; border-left: 3px solid #53962F; background: #F4F8F1; font-size: 8.5pt; }
+.fgt-letras span { color: #64748B; }
+.fgt-notas { margin-top: 5mm; color: #4A5B6C; font-size: 8.5pt; }
+.fgt-notas b { color: #102A43; }
+.fgt-notas p + p { margin-top: 1mm; }
+
+.fgt-pie { position: absolute; left: 16mm; right: 16mm; bottom: 12mm; display: flex; justify-content: space-between; padding-top: 2.5mm; border-top: 1px solid #C8D3DE; color: #8A99A8; font-size: 7.5pt; }

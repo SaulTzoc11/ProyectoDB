@@ -75,6 +75,11 @@ class ProductosSinStockView(ReporteView):
         return repositories.productos_sin_stock()
 
 
+class ListaFacturasView(ReporteView):
+    def consultar(self, request):
+        return repositories.lista_facturas()
+
+
 class FacturaView(ReporteView):
     def consultar(self, request, no_factura):
         return repositories.factura(no_factura)

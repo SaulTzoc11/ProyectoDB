@@ -56,6 +56,10 @@ def productos_sin_stock():
     return _ejecutar("sp_Reporte_ProductosSinStock")
 
 
+def lista_facturas():
+    return _ejecutar("sp_Reporte_ListaFacturas")
+
+
 def factura(no_factura):
     encabezado = _ejecutar("sp_Reporte_Factura", [no_factura])
     return {

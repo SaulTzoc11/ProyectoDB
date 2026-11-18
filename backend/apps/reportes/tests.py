@@ -67,6 +67,16 @@ class ReportesTests(TestCase):
         self.assertEqual(respuesta.status_code, 404)
         self.assertFalse(respuesta.json()["ok"])
 
+    def test_lista_de_facturas_solo_para_gerente(self):
+        filas = [{"noFactura": "FAC-2026-000001", "estado": "Emitida"}]
+        with mock.patch(f"{RUTA}.lista_facturas", return_value=filas):
+            cajero = cliente_autenticado("caja", "Cajero")
+            self.assertEqual(cajero.get("/api/reportes/facturas/").status_code, 403)
+            api = cliente_autenticado("jefe", "Gerente")
+            respuesta = api.get("/api/reportes/facturas/")
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.json(), filas)
+
     def test_error_del_procedimiento_responde_400_con_su_mensaje(self):
         api = cliente_autenticado("jefe", "Gerente")
         error = repositories.ReporteError("Indique un rango de fechas valido.")

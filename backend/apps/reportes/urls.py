@@ -14,5 +14,6 @@ urlpatterns = [
     path("finanzas/valor-inventario/", views.ValorInventarioView.as_view()),
     path("finanzas/cuentas-por-pagar/", views.CuentasPorPagarView.as_view()),
     path("finanzas/iva/", views.IvaView.as_view()),
+    path("facturas/", views.ListaFacturasView.as_view()),
     path("factura/<str:no_factura>/", views.FacturaView.as_view()),
 ]

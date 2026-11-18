@@ -34,13 +34,23 @@
       <section class="workspace-card quote-card">
         <!-- NUEVO: aparece después de guardar la cotización -->
         <div id="cotizacionGuardada" class="quote-saved" hidden>
-          <h3>Cotización <span id="codigoGuardada"></span> guardada correctamente</h3>
-          <p id="estadoGuardada">Estado: Pendiente. Confírmela cuando el cliente la acepte.</p>
-          <div class="button-row">
-            <button type="button" class="action-button green" id="confirmarGuardada">Confirmar cotización</button>
-            <button type="button" class="action-button" id="imprimirGuardada">Imprimir cotización guardada</button>
-            <a class="action-button green" href="/pages/facturacion.html">Ir a facturar</a>
-            <button type="button" class="action-button green" id="nuevaCotizacion">Nueva cotización</button>
+          <div class="quote-saved-info">
+            <div class="quote-saved-icon" aria-hidden="true">&#10003;</div>
+            <div>
+              <h3>Cotización <span id="codigoGuardada"></span> guardada</h3>
+              <span id="insigniaGuardada" class="quote-badge pendiente">Pendiente</span>
+              <p id="estadoGuardada">Confírmela cuando el cliente la acepte.</p>
+            </div>
+          </div>
+          <div class="quote-saved-actions">
+            <div class="quote-saved-main">
+              <button type="button" class="action-button green" id="confirmarGuardada">Confirmar cotización</button>
+              <a class="action-button green" id="irFacturar" href="/pages/facturacion.html" hidden>Ir a facturar</a>
+            </div>
+            <div class="quote-saved-secondary">
+              <button type="button" class="action-button ghost" id="imprimirGuardada">Imprimir</button>
+              <button type="button" class="action-button ghost" id="nuevaCotizacion">Nueva cotización</button>
+            </div>
           </div>
         </div>
 

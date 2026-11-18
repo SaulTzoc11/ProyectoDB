@@ -1,5 +1,7 @@
 import * as carrito from "../carrito.js";
 import { facturarVenta, solicitar } from "../api.js";
+import { EMPRESA } from "../config/empresa.js";
+import { montoEnLetras } from "../numero-letras.js";
 import { iniciarPagina } from "../sesion.js";
 import { clonarPlantilla, formatearQuetzales, llenar, mostrarAviso } from "../ui.js";
 
@@ -150,26 +152,55 @@ async function imprimirFactura(noFactura) {
   const { factura, detalle, pagos } = await solicitar(`/api/facturas/${encodeURIComponent(noFactura)}/`);
   const documento = clonarPlantilla("plantillaFactura");
   const monto = (v) => formatearQuetzales(Number(v));
+  const total = Number(factura.total);
+  const gravado = total / (1 + EMPRESA.tasaIva / 100);
+  const fecha = new Date(factura.fecha);
+  // FAC-2026-000101 -> serie FAC-2026, número 000101
+  const corte = factura.noFactura.lastIndexOf("-");
+  const anulada = /^anulad/i.test(factura.estado || "");
 
   llenar(documento, {
-    fecha: new Date(factura.fecha).toLocaleDateString("es-GT"),
-    empleado: factura.empleado,
-    noFactura: factura.noFactura,
+    nombreComercial: EMPRESA.nombreComercial,
+    razonSocial: EMPRESA.razonSocial,
+    direccionEmisor: EMPRESA.direccion,
+    serie: factura.noFactura.slice(0, corte),
+    numero: factura.noFactura.slice(corte + 1),
+    fecha: `${fecha.toLocaleDateString("es-GT")} ${fecha.toLocaleTimeString("es-GT", { hour: "2-digit", minute: "2-digit" })}`,
     cliente: factura.cliente,
-    nit: factura.nit ? `NIT: ${factura.nit}` : "",
-    observaciones: factura.observaciones || "Gracias por su compra.",
+    direccion: factura.direccionCliente || "Ciudad",
+    nit: factura.nit || "C/F",
+    empleado: factura.empleado,
     subtotal: monto(factura.subtotal),
-    descuento: `− ${monto(Number(factura.subtotal) - Number(factura.total))}`,
-    total: monto(factura.total),
+    descuento: `− ${monto(Number(factura.subtotal) - total)}`,
+    total: monto(total),
+    gravado: monto(gravado),
+    etiquetaIva: `IVA incluido (${EMPRESA.tasaIva} %)`,
+    iva: monto(total - gravado),
+    letras: montoEnLetras(total),
+    regimen: EMPRESA.regimen,
+    observaciones: factura.observaciones || "Gracias por su compra.",
+    referencia: factura.noFactura,
   });
+
+  const opcional = (elemento, texto) => {
+    const nodo = documento.querySelector(`[data-elemento="${elemento}"]`);
+    if (texto) nodo.textContent = texto;
+    else nodo.remove();
+  };
+  opcional("nitEmisor", EMPRESA.nit && `NIT: ${EMPRESA.nit}`);
+  opcional("contactoEmisor", [EMPRESA.telefono && `Tel. ${EMPRESA.telefono}`, EMPRESA.correo].filter(Boolean).join(" · "));
+  opcional("cotizacion", factura.codigoCotizacion && `Cotización ${factura.codigoCotizacion}`);
+  documento.querySelector('[data-elemento="anulada"]').hidden = !anulada;
 
   documento.querySelector('[data-elemento="filas"]').append(
     ...detalle.map((l) =>
       llenar(clonarPlantilla("plantillaFilaFactura"), {
-        nombre: [l.producto, l.presentacion].filter(Boolean).join(" · "),
         cantidad: l.cantidad,
+        nombre: l.producto,
+        codigo: l.codigoProducto ? `Código ${l.codigoProducto}` : "",
+        unidad: l.presentacion || "",
         precio: monto(l.precioUnitario),
-        descuento: `${Number(l.descuento)}%`,
+        descuento: Number(l.descuento) ? `${Number(l.descuento)} %` : "—",
         importe: monto(l.subtotal),
       })
     )
@@ -178,7 +209,7 @@ async function imprimirFactura(noFactura) {
     ...pagos.map((p) =>
       llenar(clonarPlantilla("plantillaFilaPago"), {
         medio: p.medioPago,
-        referencia: p.observaciones || "",
+        referencia: p.observaciones ? `Ref. ${p.observaciones}` : "",
         monto: monto(p.monto),
       })
     )

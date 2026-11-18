@@ -5,3 +5,6 @@ button { cursor: pointer; }
 .hidden { display: none !important; }
 .eyebrow { color: var(--blue); font-size: .75rem; font-weight: 800; letter-spacing: .16em; margin: 0 0 .45rem; }
 .muted { color: var(--muted); }
+
+/* El atributo hidden siempre oculta, aunque la clase defina display. */
+[hidden] { display: none !important; }

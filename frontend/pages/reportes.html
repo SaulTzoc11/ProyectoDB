@@ -55,13 +55,18 @@
           </div>
           <div data-filtro="noFactura">
             <label for="f_factura">Número de factura</label>
-            <input id="f_factura" name="noFactura" maxlength="50" autocomplete="off">
+            <div class="invoice-input">
+              <span aria-hidden="true">FAC-</span>
+              <input id="f_factura" name="noFactura" inputmode="numeric" maxlength="11"
+                     placeholder="0000-000000" autocomplete="off">
+            </div>
           </div>
           <button type="submit" class="action-button green">Consultar</button>
         </form>
 
         <p class="error" id="errorReporte" role="alert"></p>
         <div id="resultado"></div>
+        <div id="listaFacturas" class="invoice-columns" hidden></div>
       </section>
     </main>
   </div>

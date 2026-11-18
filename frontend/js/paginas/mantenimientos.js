@@ -3,6 +3,7 @@ import { grupos, tablas, titulos } from "../config/mantenimientos.js";
 import { iniciarPagina } from "../sesion.js";
 import {
   clonarPlantilla,
+  confirmar,
   llenar,
   mostrarAviso,
   mostrarEstadoVacio,
@@ -451,10 +452,14 @@ async function guardar(evento) {
 }
 
 async function eliminar(id, tieneActivo) {
-  const mensaje = tieneActivo
-    ? "¿Desea desactivar este registro?"
-    : "¿Desea eliminar este registro? Esta acción no se puede deshacer.";
-  if (!window.confirm(mensaje)) return;
+  const acepta = await confirmar({
+    titulo: tieneActivo ? "Desactivar registro" : "Eliminar registro",
+    mensaje: tieneActivo ? "¿Desea desactivar este registro?" : "¿Desea eliminar este registro?",
+    detalle: tieneActivo ? "Podrá activarlo de nuevo más adelante." : "Esta acción no se puede deshacer.",
+    aceptar: tieneActivo ? "Desactivar" : "Eliminar",
+    tono: "wine",
+  });
+  if (!acepta) return;
 
   try {
     await solicitar(`${configuracion.ruta}${id}/`, { metodo: "DELETE" });

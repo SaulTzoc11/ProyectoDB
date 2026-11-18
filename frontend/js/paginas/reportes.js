@@ -1,5 +1,5 @@
 import { ErrorApi, solicitar } from "../api.js";
-import { formatearQuetzales } from "../ui.js";
+import { confirmar, formatearQuetzales } from "../ui.js";
 import { iniciarPagina } from "../sesion.js";
 
 await iniciarPagina({ roles: ["Gerente"] });
@@ -24,7 +24,7 @@ const FECHAS_OPCIONALES = new Set(["menos-vendidos", "cuentas-por-pagar"]);
 const REPORTES = [
   {
     id: "total-facturado",
-    grupo: "Ventas e inventario",
+    grupo: "Ventas",
     titulo: "Total facturado",
     descripcion: "Monto facturado entre dos fechas, con el desglose por medio de pago.",
     filtros: ["desde", "hasta"],
@@ -37,7 +37,7 @@ const REPORTES = [
   },
   {
     id: "mas-ingresos",
-    grupo: "Ventas e inventario",
+    grupo: "Productos",
     titulo: "Productos que más generan",
     descripcion: "Productos que más dinero generan entre dos fechas (ingreso neto de devoluciones).",
     filtros: ["desde", "hasta", "top"],
@@ -52,7 +52,7 @@ const REPORTES = [
   },
   {
     id: "mas-vendidos",
-    grupo: "Ventas e inventario",
+    grupo: "Productos",
     titulo: "Productos más vendidos",
     descripcion: "Productos con más unidades vendidas entre dos fechas.",
     filtros: ["desde", "hasta", "top"],
@@ -67,7 +67,7 @@ const REPORTES = [
   },
   {
     id: "inventario",
-    grupo: "Ventas e inventario",
+    grupo: "Inventario",
     titulo: "Inventario actual",
     descripcion: "Existencias por lote. 'Orden de salida' 1 es el lote más antiguo, el primero que debe venderse (PEPS).",
     filtros: [],
@@ -87,7 +87,7 @@ const REPORTES = [
   },
   {
     id: "menos-vendidos",
-    grupo: "Ventas e inventario",
+    grupo: "Productos",
     titulo: "Productos con menos ventas",
     descripcion: "Productos que menos se venden, incluidos los que nunca se han vendido. Sin fechas se usa todo el historial.",
     filtros: ["desde", "hasta", "top"],
@@ -102,7 +102,7 @@ const REPORTES = [
   },
   {
     id: "sin-stock",
-    grupo: "Ventas e inventario",
+    grupo: "Inventario",
     titulo: "Productos sin stock",
     descripcion: "Productos activos sin existencia que hay que comprar a los proveedores.",
     filtros: [],
@@ -147,7 +147,7 @@ const REPORTES = [
   },
   {
     id: "valor-inventario",
-    grupo: "Finanzas",
+    grupo: "Inventario",
     titulo: "Valor del inventario",
     descripcion: "Valor de las existencias a su costo de adquisición, por categoría.",
     filtros: [],
@@ -190,13 +190,21 @@ const REPORTES = [
   },
   {
     id: "factura",
-    grupo: "Ventas e inventario",
-    titulo: "Buscar factura",
-    descripcion: "Detalle de una factura, sus medios de pago y el empleado que la emitió.",
+    grupo: "Ventas",
+    titulo: "Facturas",
+    descripcion: "Busque una factura por su número o elíjala del listado para ver su detalle. Las emitidas se pueden anular.",
     filtros: ["noFactura"],
     ruta: (valores) => `/api/reportes/factura/${encodeURIComponent(valores.noFactura)}/`,
     factura: true,
   },
+];
+
+// Columnas de la barra de reportes, en este orden.
+const GRUPOS = [
+  { nombre: "Ventas", descripcion: "Facturación del periodo" },
+  { nombre: "Productos", descripcion: "Comportamiento de ventas" },
+  { nombre: "Inventario", descripcion: "Existencias y valor" },
+  { nombre: "Finanzas", descripcion: "Resultados e impuestos" },
 ];
 
 const COLUMNAS_DETALLE = [
@@ -219,6 +227,8 @@ const pestanas = document.querySelector("#pestanas");
 const formulario = document.querySelector("#filtros");
 const resultado = document.querySelector("#resultado");
 const errorReporte = document.querySelector("#errorReporte");
+const listaFacturas = document.querySelector("#listaFacturas");
+const campoFactura = document.querySelector("#f_factura");
 
 let reporteActual = REPORTES[0];
 
@@ -322,9 +332,14 @@ function bloqueAnulacion(factura) {
   caja.append(etiqueta, motivo, fila);
 
   boton.addEventListener("click", async () => {
-    const aviso = `¿Anular la factura ${factura.noFactura} por ${formatearQuetzales(factura.total)}?\n`
-      + "Su monto quedará en cero y los productos regresarán al inventario. No se puede deshacer.";
-    if (!window.confirm(aviso)) return;
+    const acepta = await confirmar({
+      titulo: "Anular factura",
+      mensaje: `¿Anular la factura ${factura.noFactura} por ${formatearQuetzales(factura.total)}?`,
+      detalle: "Su monto quedará en cero y los productos regresarán al inventario. No se puede deshacer.",
+      aceptar: "Sí, anular",
+      tono: "wine",
+    });
+    if (!acepta) return;
 
     boton.disabled = true;
     errorReporte.textContent = "";
@@ -334,6 +349,7 @@ function bloqueAnulacion(factura) {
         cuerpo: { motivo: motivo.value.trim() },
       });
       await consultar(); // vuelve a cargar la factura: estado Anulada y total en cero
+      cargarListaFacturas();
     } catch (error) {
       errorReporte.textContent = error instanceof ErrorApi ? error.message : "No se pudo anular la factura.";
       boton.disabled = false;
@@ -341,6 +357,52 @@ function bloqueAnulacion(factura) {
   });
 
   return bloque("Anulación", caja);
+}
+
+function tarjetaFactura(f) {
+  const boton = elemento("button", undefined, "invoice-item");
+  boton.type = "button";
+  const linea1 = elemento("span", undefined, "invoice-item-top");
+  linea1.append(elemento("b", f.noFactura), elemento("span", FORMATOS.fecha(f.fecha)));
+  const linea2 = elemento("span", undefined, "invoice-item-bottom");
+  const anulada = /^anulad/i.test(f.estado);
+  linea2.append(
+    elemento("span", `${f.cliente} · NIT ${f.nit}`),
+    elemento("b", anulada ? "Anulada" : formatearQuetzales(f.total)),
+  );
+  boton.append(linea1, linea2);
+  boton.addEventListener("click", () => {
+    campoFactura.value = f.noFactura.slice(4);
+    consultar();
+    document.querySelector("#tituloReporte").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  return boton;
+}
+
+function columnaFacturas(titulo, clase, facturas, vacio) {
+  const columna = elemento("section", undefined, `invoice-column ${clase}`);
+  const cabecera = elemento("header");
+  cabecera.append(elemento("h4", titulo), elemento("span", String(facturas.length), "invoice-count"));
+  const lista = elemento("div", undefined, "invoice-list");
+  if (facturas.length) lista.append(...facturas.map(tarjetaFactura));
+  else lista.append(elemento("p", vacio, "muted"));
+  columna.append(cabecera, lista);
+  return columna;
+}
+
+async function cargarListaFacturas() {
+  listaFacturas.replaceChildren(elemento("p", "Cargando facturas…", "muted"));
+  try {
+    const facturas = await solicitar("/api/reportes/facturas/");
+    const anuladas = facturas.filter((f) => /^anulad/i.test(f.estado));
+    const emitidas = facturas.filter((f) => !/^anulad/i.test(f.estado));
+    listaFacturas.replaceChildren(
+      columnaFacturas("Emitidas", "emitidas", emitidas, "No hay facturas emitidas."),
+      columnaFacturas("Anuladas", "anuladas", anuladas, "No hay facturas anuladas."),
+    );
+  } catch (error) {
+    listaFacturas.replaceChildren(elemento("p", error instanceof ErrorApi ? error.message : "No se pudo cargar el listado.", "error"));
+  }
 }
 
 function leerValores() {
@@ -358,9 +420,21 @@ function construirUrl(reporte, valores) {
   return texto ? `${reporte.ruta}?${texto}` : reporte.ruta;
 }
 
+// "2026-101" -> "FAC-2026-000101". Devuelve "" si el número está incompleto.
+function normalizarFactura(texto) {
+  const digitos = String(texto || "").replace(/\D/g, "");
+  if (digitos.length < 5) return "";
+  return `FAC-${digitos.slice(0, 4)}-${digitos.slice(4, 10).padStart(6, "0")}`;
+}
+
+function enmascararFactura(texto) {
+  const digitos = String(texto || "").replace(/\D/g, "").slice(0, 10);
+  return digitos.length > 4 ? `${digitos.slice(0, 4)}-${digitos.slice(4)}` : digitos;
+}
+
 function validar(reporte, valores) {
-  if (reporte.filtros.includes("noFactura") && !valores.noFactura?.trim()) {
-    return "Escriba el número de factura.";
+  if (reporte.filtros.includes("noFactura") && !valores.noFactura) {
+    return "Escriba el número completo: FAC-0000-000000.";
   }
   const opcionales = FECHAS_OPCIONALES.has(reporte.id);
   const exigeFechas = reporte.filtros.includes("desde") && !opcionales;
@@ -380,7 +454,8 @@ function validar(reporte, valores) {
 async function consultar() {
   errorReporte.textContent = "";
   const valores = leerValores();
-  valores.noFactura = valores.noFactura?.trim();
+  valores.noFactura = normalizarFactura(valores.noFactura);
+  if (valores.noFactura) campoFactura.value = valores.noFactura.slice(4);
 
   const problema = validar(reporteActual, valores);
   if (problema) {
@@ -423,18 +498,23 @@ function seleccionar(reporte) {
     campo.hidden = !reporte.filtros.includes(campo.dataset.filtro);
   });
 
+  listaFacturas.hidden = !reporte.factura;
+  if (reporte.factura) cargarListaFacturas();
+
   // Los reportes sin filtros se muestran de inmediato.
   if (!reporte.filtros.length) consultar();
 }
 
 const grupos = new Map();
+GRUPOS.forEach(({ nombre, descripcion }) => {
+  const caja = elemento("div", undefined, "report-group");
+  const cabecera = elemento("div", undefined, "report-group-head");
+  cabecera.append(elemento("span", nombre, "report-group-label"), elemento("small", descripcion));
+  caja.append(cabecera);
+  grupos.set(nombre, caja);
+  pestanas.append(caja);
+});
 REPORTES.forEach((reporte) => {
-  if (!grupos.has(reporte.grupo)) {
-    const caja = elemento("div", undefined, "report-group");
-    caja.append(elemento("span", reporte.grupo, "report-group-label"));
-    grupos.set(reporte.grupo, caja);
-    pestanas.append(caja);
-  }
   const boton = elemento("button", reporte.titulo, "report-tab");
   boton.type = "button";
   boton.dataset.id = reporte.id;
@@ -447,6 +527,10 @@ const hoy = new Date();
 const haceUnMes = new Date(hoy.getFullYear(), hoy.getMonth() - 1, hoy.getDate());
 formulario.elements.hasta.value = fechaIso(hoy);
 formulario.elements.desde.value = fechaIso(haceUnMes);
+
+campoFactura.addEventListener("input", () => {
+  campoFactura.value = enmascararFactura(campoFactura.value);
+});
 
 formulario.addEventListener("submit", (evento) => {
   evento.preventDefault();

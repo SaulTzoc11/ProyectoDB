@@ -11,10 +11,6 @@
 .discount-label { margin-top:.35rem; color:var(--green); font-weight:800; }
 .quote-summary { max-width:420px; margin:1.2rem 0 0 auto; }.quote-summary div { display:flex; justify-content:space-between; padding:.45rem .2rem; }.quote-summary .discount-total { color:var(--green); }.quote-summary .grand-total { margin-top:.35rem; padding-top:.8rem; border-top:2px solid var(--navy); color:var(--navy); font-size:1.25rem; }
 
-.dialogo { width: min(440px, 92vw); padding: 1.5rem; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
-.dialogo::backdrop { background: rgba(16, 42, 67, .45); }
-.dialogo h3 { margin: 0 0 .25rem; color: var(--navy); }
-.dialogo .button-row { margin-top: 1rem; }
 /* Estilo para el combobox de clientes */
 #clienteCotizacion {
   width: 100%;
@@ -49,4 +45,23 @@
   color: var(--navy);
   background-color: white;
   padding: 0.5rem;
+}
+/* Panel de cotización guardada */
+.quote-saved { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.2rem; margin-bottom: 1.4rem; padding: 1.2rem 1.3rem; border: 1px solid #CFE6C2; border-left: 5px solid var(--green); border-radius: 14px; background: #F6FBF3; }
+.quote-saved[hidden] { display: none; }
+.quote-saved-info { display: flex; align-items: flex-start; gap: .9rem; }
+.quote-saved-icon { flex: none; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--green); font-weight: 900; }
+.quote-saved h3 { display: inline; margin: 0 .5rem 0 0; color: var(--navy); font-size: 1.1rem; }
+.quote-saved p { margin: .35rem 0 0; color: var(--muted); font-size: .9rem; }
+.quote-badge { display: inline-block; vertical-align: middle; padding: .2rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+.quote-badge.pendiente { color: #8A5A00; background: #FFF3D6; }
+.quote-badge.confirmada { color: #34751C; background: #E3F3DA; }
+.quote-saved-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.quote-saved-main, .quote-saved-secondary { display: flex; gap: .6rem; }
+.quote-saved-secondary { padding-left: .6rem; border-left: 1px solid #CFE6C2; }
+.quote-saved [hidden] { display: none; }
+@media (max-width: 720px) {
+  .quote-saved-actions, .quote-saved-main, .quote-saved-secondary { width: 100%; }
+  .quote-saved-secondary { padding-left: 0; border-left: 0; }
+  .quote-saved-actions .action-button { flex: 1; text-align: center; }
 }

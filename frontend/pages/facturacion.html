@@ -34,11 +34,20 @@
 
       <section class="workspace-card quote-card">
         <div id="facturaEmitida" class="quote-saved" hidden>
-          <h3>Factura <span id="noFacturaEmitida"></span> emitida correctamente</h3>
-          <p>El inventario se actualizó (salida del lote más antiguo) y los pagos quedaron registrados.</p>
-          <div class="button-row">
-            <button type="button" class="action-button" id="imprimirFactura">Imprimir factura</button>
-            <button type="button" class="action-button green" id="nuevaFactura">Nueva factura</button>
+          <div class="quote-saved-info">
+            <div class="quote-saved-icon" aria-hidden="true">&#10003;</div>
+            <div>
+              <h3>Factura <span id="noFacturaEmitida"></span> emitida</h3>
+              <p>El inventario se actualizó (salida del lote más antiguo) y los pagos quedaron registrados.</p>
+            </div>
+          </div>
+          <div class="quote-saved-actions">
+            <div class="quote-saved-main">
+              <button type="button" class="action-button" id="imprimirFactura">Imprimir factura</button>
+            </div>
+            <div class="quote-saved-secondary">
+              <button type="button" class="action-button ghost" id="nuevaFactura">Nueva factura</button>
+            </div>
           </div>
         </div>
 
@@ -87,62 +96,92 @@
   <section id="areaImpresion" class="print-area" aria-hidden="true"></section>
 
   <template id="plantillaFactura">
-    <div class="document-sheet">
-      <div class="document-accent"></div>
-      <header class="print-header">
-        <div class="print-brand">
+    <div class="factura-gt">
+      <header class="fgt-encabezado">
+        <div class="fgt-emisor">
           <img src="/assets/logo-sapo-pinturas.png" alt="Sapo Pinturas">
-          <div><b>SAPO <em>PINTURAS</em></b><span>Color en cada proyecto</span></div>
+          <div>
+            <b data-campo="nombreComercial"></b>
+            <p data-campo="razonSocial"></p>
+            <p data-elemento="nitEmisor"></p>
+            <p data-campo="direccionEmisor"></p>
+            <p data-elemento="contactoEmisor"></p>
+          </div>
         </div>
-        <div class="document-title"><span>DOCUMENTO COMERCIAL</span><h1>FACTURA</h1></div>
-        <div class="print-number"><span>FECHA</span><b data-campo="fecha"></b></div>
+        <div class="fgt-documento">
+          <h1>FACTURA</h1>
+          <dl>
+            <div><dt>Serie</dt><dd data-campo="serie"></dd></div>
+            <div><dt>Número</dt><dd data-campo="numero"></dd></div>
+            <div><dt>Fecha de emisión</dt><dd data-campo="fecha"></dd></div>
+            <div><dt>Moneda</dt><dd>GTQ (Quetzales)</dd></div>
+          </dl>
+        </div>
       </header>
-      <section class="print-meta">
-        <div><span>EMITIÓ</span><b data-campo="empleado"></b></div>
-        <div><span>FACTURA N°</span><b data-campo="noFactura"></b></div>
-        <div><span>CLIENTE</span><b data-campo="cliente"></b><small data-campo="nit"></small></div>
+
+      <section class="fgt-receptor">
+        <div><span>Facturar a</span><b data-campo="cliente"></b><p data-campo="direccion"></p></div>
+        <div><span>NIT</span><b data-campo="nit"></b></div>
+        <div><span>Atendió</span><b data-campo="empleado"></b><p data-elemento="cotizacion"></p></div>
       </section>
-      <table class="print-table">
-        <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio unitario</th><th>Descuento</th><th>Importe</th></tr></thead>
+
+      <p class="fgt-anulada" data-elemento="anulada" hidden>DOCUMENTO ANULADO</p>
+
+      <table class="fgt-tabla">
+        <thead>
+          <tr><th>Cant.</th><th>Descripción</th><th>Unidad</th><th class="num">Precio unit.</th><th class="num">Desc.</th><th class="num">Importe</th></tr>
+        </thead>
         <tbody data-elemento="filas"></tbody>
       </table>
-      <table class="print-table" style="margin-top:6mm">
-        <thead><tr><th>Medio de pago</th><th>Referencia</th><th>Monto</th></tr></thead>
-        <tbody data-elemento="pagos"></tbody>
-      </table>
-      <section class="document-bottom">
-        <div class="document-note">
-          <b>Observaciones</b>
-          <p data-campo="observaciones"></p>
-          <span>Documento generado por el sistema comercial Sapo Pinturas.</span>
+
+      <section class="fgt-cierre">
+        <div class="fgt-pagos">
+          <h2>Forma de pago</h2>
+          <table>
+            <tbody data-elemento="pagos"></tbody>
+          </table>
         </div>
-        <div class="print-totals">
+        <div class="fgt-totales">
           <p><span>Subtotal</span><b data-campo="subtotal"></b></p>
-          <p><span>Descuento</span><b data-campo="descuento"></b></p>
-          <p class="print-grand"><span>TOTAL</span><b data-campo="total"></b></p>
+          <p><span>Descuentos</span><b data-campo="descuento"></b></p>
+          <p class="fgt-total"><span>TOTAL</span><b data-campo="total"></b></p>
+          <p class="fgt-iva"><span>Monto gravado</span><b data-campo="gravado"></b></p>
+          <p class="fgt-iva"><span data-campo="etiquetaIva"></span><b data-campo="iva"></b></p>
         </div>
       </section>
+
+      <p class="fgt-letras"><span>Total en letras:</span> <b data-campo="letras"></b></p>
+
+      <section class="fgt-notas">
+        <p><b data-campo="regimen"></b></p>
+        <p data-campo="observaciones"></p>
+      </section>
+
+      <footer class="fgt-pie">
+        <span>Documento generado por el sistema comercial Sapo Pinturas.</span>
+        <span data-campo="referencia"></span>
+      </footer>
     </div>
   </template>
 
   <template id="plantillaFilaFactura">
     <tr>
-      <td><b data-campo="nombre"></b></td>
       <td data-campo="cantidad"></td>
-      <td data-campo="precio"></td>
-      <td data-campo="descuento"></td>
-      <td><b data-campo="importe"></b></td>
+      <td><b data-campo="nombre"></b><small data-campo="codigo"></small></td>
+      <td data-campo="unidad"></td>
+      <td class="num" data-campo="precio"></td>
+      <td class="num" data-campo="descuento"></td>
+      <td class="num"><b data-campo="importe"></b></td>
     </tr>
   </template>
 
   <template id="plantillaFilaPago">
     <tr>
-      <td data-campo="medio"></td>
-      <td data-campo="referencia"></td>
-      <td><b data-campo="monto"></b></td>
+      <td><b data-campo="medio"></b><small data-campo="referencia"></small></td>
+      <td class="num" data-campo="monto"></td>
     </tr>
   </template>
-  
+
   <!--# include virtual="/partials/pie-pagina.html" -->
   <script type="module" src="/js/paginas/facturacion.js"></script>
 </body>
