@@ -3,7 +3,7 @@
 export const EMPRESA = {
   nombreComercial: "SAPO PINTURAS",
   razonSocial: "Sapo Pinturas, Sociedad Anónima",
-  nit: "",
+  nit: "321435089",
   direccion: "Ciudad de Guatemala, Guatemala",
   telefono: "",
   correo: "",
