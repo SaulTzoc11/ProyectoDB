@@ -311,7 +311,7 @@ function crearFila(registro, campos, tieneActivo) {
 
 
 function dibujarRegistros() {
-  const termino = buscador.value.trim().toLocaleLowerCase();
+  const termino = (buscador?.value || "").trim().toLocaleLowerCase();
 
   const busquedaServidor =
     configuracion.soloLectura ||
@@ -385,7 +385,7 @@ async function cargarRegistros() {
   const solicitud = ++contadorPeticiones;
   const url = new URL(configuracion.ruta, location.origin);
 
-  const termino = buscador.value.trim();
+  const termino = (buscador?.value || "").trim();
 
   const busquedaServidor =
     configuracion.soloLectura ||
@@ -530,7 +530,7 @@ async function abrirTabla(nombre) {
 }
 
 await iniciarPagina();
-buscador.addEventListener("input", () => {
+buscador?.addEventListener("input", () => {
   clearTimeout(temporizadorBusqueda);
 
   const busquedaServidor =

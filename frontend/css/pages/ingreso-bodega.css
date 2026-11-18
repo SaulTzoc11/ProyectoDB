@@ -1,0 +1,25 @@
+/* Ingreso a bodega */
+.ingreso-card { max-width: 1200px; }
+.ingreso-encabezado { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; }
+.ingreso-encabezado label { margin-top: 0; }
+.ingreso-resumen { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 1.2rem; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #F7FAFC; }
+.ingreso-resumen div { padding: .8rem 1rem; border-right: 1px solid var(--line); }
+.ingreso-resumen div:last-child { border-right: 0; }
+.ingreso-resumen span { display: block; color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.ingreso-resumen b { display: block; margin-top: .2rem; color: var(--navy); }
+.ingreso-subtitulo { margin: 1.5rem 0 .6rem; color: var(--navy); }
+.ingreso-tabla td { vertical-align: middle; }
+.ingreso-tabla td strong, .ingreso-tabla td small { display: block; }
+.ingreso-tabla td small { margin-top: .15rem; color: var(--muted); font-size: .8rem; }
+.ingreso-tabla input { min-height: 44px; max-width: 120px; padding: .55rem .7rem; }
+.ingreso-tabla select { min-height: 44px; min-width: 190px; }
+.ingreso-tabla tr.sin-recibir td { opacity: .5; }
+.ingreso-nota { margin: .5rem 0 0; font-size: .85rem; }
+.mensaje-exito { color: #34751C; }
+@media (max-width: 860px) {
+  .ingreso-encabezado { grid-template-columns: 1fr; }
+  .ingreso-resumen { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ingreso-resumen div:nth-child(2) { border-right: 0; }
+  .ingreso-resumen div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+}
+.ingreso-tabla .num { text-align: right; font-variant-numeric: tabular-nums; }

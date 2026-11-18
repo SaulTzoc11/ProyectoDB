@@ -20,7 +20,10 @@ body[data-subseccion="proveedores"] .subnav-button[data-subseccion="proveedores"
 body[data-subseccion="clientes"] .subnav-button[data-subseccion="clientes"],
 body[data-subseccion="reportes"] .subnav-button[data-subseccion="reportes"],
 body[data-subseccion="mantenimientos"] .subnav-button[data-subseccion="mantenimientos"],
-body[data-subseccion="usuarios"] .subnav-button[data-subseccion="usuarios"] {
+body[data-subseccion="usuarios"] .subnav-button[data-subseccion="usuarios"],
+body[data-subseccion="consultas"] .subnav-button[data-subseccion="consultas"],
+body[data-subseccion="ordenes"] .subnav-button[data-subseccion="ordenes"],
+body[data-subseccion="ingreso"] .subnav-button[data-subseccion="ingreso"] {
   color: white;
   border-color: var(--blue);
   background: var(--blue);

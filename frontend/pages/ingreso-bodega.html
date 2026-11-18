@@ -7,9 +7,10 @@
         content="width=device-width, initial-scale=1">
   <title>Ingreso a bodega | Sapo Pinturas</title>
   <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/pages/ingreso-bodega.css">
 </head>
 
-<body class="app-view cargando" data-seccion="compras">
+<body class="app-view cargando" data-seccion="compras" data-subseccion="ingreso">
   <!--# include virtual="/partials/barra-lateral.html" -->
 
   <div class="app-shell">
@@ -26,44 +27,66 @@
     <!--# include virtual="/partials/subnav-compras.html" -->
 
     <main class="content">
-      <section class="workspace-card">
-        <h2>Registrar recepción de productos</h2>
-        <p>Selecciona una orden con productos pendientes.</p>
+      <div class="section-heading">
+        <div>
+          <h2>Ingreso a bodega</h2>
+          <p>Registre la recepción de productos de una orden de compra.</p>
+        </div>
+      </div>
 
-        <form id="formIngreso">
-          <label for="orden">Orden de compra</label>
-          <select id="orden" required>
-            <option value="">Cargando órdenes...</option>
-          </select>
-
-          <h3>Productos pendientes</h3>
-
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-spacing:12px">
-              <thead>
-                <tr>
-                  <th>Producto (ID)</th>
-                  <th>Pendiente</th>
-                  <th>Recibir</th>
-                  <th>Costo real (Q)</th>
-                  <th>Estante</th>
-                </tr>
-              </thead>
-              <tbody id="productosPendientes"></tbody>
-            </table>
+      <section class="workspace-card ingreso-card">
+        <form id="formIngreso" novalidate>
+          <div class="ingreso-encabezado">
+            <div>
+              <label for="orden">Orden de compra</label>
+              <select id="orden" required>
+                <option value="">Cargando órdenes...</option>
+              </select>
+            </div>
+            <div>
+              <label for="estanteGeneral">Estante de destino</label>
+              <select id="estanteGeneral"></select>
+            </div>
           </div>
 
-          <label for="observaciones">Observaciones</label>
-          <input id="observaciones" maxlength="250"
-                 placeholder="Ej. Primera entrega del proveedor">
+          <div id="resumenOrden" class="ingreso-resumen" hidden>
+            <div><span>Proveedor</span><b data-campo="proveedor"></b></div>
+            <div><span>Fecha de la orden</span><b data-campo="fecha"></b></div>
+            <div><span>Productos pendientes</span><b data-campo="lineas"></b></div>
+            <div><span>Valor a recibir</span><b data-campo="valor"></b></div>
+          </div>
 
-          <p id="mensajeIngreso" role="alert"></p>
+          <div id="sinOrden" class="empty-state">
+            <h2>Seleccione una orden de compra</h2>
+            <p>Los productos pendientes se cargarán con la cantidad y el costo de la orden.</p>
+          </div>
+
+          <div id="bloqueProductos" hidden>
+            <h3 class="ingreso-subtitulo">Productos pendientes</h3>
+            <div class="table-wrap">
+              <table class="data-table ingreso-tabla">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th class="num">Pendiente</th>
+                    <th>Recibir</th>
+                    <th>Costo real (Q)</th>
+                    <th>Estante</th>
+                  </tr>
+                </thead>
+                <tbody id="productosPendientes"></tbody>
+              </table>
+            </div>
+            <p class="muted ingreso-nota">Ponga 0 en "Recibir" para los productos que no llegaron en esta entrega.</p>
+
+            <label for="observaciones">Observaciones</label>
+            <input id="observaciones" maxlength="250" placeholder="Ej. Primera entrega del proveedor">
+          </div>
+
+          <p id="mensajeIngreso" class="error" role="alert"></p>
 
           <div class="button-row">
-            <button type="submit" class="action-button green"
-                    id="guardarIngreso">
-              Registrar ingreso
-            </button>
+            <button type="submit" class="action-button green" id="guardarIngreso" disabled>Registrar ingreso</button>
           </div>
         </form>
       </section>

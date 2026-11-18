@@ -73,9 +73,11 @@
   border: 1px solid #C9D8E5;
   border-radius: 9px;
   color: var(--ink);
-  background: white;
+  background-color: white;
   font: inherit;
 }
+
+.user-form select { padding-right: 2.6rem; }
 
 
 .user-form input:focus,

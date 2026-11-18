@@ -22,6 +22,7 @@ from .repositories import crear_orden_compra
 from .serializers import OrdenCompraSerializer
 
 from .repositories import (
+    mensaje_sql,
     obtener_pendientes_bodega,
     obtener_estantes_bodega,
     registrar_ingreso_bodega
@@ -54,12 +55,9 @@ class OrdenCompraViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED
             )
 
-        except DatabaseError:
+        except DatabaseError as error:
             return Response(
-                {
-                    "ok": False,
-                    "mensaje": "No se pudo crear la orden de compra. Revisa los datos y la conexión."
-                },
+                {"ok": False, "mensaje": mensaje_sql(error)},
                 status=status.HTTP_400_BAD_REQUEST
             )
     
@@ -104,12 +102,9 @@ class IngresoBodegaViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED
             )
 
-        except DatabaseError:
+        except DatabaseError as error:
             return Response(
-                {
-                    "mensaje": "No se pudo registrar la recepción. "
-                               "Revisa los datos y el procedimiento SQL."
-                },
+                {"ok": False, "mensaje": mensaje_sql(error)},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

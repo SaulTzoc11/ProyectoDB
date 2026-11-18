@@ -1,6 +1,16 @@
 
 import json
+import re
+
 from django.db import connection
+
+
+def mensaje_sql(error):
+    """Texto limpio del THROW de SQL Server (sin prefijo del driver ni código final)."""
+    texto = str(error.args[-1]) if error.args else str(error)
+    texto = texto.split("]")[-1]
+    texto = re.sub(r"\s*\(\d+\)\s*(\(SQL\w+\))?\s*$", "", texto)
+    return texto.strip() or str(error)
 
 
 def crear_orden_compra(id_proveedor, id_usuario, observaciones, detalle):
@@ -69,12 +79,17 @@ def obtener_pendientes_bodega():
                 p.nombreProveedor,
                 d.idDetalleCompra, d.idProducto,
                 d.cantidad,
-                d.cantidad - COALESCE(r.recibido, 0)
+                d.cantidad - COALESCE(r.recibido, 0),
+                d.costoUnitario,
+                pd.nombreCompleto, pd.marca, pd.codigoProducto,
+                c.fechaCompra
             FROM COMPRA c
             JOIN PROVEEDOR p
                 ON p.idProveedor = c.idProveedor
             JOIN DETALLE_COMPRA d
                 ON d.idCompra = c.idCompra
+            JOIN dbo.vw_ProductoDescripcion pd
+                ON pd.idProducto = d.idProducto
             OUTER APPLY (
                 SELECT SUM(de.cantidadEntregada) recibido
                 FROM DETALLE_ENTREGA de
@@ -100,7 +115,12 @@ def obtener_pendientes_bodega():
                 "idDetalleCompra": f[3],
                 "idProducto": f[4],
                 "solicitado": f[5],
-                "pendiente": f[6]
+                "pendiente": f[6],
+                "costoUnitario": str(f[7]),
+                "producto": f[8],
+                "marca": f[9],
+                "codigoProducto": f[10],
+                "fechaCompra": f[11],
             }
             for f in cursor.fetchall()
         ]
@@ -114,6 +134,7 @@ def obtener_estantes_bodega():
             FROM ESTANTE e
             JOIN BODEGA b ON b.idBodega = e.idBodega
             WHERE e.activo = 1 AND b.activo = 1
+            ORDER BY b.nombre, e.codigoEstante
         """)
         return [
             {
