@@ -1,13 +1,14 @@
 from datetime import timedelta
 
-from django.test import TestCase
+from django.core.cache import cache
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.nucleo.pruebas import CONTRASENA, cliente_autenticado, crear_usuario
 
 from . import passwords
-from .models import Usuario
+from .models import Rol, Usuario
 
 HASH_LEGADO = (
     "PBKDF2-SHA512$50$BDCAA642E8AE0FEDE3DFD0ED1480DAF563674BE2376BD7BB9C7A0AF574140C3E$"
@@ -241,6 +242,85 @@ class PoliticaContrasenaTests(TestCase):
             format="json",
         )
         self.assertEqual(respuesta.status_code, 400)
+
+
+@override_settings(
+    REGISTRO_HABILITADO=True,
+    ROL_REGISTRO="Cajero",
+)
+class RegistroTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.api = APIClient()
+        Rol.objects.get_or_create(nombre="Cajero")
+
+    def datos(self, **cambios):
+        datos = {
+            "nombreusuario": "maria.lopez",
+            "nombres": "María",
+            "apellidos": "López",
+            "correo": "maria@prueba.com",
+            "contrasena": "Clave-segura-1",
+            "confirmacion": "Clave-segura-1",
+        }
+        datos.update(cambios)
+        return datos
+
+    def registrar(self, **cambios):
+        return self.api.post(
+            "/api/registro/", self.datos(**cambios), format="json"
+        )
+
+    def test_crea_cuenta_con_rol_por_defecto_y_contrasena_cifrada(self):
+        respuesta = self.registrar()
+        self.assertEqual(respuesta.status_code, 201, respuesta.content)
+        usuario = Usuario.objects.get(nombreusuario="maria.lopez")
+        self.assertEqual(usuario.idrol.nombre, "Cajero")
+        self.assertTrue(usuario.activo)
+        self.assertTrue(
+            passwords.es_formato_django(usuario.contrasenaencriptada)
+        )
+        self.assertEqual(
+            passwords.verificar("Clave-segura-1", usuario.contrasenaencriptada)[0],
+            True,
+        )
+        self.assertNotIn("contrasena", respuesta.json()["usuario"])
+
+    @override_settings(ROL_REGISTRO="Digitador")
+    def test_respeta_el_rol_configurado(self):
+        Rol.objects.get_or_create(nombre="Digitador")
+        self.assertEqual(self.registrar().status_code, 201)
+        usuario = Usuario.objects.get(nombreusuario="maria.lopez")
+        self.assertEqual(usuario.idrol.nombre, "Digitador")
+
+    def test_rechaza_usuario_y_correo_duplicados(self):
+        existente = crear_usuario("Maria.Lopez", "Cajero")
+        existente.correo = "maria@prueba.com"
+        existente.save(update_fields=["correo"])
+        respuesta = self.registrar()
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertIn("usuario", respuesta.json()["mensaje"].lower())
+
+        respuesta = self.registrar(
+            nombreusuario="otra", correo="maria@prueba.com"
+        )
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertIn("correo", respuesta.json()["mensaje"].lower())
+
+    def test_rechaza_contrasena_debil_y_confirmacion_distinta(self):
+        self.assertEqual(
+            self.registrar(contrasena="debil", confirmacion="debil").status_code,
+            400,
+        )
+        self.assertEqual(
+            self.registrar(confirmacion="Otra-clave-9").status_code,
+            400,
+        )
+        self.assertFalse(Usuario.objects.filter(nombreusuario="maria.lopez").exists())
+
+    @override_settings(REGISTRO_HABILITADO=False)
+    def test_registro_deshabilitado(self):
+        self.assertEqual(self.registrar().status_code, 403)
 
 
 class CrearGerenteTests(TestCase):

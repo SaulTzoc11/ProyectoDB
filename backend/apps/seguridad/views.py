@@ -1,10 +1,12 @@
+from django.conf import settings
 from django.middleware.csrf import get_token, rotate_token
-from rest_framework import status, viewsets
+from rest_framework import status, throttling, viewsets
 from rest_framework.decorators import (
     action,
     api_view,
     authentication_classes,
     permission_classes,
+    throttle_classes,
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -15,6 +17,7 @@ from . import repositories, services
 from .authentication import CLAVE_SESION
 from apps.nucleo.viewsets import MantenimientoViewSet
 from .serializers import (
+    RegistroSerializer,
     RolSerializer,
     SesionSerializer,
     UsuarioSerializer,
@@ -24,6 +27,10 @@ from .serializers import (
     TablaSerializer,
 )
 MENSAJE_CREDENCIALES = "El usuario o la contraseña no son correctos."
+
+
+class RegistroThrottle(throttling.AnonRateThrottle):
+    scope = "registro"
 
 
 class RolViewSet(viewsets.ModelViewSet):
@@ -143,6 +150,50 @@ def iniciar_sesion(request):
 def cerrar_sesion(request):
     request.session.flush()
     return Response({"ok": True, "mensaje": "Sesión cerrada correctamente."})
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([AllowAny])
+@throttle_classes([RegistroThrottle])
+def registrar_cuenta(request):
+    if not settings.REGISTRO_HABILITADO:
+        return Response(
+            {
+                "ok": False,
+                "mensaje": "El registro de cuentas está deshabilitado.",
+            },
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    serializer = RegistroSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    try:
+        usuario = services.registrar_usuario(**serializer.validated_data)
+    except services.RegistroInvalido as error:
+        return Response(
+            {"ok": False, "mensaje": str(error), "errores": [str(error)]},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    except services.ContrasenaInvalida as error:
+        return Response(
+            {"ok": False, "mensaje": str(error), "errores": [str(error)]},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    return Response(
+        {
+            "ok": True,
+            "mensaje": "Cuenta creada correctamente. Ya puede iniciar sesión.",
+            "usuario": {
+                "id": usuario.idusuario,
+                "username": usuario.nombreusuario,
+                "role": usuario.idrol.nombre,
+            },
+        },
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["GET"])

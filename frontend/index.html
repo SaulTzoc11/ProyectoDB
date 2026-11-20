@@ -25,22 +25,73 @@
           <img class="brand-logo" src="/assets/logo-sapo-pinturas.png" alt="Logo de Sapo Pinturas">
           <div><strong>SAPO PINTURAS</strong><small>Acceso al sistema</small></div>
         </div>
-        <h2>Bienvenido</h2>
-        <p class="muted">Ingrese sus credenciales para continuar.</p>
 
-        <form id="formularioLogin" novalidate>
-          <label for="usuario">Usuario</label>
-          <input id="usuario" name="username" autocomplete="username" placeholder="Ejemplo: gerente" required>
+        <section class="auth-panel" id="panelLogin">
+          <h2>Bienvenido</h2>
+          <p class="muted">Ingrese sus credenciales para continuar.</p>
 
-          <label for="contrasena">Contraseña</label>
-          <div class="password-row">
-            <input id="contrasena" name="password" type="password" autocomplete="current-password" placeholder="Su contraseña" required>
-            <button id="mostrarContrasena" class="icon-button" type="button" aria-label="Mostrar contraseña">&#9673;</button>
+          <form id="formularioLogin" novalidate>
+            <label for="usuario">Usuario</label>
+            <input id="usuario" name="username" autocomplete="username" placeholder="Ejemplo: gerente" required>
+
+            <label for="contrasena">Contraseña</label>
+            <div class="password-row">
+              <input id="contrasena" name="password" type="password" autocomplete="current-password" placeholder="Su contraseña" required>
+              <button class="icon-button" type="button" data-toggle-password="contrasena" aria-label="Mostrar contraseña">&#9673;</button>
+            </div>
+
+            <p id="errorLogin" class="error" role="alert"></p>
+            <p id="avisoLogin" class="auth-notice" role="status" hidden></p>
+            <button class="primary-button" type="submit">Ingresar al sistema <span>&rarr;</span></button>
+          </form>
+
+          <div class="auth-links">
+            <button class="link-button" type="button" data-panel="registro">Crear una cuenta</button>
           </div>
+        </section>
 
-          <p id="errorLogin" class="error" role="alert"></p>
-          <button class="primary-button" type="submit">Ingresar al sistema <span>&rarr;</span></button>
-        </form>
+        <section class="auth-panel" id="panelRegistro" hidden>
+          <h2>Crear cuenta</h2>
+          <p class="muted">Complete sus datos para solicitar acceso al sistema.</p>
+
+          <form id="formularioRegistro" novalidate>
+            <div class="field-grid">
+              <div>
+                <label for="registroNombres">Nombres</label>
+                <input id="registroNombres" name="nombres" autocomplete="given-name" maxlength="100" required>
+              </div>
+              <div>
+                <label for="registroApellidos">Apellidos</label>
+                <input id="registroApellidos" name="apellidos" autocomplete="family-name" maxlength="100" required>
+              </div>
+            </div>
+
+            <label for="registroUsuario">Usuario</label>
+            <input id="registroUsuario" name="nombreusuario" autocomplete="username" minlength="3" maxlength="50" placeholder="Ejemplo: maria.lopez" required>
+
+            <label for="registroCorreo">Correo electrónico</label>
+            <input id="registroCorreo" name="correo" type="email" autocomplete="email" maxlength="100" required>
+
+            <label for="registroContrasena">Contraseña</label>
+            <div class="password-row">
+              <input id="registroContrasena" name="contrasena" type="password" autocomplete="new-password" required>
+              <button class="icon-button" type="button" data-toggle-password="registroContrasena" aria-label="Mostrar contraseña">&#9673;</button>
+            </div>
+
+            <label for="registroConfirmacion">Confirmar contraseña</label>
+            <input id="registroConfirmacion" name="confirmacion" type="password" autocomplete="new-password" required>
+            <p class="field-hint">Mínimo 8 caracteres, con mayúscula, minúscula y número.</p>
+
+            <p id="errorRegistro" class="error" role="alert"></p>
+            <p id="avisoRegistro" class="auth-notice" role="status" hidden></p>
+            <button class="primary-button" type="submit">Crear cuenta <span>&rarr;</span></button>
+          </form>
+
+          <div class="auth-links">
+            <button class="link-button" type="button" data-panel="login">Volver al inicio de sesión</button>
+          </div>
+        </section>
+
       </div>
     </main>
   </section>

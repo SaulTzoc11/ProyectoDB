@@ -99,12 +99,19 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
+    "DEFAULT_THROTTLE_RATES": {
+        "registro": variable("THROTTLE_REGISTRO", "20/hour"),
+    },
 }
 
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
 SERVIR_FRONTEND = variable("SERVIR_FRONTEND", "1" if DEBUG else "0") == "1"
 
 DESCUENTO_CLAVE_AUTORIZACION = variable("DESCUENTO_CLAVE", "")
+
+# Registro de cuentas
+REGISTRO_HABILITADO = variable("REGISTRO_HABILITADO", "1") == "1"
+ROL_REGISTRO = variable("ROL_REGISTRO", "Cajero")
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"

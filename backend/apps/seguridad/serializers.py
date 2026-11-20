@@ -69,6 +69,51 @@ class UsuarioSerializer(serializers.ModelSerializer):
         return instance
 
 
+USUARIO_VALIDO = r"^[\w.@+-]+$"
+
+
+class RegistroSerializer(serializers.Serializer):
+    nombreusuario = serializers.RegexField(
+        USUARIO_VALIDO,
+        min_length=3,
+        max_length=50,
+        error_messages={
+            "invalid": "Use letras, números y los símbolos @ . + - _",
+        },
+    )
+    nombres = serializers.CharField(max_length=100)
+    apellidos = serializers.CharField(max_length=100)
+    correo = serializers.EmailField(max_length=100)
+    contrasena = serializers.CharField(
+        write_only=True, style={"input_type": "password"}
+    )
+    confirmacion = serializers.CharField(
+        write_only=True, style={"input_type": "password"}
+    )
+
+    def validate_nombreusuario(self, valor):
+        return valor.strip()
+
+    def validate_correo(self, valor):
+        return valor.strip().lower()
+
+    def validate(self, datos):
+        if datos["contrasena"] != datos["confirmacion"]:
+            raise serializers.ValidationError(
+                {"confirmacion": "Las contraseñas no coinciden."}
+            )
+
+        try:
+            services.validar_contrasena(datos["contrasena"])
+        except services.ContrasenaInvalida as error:
+            raise serializers.ValidationError(
+                {"contrasena": str(error)}
+            ) from error
+
+        datos.pop("confirmacion", None)
+        return datos
+
+
 class SesionSerializer(serializers.Serializer):
     id = serializers.IntegerField(source="idusuario")
     username = serializers.CharField(source="nombreusuario")

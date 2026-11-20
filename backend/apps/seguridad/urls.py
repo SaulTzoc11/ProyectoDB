@@ -14,6 +14,7 @@ router.register("tabla", views.TablaViewSet, basename="tabla")
 urlpatterns = [
     path("login/", views.iniciar_sesion, name="iniciar_sesion_api"),
     path("logout/", views.cerrar_sesion, name="cerrar_sesion_api"),
+    path("registro/", views.registrar_cuenta, name="registro_api"),
     path("csrf/", views.token_csrf, name="token_csrf"),
     path("sesion/", views.sesion_actual, name="sesion_actual"),
     path("", include(router.urls)),

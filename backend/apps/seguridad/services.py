@@ -2,6 +2,8 @@ import math
 import re
 from datetime import timedelta
 
+from django.conf import settings
+from django.db import IntegrityError
 from django.utils import timezone
 
 from . import passwords, repositories
@@ -28,6 +30,10 @@ class CuentaBloqueada(Exception):
 
 
 class ContrasenaInvalida(Exception):
+    pass
+
+
+class RegistroInvalido(Exception):
     pass
 
 
@@ -88,3 +94,39 @@ def activar_usuario(usuario):
 def desactivar_usuario(usuario):
     repositories.cambiar_estado(usuario, False)
     return usuario
+
+
+def registrar_usuario(nombreusuario, nombres, apellidos, correo, contrasena):
+    nombreusuario = (nombreusuario or "").strip()
+    nombres = (nombres or "").strip()
+    apellidos = (apellidos or "").strip()
+    correo = (correo or "").strip().lower()
+
+    if repositories.buscar_por_nombre(nombreusuario):
+        raise RegistroInvalido("Ese nombre de usuario ya está en uso.")
+
+    if repositories.buscar_por_correo(correo):
+        raise RegistroInvalido("Ya existe una cuenta con ese correo.")
+
+    rol = repositories.obtener_rol(settings.ROL_REGISTRO)
+
+    if rol is None:
+        raise RegistroInvalido(
+            "El registro no está disponible en este momento."
+        )
+
+    validar_contrasena(contrasena)
+
+    try:
+        return repositories.crear_usuario(
+            idrol=rol,
+            nombreusuario=nombreusuario,
+            contrasena_cifrada=passwords.cifrar(contrasena),
+            nombres=nombres,
+            apellidos=apellidos,
+            correo=correo,
+        )
+    except IntegrityError as error:
+        raise RegistroInvalido(
+            "El nombre de usuario o el correo ya están registrados."
+        ) from error

@@ -26,11 +26,35 @@ def buscar_activo_por_nombre(nombre_usuario):
     )
 
 
+def buscar_por_nombre(nombre_usuario):
+    return Usuario.objects.filter(nombreusuario__iexact=nombre_usuario).first()
+
+
+def buscar_por_correo(correo):
+    return Usuario.objects.filter(correo__iexact=correo).first()
+
+
 def obtener_activo(id_usuario):
     return (
         Usuario.objects.select_related("idrol")
         .filter(idusuario=id_usuario, activo=True)
         .first()
+    )
+
+
+def obtener_rol(nombre):
+    return Rol.objects.filter(nombre__iexact=nombre).first()
+
+
+def crear_usuario(*, idrol, nombreusuario, contrasena_cifrada, nombres,
+                  apellidos, correo):
+    return Usuario.objects.create(
+        idrol=idrol,
+        nombreusuario=nombreusuario,
+        contrasenaencriptada=contrasena_cifrada,
+        nombres=nombres,
+        apellidos=apellidos,
+        correo=correo,
     )
 
 

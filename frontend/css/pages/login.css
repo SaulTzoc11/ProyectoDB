@@ -22,3 +22,20 @@
 .password-row { position: relative; }
 .password-row input { padding-right: 3.2rem; }
 .icon-button { position: absolute; right: .45rem; top: .42rem; width: 40px; height: 40px; border: 0; border-radius: 8px; color: var(--navy); background: transparent; }
+
+.auth-panel[hidden] { display: none; }
+.auth-panel h2 { margin-bottom: .35rem; }
+.auth-panel .muted { margin-bottom: 0; }
+.auth-panel form { margin-top: 1.5rem; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+.field-grid > div { min-width: 0; }
+.field-hint { margin: -.15rem 0 .9rem; color: var(--muted); font-size: .82rem; }
+.auth-links { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin-top: 1.25rem; }
+.link-button { padding: 0; border: 0; background: transparent; color: var(--blue); font: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; }
+.link-button:hover, .link-button:focus-visible { text-decoration: underline; }
+.auth-notice { margin: .25rem 0 .9rem; padding: .7rem .85rem; border-radius: 9px; color: #14532d; background: #DCFCE7; font-size: .9rem; }
+.auth-notice[hidden] { display: none; }
+
+@media (max-width: 480px) {
+  .field-grid { grid-template-columns: 1fr; gap: 0; }
+}
